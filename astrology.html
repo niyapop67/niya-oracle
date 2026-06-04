@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>西洋占星術｜Astrology Chart</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Noto+Serif+JP:wght@300;400&family=Karla:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f8f7f4;
+  --white: #ffffff;
+  --ink: #1a1a1a;
+  --ink-mid: #4a4a4a;
+  --ink-light: #9a9a9a;
+  --ink-xlight: #d0d0d0;
+  --accent: #1a1a1a;
+  --fire: #c0392b;
+  --earth: #7d6608;
+  --air: #1a5276;
+  --water: #1a6b5c;
+  --border: #e8e6e1;
+  --hover: #f0ede8;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Karla', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Layout */
+.page {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 64px 32px 100px;
+}
+
+/* Header */
+.header {
+  margin-bottom: 64px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 32px;
+}
+
+.header-label {
+  font-size: 10px;
+  letter-spacing: 0.4em;
+  color: var(--ink-light);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  font-weight: 400;
+}
+
+.header h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(32px, 6vw, 56px);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+
+.header h1 em {
+  font-style: italic;
+  color: var(--ink-mid);
+}
+
+.header-desc {
+  font-size: 13px;
+  color: var(--ink-light);
+  letter-spacing: 0.05em;
+  line-height: 1.7;
+}
+
+/* Tab */
+.tab-row {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 48px;
+}
+
+.tab-btn {
+  background: none;
+  border: none;
+  padding: 14px 24px;
+  font-family: 'Karla', sans-serif;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  color: var(--ink-light);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: all 0.2s;
+}
+
+.tab-btn:hover { color: var(--ink); }
+.tab-btn.active { color: var(--ink); border-bottom-color: var(--ink); }
+
+/* Form */
+.form-section { margin-bottom: 40px; }
+
+.form-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px;
+  font-weight: 400;
+  margin-bottom: 24px;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.form-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-group.half { grid-column: span 1; }
+.form-group.full { grid-column: 1 / -1; }
+
+.form-label {
+  font-size: 10px;
+  letter-spacing: 0.25em;
+  color: var(--ink-light);
+  text-transform: uppercase;
+  font-weight: 400;
+}
+
+.form-input, .form-select {
+  background: var(--white);
+  border: 1px solid var(--border);
+  color: var(--ink);
+  font-family: 'Karla', sans-serif;
+  font-size: 14px;
+  padding: 11px 14px;
+  outline: none;
+  transition: border-color 0.2s;
+  appearance: none;
+  border-radius: 0;
+}
+
+.form-input:focus, .form-select:focus { border-color: var(--ink); }
+.form-input::placeholder { color: var(--ink-xlight); }
+
+/* Divider for compat */
+.compat-divider {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 32px 0;
+  color: var(--ink-light);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+}
+.compat-divider::before, .compat-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* Submit */
+.submit-btn {
+  background: var(--ink);
+  border: none;
+  color: var(--white);
+  font-family: 'Karla', sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  padding: 16px 48px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: block;
+}
+
+.submit-btn:hover { background: var(--ink-mid); }
+.submit-btn:disabled { background: var(--ink-xlight); cursor: not-allowed; }
+
+/* Loading */
+.loading {
+  display: none;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+  font-size: 12px;
+  color: var(--ink-light);
+  letter-spacing: 0.15em;
+}
+.loading.show { display: flex; }
+.load-bar {
+  width: 120px;
+  height: 1px;
+  background: var(--border);
+  position: relative;
+  overflow: hidden;
+}
+.load-bar::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: var(--ink);
+  animation: loadSlide 1.5s ease-in-out infinite;
+}
+@keyframes loadSlide { to { left: 100%; } }
+
+/* Result */
+.result-wrap {
+  opacity: 0;
+  transform: translateY(12px);
+  transition: all 0.6s ease;
+  pointer-events: none;
+}
+.result-wrap.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+
+/* Chart wheel - SVG */
+.chart-section {
+  margin-bottom: 48px;
+  display: flex;
+  gap: 40px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.chart-wheel { flex-shrink: 0; }
+
+.chart-legend { flex: 1; min-width: 200px; }
+
+.legend-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 14px;
+  font-weight: 400;
+  margin-bottom: 16px;
+  color: var(--ink);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.legend-item:hover { background: var(--hover); margin: 0 -8px; padding: 6px 8px; }
+
+.legend-planet { font-size: 16px; width: 24px; text-align: center; }
+.legend-info { flex: 1; }
+.legend-name { font-size: 12px; letter-spacing: 0.05em; color: var(--ink); }
+.legend-sign { font-size: 11px; color: var(--ink-light); margin-top: 1px; }
+.legend-deg { font-size: 11px; color: var(--ink-xlight); font-family: 'Karla', monospace; }
+
+/* Planet detail */
+.planet-detail {
+  background: var(--white);
+  border: 1px solid var(--border);
+  padding: 24px;
+  margin-bottom: 32px;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: all 0.3s;
+  pointer-events: none;
+}
+.planet-detail.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+
+.pd-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.pd-symbol { font-size: 28px; }
+.pd-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 400; }
+.pd-sign { font-size: 13px; color: var(--ink-light); letter-spacing: 0.1em; }
+.pd-house { font-size: 11px; color: var(--ink-xlight); margin-left: auto; letter-spacing: 0.1em; }
+
+.pd-text { font-size: 13px; line-height: 1.9; color: var(--ink-mid); margin-bottom: 12px; }
+
+.pd-keywords {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.pd-kw {
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  color: var(--ink-light);
+  border: 1px solid var(--border);
+  padding: 3px 10px;
+}
+
+/* Sections */
+.section { margin-bottom: 48px; }
+
+.section-header {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  font-weight: 400;
+}
+
+.section-title em { font-style: italic; color: var(--ink-mid); }
+
+.section-line { flex: 1; height: 1px; background: var(--border); }
+
+/* Element balance */
+.element-bars { display: flex; flex-direction: column; gap: 12px; margin-bottom: 32px; }
+
+.el-row { display: flex; align-items: center; gap: 12px; }
+.el-label { font-size: 11px; letter-spacing: 0.2em; width: 40px; color: var(--ink-light); }
+.el-bar-wrap { flex: 1; height: 3px; background: var(--border); }
+.el-bar { height: 100%; transition: width 0.8s ease; }
+.el-fire { background: var(--fire); }
+.el-earth { background: var(--earth); }
+.el-air { background: var(--air); }
+.el-water { background: var(--water); }
+.el-count { font-size: 11px; color: var(--ink-light); width: 20px; text-align: right; font-family: 'Karla', monospace; }
+
+/* House table */
+.house-table { width: 100%; border-collapse: collapse; }
+.house-table th {
+  font-size: 9px;
+  letter-spacing: 0.25em;
+  color: var(--ink-light);
+  text-transform: uppercase;
+  text-align: left;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  font-weight: 400;
+}
+.house-table td {
+  font-size: 12px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--ink-mid);
+  line-height: 1.5;
+}
+.house-table td:first-child { color: var(--ink-xlight); font-family: 'Karla', monospace; font-size: 11px; }
+.house-table td:nth-child(2) { font-weight: 500; color: var(--ink); }
+.house-table tr:hover td { background: var(--hover); }
+
+/* Big 3 summary */
+.big3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  margin-bottom: 32px;
+}
+.big3-item {
+  background: var(--white);
+  padding: 20px;
+  text-align: center;
+}
+.big3-label { font-size: 9px; letter-spacing: 0.3em; color: var(--ink-light); text-transform: uppercase; margin-bottom: 8px; }
+.big3-symbol { font-size: 28px; margin-bottom: 6px; }
+.big3-name { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 400; margin-bottom: 2px; }
+.big3-sign { font-size: 11px; color: var(--ink-light); }
+
+/* Compat */
+.compat-score {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 32px;
+  padding: 24px;
+  background: var(--white);
+  border: 1px solid var(--border);
+}
+.compat-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 56px;
+  font-weight: 400;
+  line-height: 1;
+  color: var(--ink);
+}
+.compat-unit { font-size: 14px; color: var(--ink-light); align-self: flex-end; margin-bottom: 8px; }
+.compat-right { flex: 1; }
+.compat-verdict { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 400; font-style: italic; margin-bottom: 8px; }
+.compat-sub { font-size: 12px; color: var(--ink-light); line-height: 1.7; }
+
+.compat-aspects { display: flex; flex-direction: column; gap: 0; }
+.compat-aspect-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+}
+.asp-planets { width: 140px; color: var(--ink); font-weight: 500; }
+.asp-type { width: 80px; color: var(--ink-light); font-size: 11px; letter-spacing: 0.1em; }
+.asp-meaning { flex: 1; color: var(--ink-mid); font-size: 11px; line-height: 1.5; }
+.asp-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.asp-trine { background: var(--water); }
+.asp-sextile { background: var(--air); }
+.asp-square { background: var(--fire); }
+.asp-opposition { background: #888; }
+.asp-conjunction { background: var(--earth); }
+
+/* Reset */
+.reset-btn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--ink-light);
+  font-family: 'Karla', sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  padding: 12px 32px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: block;
+  margin: 0 auto;
+}
+.reset-btn:hover { border-color: var(--ink); color: var(--ink); }
+
+.footer-note {
+  font-size: 11px;
+  color: var(--ink-xlight);
+  text-align: center;
+  margin-top: 48px;
+  letter-spacing: 0.08em;
+}
+
+/* Responsive */
+@media (max-width: 580px) {
+  .page { padding: 40px 20px 80px; }
+  .form-grid { grid-template-columns: 1fr 1fr; }
+  .big3 { grid-template-columns: 1fr; }
+  .chart-section { flex-direction: column; }
+  .compat-score { flex-direction: column; text-align: center; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="header">
+    <div class="header-label">Western Astrology · 西洋占星術</div>
+    <h1>Natal Chart<br><em>& Synastry</em></h1>
+    <div class="header-desc">生年月日・出生時刻・出生地から10天体・ハウス・相性を読み解きます</div>
+  </div>
+
+  <!-- Tab -->
+  <div class="tab-row">
+    <button class="tab-btn active" onclick="switchTab('natal', this)">個人チャート</button>
+    <button class="tab-btn" onclick="switchTab('compat', this)">相性診断</button>
+  </div>
+
+  <!-- Natal form -->
+  <div id="natalForm">
+    <div class="form-section">
+      <div class="form-title">出生情報</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <div class="form-label">名前</div>
+          <input class="form-input" type="text" id="nName" placeholder="山田花子">
+        </div>
+        <div class="form-group">
+          <div class="form-label">生年月日</div>
+          <input class="form-input" type="date" id="nDate">
+        </div>
+        <div class="form-group">
+          <div class="form-label">出生時刻</div>
+          <input class="form-input" type="time" id="nTime" value="12:00">
+        </div>
+        <div class="form-group full">
+          <div class="form-label">出生地（都市）</div>
+          <select class="form-select" id="nCity">
+            <option value="135,35">東京</option>
+            <option value="135.5,34.7">大阪</option>
+            <option value="136.9,35.2">名古屋</option>
+            <option value="141.4,43.1">札幌</option>
+            <option value="130.4,33.6">福岡</option>
+            <option value="130.6,31.6">鹿児島</option>
+            <option value="127.7,26.2">那覇</option>
+            <option value="139.6,35.4">横浜</option>
+            <option value="132.5,34">広島</option>
+            <option value="133.9,34.7">岡山</option>
+            <option value="135.8,35">京都</option>
+            <option value="0,51.5">ロンドン</option>
+            <option value="-74,40.7">ニューヨーク</option>
+            <option value="2.3,48.9">パリ</option>
+            <option value="116.4,39.9">北京</option>
+          </select>
+        </div>
+      </div>
+      <button class="submit-btn" id="natalBtn" onclick="calcNatal()">チャートを計算する</button>
+      <div class="loading" id="natalLoading">
+        <div class="load-bar"></div>
+        <span>天体の位置を計算中…</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Compat form -->
+  <div id="compatForm" style="display:none">
+    <div class="form-section">
+      <div class="form-title">Person A</div>
+      <div class="form-grid">
+        <div class="form-group"><div class="form-label">名前</div><input class="form-input" type="text" id="aName" placeholder="山田花子"></div>
+        <div class="form-group"><div class="form-label">生年月日</div><input class="form-input" type="date" id="aDate"></div>
+        <div class="form-group"><div class="form-label">出生時刻</div><input class="form-input" type="time" id="aTime" value="12:00"></div>
+      </div>
+    </div>
+    <div class="compat-divider">×</div>
+    <div class="form-section">
+      <div class="form-title">Person B</div>
+      <div class="form-grid">
+        <div class="form-group"><div class="form-label">名前</div><input class="form-input" type="text" id="bName" placeholder="鈴木太郎"></div>
+        <div class="form-group"><div class="form-label">生年月日</div><input class="form-input" type="date" id="bDate"></div>
+        <div class="form-group"><div class="form-label">出生時刻</div><input class="form-input" type="time" id="bTime" value="12:00"></div>
+      </div>
+    </div>
+    <button class="submit-btn" id="compatBtn" onclick="calcCompat()">相性を診断する</button>
+    <div class="loading" id="compatLoading">
+      <div class="load-bar"></div>
+      <span>二人のアスペクトを計算中…</span>
+    </div>
+  </div>
+
+  <!-- Results -->
+  <div class="result-wrap" id="resultWrap"></div>
+
+</div>
+
+<script>
+// ===== ASTROLOGY ENGINE =====
+
+const SIGNS = [
+  { name:'牡羊座', en:'Aries', symbol:'♈', element:'fire', quality:'cardinal', ruler:'火星', start:0 },
+  { name:'牡牛座', en:'Taurus', symbol:'♉', element:'earth', quality:'fixed', ruler:'金星', start:30 },
+  { name:'双子座', en:'Gemini', symbol:'♊', element:'air', quality:'mutable', ruler:'水星', start:60 },
+  { name:'蟹座', en:'Cancer', symbol:'♋', element:'water', quality:'cardinal', ruler:'月', start:90 },
+  { name:'獅子座', en:'Leo', symbol:'♌', element:'fire', quality:'fixed', ruler:'太陽', start:120 },
+  { name:'乙女座', en:'Virgo', symbol:'♍', element:'earth', quality:'mutable', ruler:'水星', start:150 },
+  { name:'天秤座', en:'Libra', symbol:'♎', element:'air', quality:'cardinal', ruler:'金星', start:180 },
+  { name:'蠍座', en:'Scorpio', symbol:'♏', element:'water', quality:'fixed', ruler:'冥王星', start:210 },
+  { name:'射手座', en:'Sagittarius', symbol:'♐', element:'fire', quality:'mutable', ruler:'木星', start:240 },
+  { name:'山羊座', en:'Capricorn', symbol:'♑', element:'earth', quality:'cardinal', ruler:'土星', start:270 },
+  { name:'水瓶座', en:'Aquarius', symbol:'♒', element:'air', quality:'fixed', ruler:'天王星', start:300 },
+  { name:'魚座', en:'Pisces', symbol:'♓', element:'water', quality:'mutable', ruler:'海王星', start:330 }
+];
+
+const PLANETS = [
+  { key:'sun', name:'太陽', en:'Sun', symbol:'☉', color:'#e67e22' },
+  { key:'moon', name:'月', en:'Moon', symbol:'☽', color:'#7f8c8d' },
+  { key:'mercury', name:'水星', en:'Mercury', symbol:'☿', color:'#2980b9' },
+  { key:'venus', name:'金星', en:'Venus', symbol:'♀', color:'#27ae60' },
+  { key:'mars', name:'火星', en:'Mars', symbol:'♂', color:'#c0392b' },
+  { key:'jupiter', name:'木星', en:'Jupiter', symbol:'♃', color:'#8e44ad' },
+  { key:'saturn', name:'土星', en:'Saturn', symbol:'♄', color:'#2c3e50' },
+  { key:'uranus', name:'天王星', en:'Uranus', symbol:'♅', color:'#16a085' },
+  { key:'neptune', name:'海王星', en:'Neptune', symbol:'♆', color:'#2980b9' },
+  { key:'pluto', name:'冥王星', en:'Pluto', symbol:'♇', color:'#7d3c98' }
+];
+
+const HOUSES = [
+  { num:1, name:'第1ハウス', theme:'自己・外見・始まり', keyword:'アイデンティティ' },
+  { num:2, name:'第2ハウス', theme:'財産・価値観・才能', keyword:'所有' },
+  { num:3, name:'第3ハウス', theme:'コミュニケーション・兄弟・移動', keyword:'表現' },
+  { num:4, name:'第4ハウス', theme:'家庭・ルーツ・感情の基盤', keyword:'基盤' },
+  { num:5, name:'第5ハウス', theme:'創造・恋愛・趣味・子供', keyword:'喜び' },
+  { num:6, name:'第6ハウス', theme:'仕事・健康・日常ルーティン', keyword:'奉仕' },
+  { num:7, name:'第7ハウス', theme:'パートナーシップ・結婚・契約', keyword:'関係' },
+  { num:8, name:'第8ハウス', theme:'変容・死と再生・共有財産', keyword:'変容' },
+  { num:9, name:'第9ハウス', theme:'哲学・旅行・高等教育・信念', keyword:'拡大' },
+  { num:10, name:'第10ハウス', theme:'キャリア・社会的地位・使命', keyword:'達成' },
+  { num:11, name:'第11ハウス', theme:'友人・グループ・理想・未来', keyword:'希望' },
+  { num:12, name:'第12ハウス', theme:'潜在意識・隠れたもの・精神性', keyword:'解放' }
+];
+
+// Planet meanings per sign
+const PLANET_SIGN_MEANINGS = {
+  sun: {
+    '牡羊座':'先駆者的な魂を持ちます。情熱と行動力で人々をリードする存在。自己表現に積極的で、チャレンジを愛します。',
+    '牡牛座':'安定と美を愛する魂。感覚的な喜びと物質的な豊かさを重視し、着実に目標を達成します。',
+    '双子座':'好奇心旺盛で機知に富む魂。コミュニケーションと情報収集が得意で、変化を楽しみます。',
+    '蟹座':'深い感受性と母性愛を持つ魂。感情豊かで家族や大切な人を守ることに喜びを感じます。',
+    '獅子座':'輝く存在感と創造力を持つ魂。人々を照らし、情熱的に自己表現することが使命です。',
+    '乙女座':'分析力と奉仕精神を持つ魂。細部への注意と実用的なスキルで世界に貢献します。',
+    '天秤座':'美と調和を愛する魂。公正さとバランスを重視し、関係性の中で輝きます。',
+    '蠍座':'深い洞察力と変容の力を持つ魂。物事の本質を見抜き、何度でも再生します。',
+    '射手座':'自由と真実を求める魂。哲学と冒険を愛し、世界を広げることに使命を感じます。',
+    '山羊座':'責任感と野心を持つ魂。長期的な目標に向かって着実に登り続けます。',
+    '水瓶座':'革新と博愛の魂。既成概念を打ち破り、人類の進歩に貢献することが使命です。',
+    '魚座':'深い感受性と精神性を持つ魂。境界を超えた愛と共感で人々を癒します。'
+  },
+  moon: {
+    '牡羊座':'感情が素早く燃え上がり、直感的に行動します。独立心が強く、感情を率直に表現します。',
+    '牡牛座':'安定と感覚的な心地よさを求めます。感情は深く安定しており、変化を好みません。',
+    '双子座':'感情と知性が繋がっており、言葉で気持ちを表現します。気分の変化が早いです。',
+    '蟹座':'深い感受性と直感を持ちます。家庭や親しい人への愛情が極めて深い。',
+    '獅子座':'温かく劇的な感情表現。愛情を大げさに表現し、認められることで満たされます。',
+    '乙女座':'感情を分析し、実用的に処理します。心配症な面も。細かい気遣いで愛情を示します。',
+    '天秤座':'調和と公正さを感情的に求めます。関係性の中で感情的な均衡を保ちたいタイプ。',
+    '蠍座':'感情が深く激しい。秘密主義で嫉妬深い面もありますが、愛情は極めて深い。',
+    '射手座':'自由と楽観主義に満ちた感情。感情を哲学的に解釈し、冒険の中で満たされます。',
+    '山羊座':'感情を内に秘め、実用的に対処します。責任感から感情表現を抑えることも。',
+    '水瓶座':'感情よりも理性を優先します。普遍的な愛を持ち、人類全体に関心を向けます。',
+    '魚座':'境界のない共感力を持ちます。感情的に溶け合いやすく、霊的な感受性も高い。'
+  },
+  mercury: {
+    '牡羊座':'思考が素早く直感的。決断が早く、言葉が率直。ディベートを好みます。',
+    '牡牛座':'ゆっくりと確実に考えます。実用的で現実的な思考。記憶力に優れています。',
+    '双子座':'機知に富む鋭い知性。マルチタスクが得意で情報収集を愛します。',
+    '蟹座':'感情と記憶に根ざした思考。直感的で過去の経験から学ぶのが得意。',
+    '獅子座':'創造的で劇的な表現力。話すときに存在感があり、人々を魅了します。',
+    '乙女座':'分析的で精密な思考。細部への注意と実用的な問題解決が得意。',
+    '天秤座':'バランスの取れた客観的な思考。比較検討が得意で、公正な判断を下します。',
+    '蠍座':'深く探求する知性。心理的な洞察力に優れ、隠された真実を見抜きます。',
+    '射手座':'大きな視野を持つ楽観的な思考。哲学・宗教・文化への興味が深い。',
+    '山羊座':'構造的で現実的な思考。長期計画と戦略を得意とし、目標に向かって緻密に考えます。',
+    '水瓶座':'革新的で独創的な思考。常識を疑い、新しいアイデアを愛します。',
+    '魚座':'直感的で象徴的な思考。論理より感覚で理解し、芸術的表現が得意。'
+  },
+  venus: {
+    '牡羊座':'恋愛に情熱的で積極的。一目惚れしやすく、追いかけることを楽しみます。',
+    '牡牛座':'感覚的な喜びを愛します。安定した愛を好み、贈り物や肉体的な愛情表現を大切にします。',
+    '双子座':'知的な刺激を恋愛に求めます。会話と変化を愛し、軽やかな関係を好みます。',
+    '蟹座':'保護し守ることが愛情表現。深い感情的な絆を求め、家庭的なパートナーを理想とします。',
+    '獅子座':'ロマンチックで劇的な愛情表現。称賛と特別扱いを求め、愛情を惜しみなく与えます。',
+    '乙女座':'奉仕することで愛を表現します。細やかな気遣いで愛情を示し、完璧なパートナーを求めます。',
+    '天秤座':'愛と美を最も重視します。公正なパートナーシップを理想とし、調和を大切にします。',
+    '蠍座':'深く強烈な愛情。全てか無かの恋愛スタイルで、深い絆と変容を求めます。',
+    '射手座':'自由と冒険を恋愛にも求めます。哲学的なパートナーとの探求が理想です。',
+    '山羊座':'責任感ある誠実な愛。長期的なコミットメントを大切にし、実際的な愛情を示します。',
+    '水瓶座':'友情から始まる愛を理想とします。独立性を重んじ、知的で変わったパートナーを好みます。',
+    '魚座':'無条件の愛と精神的な繋がりを求めます。夢のような恋愛を理想とします。'
+  },
+  mars: {
+    '牡羊座':'強力な行動力と競争心。素早く決断し、情熱的にチャレンジします。',
+    '牡牛座':'持続する忍耐力と粘り強さ。ゆっくり確実に、しかし一度動き出したら止まりません。',
+    '双子座':'様々な方向へ同時にエネルギーを発揮。頭脳的な競争と言葉の力が武器です。',
+    '蟹座':'感情的な防衛本能と家族への献身。間接的に行動し、大切なものを守ります。',
+    '獅子座':'劇的で創造的な行動力。リーダーシップを発揮し、舞台の中心で輝きます。',
+    '乙女座':'細部への注意と分析的なアプローチ。効率と精度を追求して行動します。',
+    '天秤座':'外交的な戦略と公正な行動。対立を避けながら目標を達成します。',
+    '蠍座':'強烈な意志と変容する力。秘密裏に計画し、圧倒的な集中力で目標を達成します。',
+    '射手座':'自由を求める行動力と楽観主義。大きな目標に向かって情熱的に突き進みます。',
+    '山羊座':'規律と野心ある行動。長期的な計画を着実に実行し、社会的成功を目指します。',
+    '水瓶座':'革新的なアイデアと集団への奉仕。既成概念を打ち破る行動を取ります。',
+    '魚座':'精神的な行動力と芸術的エネルギー。直感に従い、奉仕と癒しに力を使います。'
+  },
+  jupiter: {
+    '牡羊座':'新しい挑戦に幸運が宿ります。先駆者精神と独立心が繁栄をもたらします。',
+    '牡牛座':'物質的豊かさと安定に幸運が宿ります。忍耐と堅実さが繁栄の鍵。',
+    '双子座':'コミュニケーションと学習に幸運が宿ります。多様な知識が繁栄をもたらします。',
+    '蟹座':'感情的な繋がりと家庭に幸運が宿ります。思いやりと直感が繁栄の鍵。',
+    '獅子座':'創造性と自己表現に幸運が宿ります。輝く自信が繁栄をもたらします。',
+    '乙女座':'奉仕と実用的スキルに幸運が宿ります。分析力と謙虚さが繁栄の鍵。',
+    '天秤座':'パートナーシップと美に幸運が宿ります。公正さと協力が繁栄をもたらします。',
+    '蠍座':'変容と深い探求に幸運が宿ります。洞察力と変化への勇気が繁栄の鍵。',
+    '射手座':'哲学と冒険に幸運が宿ります。木星は自分の星座で最も力を発揮します。',
+    '山羊座':'目標達成と社会的貢献に幸運が宿ります。規律と責任が繁栄の鍵。',
+    '水瓶座':'革新と人道的活動に幸運が宿ります。独創性と博愛が繁栄をもたらします。',
+    '魚座':'精神性と創造性に幸運が宿ります。慈悲と直感が繁栄の鍵。'
+  },
+  saturn: {
+    '牡羊座':'自己主張と独立に課題と成長があります。衝動を制御し責任ある行動を学びます。',
+    '牡牛座':'物質的安定と忍耐に課題があります。着実な積み重ねで本物の豊かさを築きます。',
+    '双子座':'コミュニケーションと思考の構造化に課題があります。言葉の力を磨きます。',
+    '蟹座':'感情管理と家庭の責任に課題があります。感情的な成熟が使命です。',
+    '獅子座':'自己表現と創造性に課題があります。認められるために自分を磨きます。',
+    '乙女座':'完璧主義と奉仕の限界に課題があります。自己批判を手放すことが成長の鍵。',
+    '天秤座':'関係性と公正さに課題があります。責任ある愛とパートナーシップを学びます。',
+    '蠍座':'変容と手放しに課題があります。コントロールを手放し信頼することが成長です。',
+    '射手座':'信念と哲学に課題があります。真の知恵と信仰を地道に構築します。',
+    '山羊座':'土星は自分の星座で最も力を発揮。責任とキャリアに真剣に向き合います。',
+    '水瓶座':'社会的変革と個人の自由に課題があります。伝統と革新のバランスを学びます。',
+    '魚座':'精神性と現実の統合に課題があります。境界と自己犠牲のバランスを学びます。'
+  },
+  uranus: { default:'革新と自由の天体。この位置の星座が示す領域で、あなたの世代に革命的な変化をもたらします。個人チャートでは、突然の変化と自由への衝動を表します。' },
+  neptune: { default:'夢と幻想の天体。この位置の星座が示す領域で、あなたの世代に精神的な覚醒をもたらします。個人チャートでは、直感・霊性・理想主義を表します。' },
+  pluto: { default:'変容と再生の天体。この位置の星座が示す領域で、あなたの世代に深い変革をもたらします。個人チャートでは、根本的な変容と力の課題を表します。' }
+};
+
+// ===== CALCULATION ENGINE =====
+
+function julianDay(year, month, day, hour=12) {
+  if (month <= 2) { year--; month += 12; }
+  const A = Math.floor(year / 100);
+  const B = 2 - A + Math.floor(A / 4);
+  return Math.floor(365.25 * (year + 4716)) + Math.floor(30.6001 * (month + 1)) + day + hour/24 + B - 1524.5;
+}
+
+function getSignFromDeg(deg) {
+  const d = ((deg % 360) + 360) % 360;
+  const idx = Math.floor(d / 30);
+  return { sign: SIGNS[idx], degree: d % 30, index: idx };
+}
+
+function calcPlanetPositions(dateStr, timeStr, lonStr) {
+  const [year, month, day] = dateStr.split('-').map(Number);
+  const [h, m] = timeStr.split(':').map(Number);
+  const [lon, lat] = lonStr.split(',').map(Number);
+  const hour = h + m/60 - 9; // JST to UT
+  const jd = julianDay(year, month, day, hour);
+  const T = (jd - 2451545.0) / 36525; // Julian centuries from J2000
+
+  // Simplified planet positions (mean longitude approximations)
+  const planets = {};
+
+  // Sun
+  const L0 = 280.46646 + 36000.76983 * T;
+  const M0 = 357.52911 + 35999.05029 * T - 0.0001537 * T * T;
+  const Mrad = M0 * Math.PI / 180;
+  const C = (1.914602 - 0.004817 * T) * Math.sin(Mrad) + 0.019993 * Math.sin(2*Mrad);
+  planets.sun = ((L0 + C) % 360 + 360) % 360;
+
+  // Moon (simplified)
+  const Lm = 218.3165 + 481267.8813 * T;
+  planets.moon = ((Lm + 6.289 * Math.sin((134.9634 + 477198.8676 * T) * Math.PI/180)) % 360 + 360) % 360;
+
+  // Mercury
+  planets.mercury = ((252.2509 + 149472.6746 * T) % 360 + 360) % 360;
+  // Venus
+  planets.venus = ((181.9798 + 58517.8156 * T) % 360 + 360) % 360;
+  // Mars
+  planets.mars = ((355.433 + 19140.2993 * T) % 360 + 360) % 360;
+  // Jupiter
+  planets.jupiter = ((34.351 + 3034.9057 * T) % 360 + 360) % 360;
+  // Saturn
+  planets.saturn = ((50.0774 + 1222.1138 * T) % 360 + 360) % 360;
+  // Uranus
+  planets.uranus = ((314.055 + 428.4748 * T) % 360 + 360) % 360;
+  // Neptune
+  planets.neptune = ((304.348 + 218.4862 * T) % 360 + 360) % 360;
+  // Pluto (approximate)
+  planets.pluto = ((238.928 + 144.9600 * T) % 360 + 360) % 360;
+
+  // ASC calculation (simplified - based on sidereal time and latitude)
+  const GMST = (280.46061837 + 360.98564736629 * (jd - 2451545)) % 360;
+  const LMST = ((GMST + lon) % 360 + 360) % 360;
+  const latRad = lat * Math.PI / 180;
+  const e = 23.4393 * Math.PI / 180;
+  const RAMCrad = LMST * Math.PI / 180;
+  const ascRad = Math.atan2(Math.cos(RAMCrad), -(Math.sin(RAMCrad) * Math.cos(e) + Math.tan(latRad) * Math.sin(e)));
+  planets.asc = ((ascRad * 180 / Math.PI) % 360 + 360) % 360;
+
+  // Houses (Placidus simplified - equal house from ASC)
+  planets.houses = [];
+  for (let i = 0; i < 12; i++) {
+    planets.houses.push(((planets.asc + i * 30) % 360 + 360) % 360);
+  }
+
+  return planets;
+}
+
+function getHouseNum(planetDeg, houses) {
+  for (let i = 0; i < 12; i++) {
+    const start = houses[i];
+    const end = houses[(i+1) % 12];
+    const pDeg = ((planetDeg % 360) + 360) % 360;
+    if (start < end) {
+      if (pDeg >= start && pDeg < end) return i + 1;
+    } else {
+      if (pDeg >= start || pDeg < end) return i + 1;
+    }
+  }
+  return 1;
+}
+
+function calcAspects(p1, p2) {
+  const aspects = [];
+  const aspectDefs = [
+    { name:'コンジャンクション', en:'Conjunction', orb:8, type:'conjunction', score:3 },
+    { name:'トライン', en:'Trine', angle:120, orb:6, type:'trine', score:3 },
+    { name:'セクスタイル', en:'Sextile', angle:60, orb:4, type:'sextile', score:2 },
+    { name:'スクエア', en:'Square', angle:90, orb:6, type:'square', score:-2 },
+    { name:'オポジション', en:'Opposition', angle:180, orb:8, type:'opposition', score:-1 }
+  ];
+
+  const planetKeys = ['sun','moon','mercury','venus','mars','jupiter','saturn'];
+
+  planetKeys.forEach(pk => {
+    planetKeys.forEach(pk2 => {
+      if (pk === pk2) return;
+      const deg1 = p1[pk];
+      const deg2 = p2[pk2];
+      if (deg1 === undefined || deg2 === undefined) return;
+
+      aspectDefs.forEach(asp => {
+        const angle = asp.angle || 0;
+        const diff = Math.abs(((deg1 - deg2 + 180) % 360) - 180);
+        const orb = Math.abs(diff - angle);
+        if (orb <= asp.orb) {
+          aspects.push({
+            p1: pk, p2: pk2,
+            aspect: asp, orb: orb.toFixed(1), score: asp.score
+          });
+        }
+      });
+    });
+  });
+
+  return aspects.slice(0, 12);
+}
+
+// ===== UI STATE =====
+let currentTab = 'natal';
+
+function switchTab(tab, btn) {
+  currentTab = tab;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('natalForm').style.display = tab === 'natal' ? 'block' : 'none';
+  document.getElementById('compatForm').style.display = tab === 'compat' ? 'block' : 'none';
+  document.getElementById('resultWrap').classList.remove('show');
+  document.getElementById('resultWrap').innerHTML = '';
+}
+
+function calcNatal() {
+  const date = document.getElementById('nDate').value;
+  const time = document.getElementById('nTime').value || '12:00';
+  const city = document.getElementById('nCity').value;
+  const name = document.getElementById('nName').value || '鑑定結果';
+  if (!date) { alert('生年月日を入力してください'); return; }
+
+  const btn = document.getElementById('natalBtn');
+  const loading = document.getElementById('natalLoading');
+  btn.disabled = true;
+  loading.classList.add('show');
+  document.getElementById('resultWrap').classList.remove('show');
+
+  setTimeout(() => {
+    const pos = calcPlanetPositions(date, time, city);
+    renderNatal(name, pos);
+    btn.disabled = false;
+    loading.classList.remove('show');
+    document.getElementById('resultWrap').classList.add('show');
+    document.getElementById('resultWrap').scrollIntoView({ behavior:'smooth', block:'start' });
+  }, 1800);
+}
+
+function calcCompat() {
+  const aDate = document.getElementById('aDate').value;
+  const bDate = document.getElementById('bDate').value;
+  if (!aDate || !bDate) { alert('両方の生年月日を入力してください'); return; }
+
+  const aTime = document.getElementById('aTime').value || '12:00';
+  const bTime = document.getElementById('bTime').value || '12:00';
+  const aName = document.getElementById('aName').value || 'A';
+  const bName = document.getElementById('bName').value || 'B';
+
+  const btn = document.getElementById('compatBtn');
+  const loading = document.getElementById('compatLoading');
+  btn.disabled = true;
+  loading.classList.add('show');
+  document.getElementById('resultWrap').classList.remove('show');
+
+  setTimeout(() => {
+    const posA = calcPlanetPositions(aDate, aTime, '135,35');
+    const posB = calcPlanetPositions(bDate, bTime, '135,35');
+    renderCompat(aName, bName, posA, posB);
+    btn.disabled = false;
+    loading.classList.remove('show');
+    document.getElementById('resultWrap').classList.add('show');
+    document.getElementById('resultWrap').scrollIntoView({ behavior:'smooth', block:'start' });
+  }, 2000);
+}
+
+function renderNatal(name, pos) {
+  const sun = getSignFromDeg(pos.sun);
+  const moon = getSignFromDeg(pos.moon);
+  const asc = getSignFromDeg(pos.asc);
+
+  // Element count
+  const elements = { fire:0, earth:0, air:0, water:0 };
+  PLANETS.slice(0,7).forEach(p => {
+    const s = getSignFromDeg(pos[p.key]);
+    elements[s.sign.element]++;
+  });
+  const maxEl = Math.max(...Object.values(elements));
+
+  let html = `
+    <!-- Big 3 -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">${name} <em>の星図</em></div>
+        <div class="section-line"></div>
+      </div>
+      <div class="big3">
+        <div class="big3-item">
+          <div class="big3-label">Sun · 太陽星座</div>
+          <div class="big3-symbol">${sun.sign.symbol}</div>
+          <div class="big3-name">${sun.sign.name}</div>
+          <div class="big3-sign">${sun.degree.toFixed(0)}°</div>
+        </div>
+        <div class="big3-item">
+          <div class="big3-label">Moon · 月星座</div>
+          <div class="big3-symbol">${moon.sign.symbol}</div>
+          <div class="big3-name">${moon.sign.name}</div>
+          <div class="big3-sign">${moon.degree.toFixed(0)}°</div>
+        </div>
+        <div class="big3-item">
+          <div class="big3-label">ASC · 上昇星座</div>
+          <div class="big3-symbol">${asc.sign.symbol}</div>
+          <div class="big3-name">${asc.sign.name}</div>
+          <div class="big3-sign">${asc.degree.toFixed(0)}°</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chart wheel SVG -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">Natal <em>Chart</em></div>
+        <div class="section-line"></div>
+      </div>
+      <div class="chart-section">
+        <div class="chart-wheel">${renderWheel(pos)}</div>
+        <div class="chart-legend">
+          <div class="legend-title">天体の位置</div>
+          ${PLANETS.map(p => {
+            const s = getSignFromDeg(pos[p.key]);
+            const h = getHouseNum(pos[p.key], pos.houses);
+            return `<div class="legend-item" onclick="showPlanetDetail('${p.key}','${s.sign.name}',${h})">
+              <div class="legend-planet" style="color:${p.color}">${p.symbol}</div>
+              <div class="legend-info">
+                <div class="legend-name">${p.name}</div>
+                <div class="legend-sign">${s.sign.name} / ${h}ハウス</div>
+              </div>
+              <div class="legend-deg">${s.degree.toFixed(1)}°</div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>
+    </div>
+
+    <!-- Planet detail (shown on click) -->
+    <div class="planet-detail" id="planetDetail"></div>
+
+    <!-- Element balance -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">Element <em>Balance</em></div>
+        <div class="section-line"></div>
+      </div>
+      <div class="element-bars">
+        ${[['fire','🔥','火'],['earth','🌿','地'],['air','💨','風'],['water','💧','水']].map(([el,ic,jp]) => `
+          <div class="el-row">
+            <div class="el-label">${ic} ${jp}</div>
+            <div class="el-bar-wrap"><div class="el-bar el-${el}" style="width:${(elements[el]/maxEl*100)||5}%"></div></div>
+            <div class="el-count">${elements[el]}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+
+    <!-- House table -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">House <em>Interpretation</em></div>
+        <div class="section-line"></div>
+      </div>
+      <table class="house-table">
+        <thead><tr><th>ハウス</th><th>テーマ</th><th>カスプ星座</th><th>意味</th></tr></thead>
+        <tbody>
+          ${HOUSES.map((h,i) => {
+            const cuspSign = getSignFromDeg(pos.houses[i]);
+            const planetsInHouse = PLANETS.filter(p => getHouseNum(pos[p.key], pos.houses) === h.num).map(p => p.symbol).join(' ');
+            return `<tr>
+              <td>H${h.num}</td>
+              <td style="font-size:11px;color:#4a4a4a">${h.theme}</td>
+              <td>${cuspSign.sign.symbol} ${cuspSign.sign.name}</td>
+              <td style="font-size:11px">${planetsInHouse ? `<span style="color:#1a1a1a;font-weight:500">${planetsInHouse}</span> ` : ''}${h.keyword}</td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+
+    <button class="reset-btn" onclick="resetResult()">— Reset —</button>
+    <div class="footer-note">※ 出生時刻が不明な場合は12:00で計算。より正確な結果には正確な出生時刻が必要です。</div>
+  `;
+
+  document.getElementById('resultWrap').innerHTML = html;
+}
+
+function renderWheel(pos) {
+  const cx=120, cy=120, r=110, r2=85, r3=60;
+  let svg = `<svg width="240" height="240" viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg">`;
+
+  // Background
+  svg += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="white" stroke="#e8e6e1" stroke-width="1"/>`;
+  svg += `<circle cx="${cx}" cy="${cy}" r="${r2}" fill="none" stroke="#e8e6e1" stroke-width="0.5"/>`;
+  svg += `<circle cx="${cx}" cy="${cy}" r="${r3}" fill="none" stroke="#e8e6e1" stroke-width="0.5"/>`;
+  svg += `<circle cx="${cx}" cy="${cy}" r="4" fill="#1a1a1a"/>`;
+
+  // 12 divisions
+  for (let i=0; i<12; i++) {
+    const angle = (i*30 - 90) * Math.PI/180;
+    svg += `<line x1="${cx+r3*Math.cos(angle)}" y1="${cy+r3*Math.sin(angle)}" x2="${cx+r*Math.cos(angle)}" y2="${cy+r*Math.sin(angle)}" stroke="#e8e6e1" stroke-width="0.5"/>`;
+    // Sign symbol
+    const midAngle = ((i+0.5)*30-90)*Math.PI/180;
+    const tx = cx+(r2+12)*Math.cos(midAngle);
+    const ty = cy+(r2+12)*Math.sin(midAngle)+4;
+    svg += `<text x="${tx}" y="${ty}" text-anchor="middle" font-size="10" fill="#9a9a9a">${SIGNS[i].symbol}</text>`;
+  }
+
+  // Planet positions
+  const ascDeg = pos.asc;
+  PLANETS.forEach(p => {
+    const pDeg = pos[p.key];
+    const angleDeg = pDeg - ascDeg - 90;
+    const angleRad = angleDeg * Math.PI/180;
+    const px = cx + (r3-18)*Math.cos(angleRad);
+    const py = cy + (r3-18)*Math.sin(angleRad);
+    svg += `<text x="${px}" y="${py+4}" text-anchor="middle" font-size="11" fill="${p.color}">${p.symbol}</text>`;
+  });
+
+  svg += '</svg>';
+  return svg;
+}
+
+function showPlanetDetail(planetKey, signName, house) {
+  const planet = PLANETS.find(p => p.key === planetKey);
+  const meanings = PLANET_SIGN_MEANINGS[planetKey];
+  const meaning = meanings?.default || meanings?.[signName] || '天体の位置が示す独自のエネルギーがあります。';
+  const houseInfo = HOUSES[house-1];
+
+  const detail = document.getElementById('planetDetail');
+  detail.innerHTML = `
+    <div class="pd-head">
+      <div class="pd-symbol" style="color:${planet.color}">${planet.symbol}</div>
+      <div>
+        <div class="pd-title">${planet.name}</div>
+        <div class="pd-sign">${signName}</div>
+      </div>
+      <div class="pd-house">第${house}ハウス · ${houseInfo.theme}</div>
+    </div>
+    <div class="pd-text">${meaning}</div>
+    <div class="pd-text" style="font-size:12px;color:#9a9a9a;margin-bottom:12px">
+      <strong style="color:#4a4a4a">第${house}ハウス（${houseInfo.theme}）</strong>に位置することで、${houseInfo.keyword}の領域においてこのエネルギーが表現されます。
+    </div>
+    <div class="pd-keywords">
+      ${SIGNS.find(s=>s.name===signName)?.element ? `<div class="pd-kw">${SIGNS.find(s=>s.name===signName).element}</div>` : ''}
+      <div class="pd-kw">${houseInfo.keyword}</div>
+    </div>
+  `;
+  detail.classList.add('show');
+}
+
+function renderCompat(nameA, nameB, posA, posB) {
+  const aspects = calcAspects(posA, posB);
+  const totalScore = aspects.reduce((sum, a) => sum + a.score, 0);
+  const maxScore = aspects.length * 3;
+  const compatPct = Math.min(100, Math.max(20, Math.round(50 + (totalScore / Math.max(maxScore, 1)) * 50)));
+
+  const verdicts = [
+    [85, '魂の伴侶', '深い運命的な繋がり。天体レベルで共鳴し合っています。'],
+    [70, '深い縁', '強い引き合いと相互理解がある関係。長期的な絆を築けます。'],
+    [55, '成長し合う関係', '刺激し合い、互いを高め合う関係。努力で深められます。'],
+    [40, '学びの関係', '課題はありますが、それが成長の糧になります。'],
+    [0, '挑戦的な縁', '違いが大きいが、乗り越えることで強い絆が生まれます。']
+  ];
+  const [, verdict, desc] = verdicts.find(([threshold]) => compatPct >= threshold);
+
+  const sunA = getSignFromDeg(posA.sun);
+  const sunB = getSignFromDeg(posB.sun);
+  const moonA = getSignFromDeg(posA.moon);
+  const moonB = getSignFromDeg(posB.moon);
+
+  const aspectMeanings = {
+    conjunction: '同じエネルギーで強く共鳴します',
+    trine: '自然なハーモニーと相互理解',
+    sextile: '互いを支え合う友好的な関係',
+    square: '刺激と緊張。成長を促す課題',
+    opposition: '引き合いつつも視点の違いがある'
+  };
+
+  let html = `
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">${nameA} <em>×</em> ${nameB}</div>
+        <div class="section-line"></div>
+      </div>
+      <div class="compat-score">
+        <div class="compat-num">${compatPct}</div>
+        <div class="compat-unit">%</div>
+        <div class="compat-right">
+          <div class="compat-verdict">${verdict}</div>
+          <div class="compat-sub">${desc}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">Big 3 <em>Comparison</em></div>
+        <div class="section-line"></div>
+      </div>
+      <div class="big3" style="grid-template-columns:1fr 1fr;margin-bottom:32px">
+        <div class="big3-item">
+          <div class="big3-label">${nameA} · 太陽</div>
+          <div class="big3-symbol">${sunA.sign.symbol}</div>
+          <div class="big3-name">${sunA.sign.name}</div>
+        </div>
+        <div class="big3-item">
+          <div class="big3-label">${nameB} · 太陽</div>
+          <div class="big3-symbol">${sunB.sign.symbol}</div>
+          <div class="big3-name">${sunB.sign.name}</div>
+        </div>
+        <div class="big3-item">
+          <div class="big3-label">${nameA} · 月</div>
+          <div class="big3-symbol">${moonA.sign.symbol}</div>
+          <div class="big3-name">${moonA.sign.name}</div>
+        </div>
+        <div class="big3-item">
+          <div class="big3-label">${nameB} · 月</div>
+          <div class="big3-symbol">${moonB.sign.symbol}</div>
+          <div class="big3-name">${moonB.sign.name}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">Synastry <em>Aspects</em></div>
+        <div class="section-line"></div>
+      </div>
+      <div class="compat-aspects">
+        ${aspects.length === 0 ? '<div style="padding:20px;color:#9a9a9a;font-size:13px">主要なアスペクトは見つかりませんでした。</div>' :
+          aspects.map(a => {
+            const p1 = PLANETS.find(p => p.key === a.p1);
+            const p2 = PLANETS.find(p => p.key === a.p2);
+            return `<div class="compat-aspect-row">
+              <div class="asp-dot asp-${a.aspect.type}"></div>
+              <div class="asp-planets">${p1.symbol}${p1.name} × ${p2.symbol}${p2.name}</div>
+              <div class="asp-type">${a.aspect.name}</div>
+              <div class="asp-meaning">${aspectMeanings[a.aspect.type]}</div>
+            </div>`;
+          }).join('')
+        }
+      </div>
+    </div>
+
+    <button class="reset-btn" onclick="resetResult()">— Reset —</button>
+    <div class="footer-note">※ 出生時刻が不明な場合は12:00で計算しています。シナストリーは参考値です。</div>
+  `;
+
+  document.getElementById('resultWrap').innerHTML = html;
+}
+
+function resetResult() {
+  document.getElementById('resultWrap').classList.remove('show');
+  document.getElementById('resultWrap').innerHTML = '';
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+</script>
+</body>
+</html>

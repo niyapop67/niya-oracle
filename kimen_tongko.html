@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>奇門遁甲</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;700&family=Noto+Sans+JP:wght@300;400;500&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #eceae6;
+    --surface: #f5f3f0;
+    --border: rgba(0,0,0,0.1);
+    --accent: #8a6430;
+    --accent2: #3a6e98;
+    --text: #18181e;
+    --muted: #666070;
+    --good: #2e8a48;
+    --bad: #a03030;
+    --neutral: #555565;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-weight: 400;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── 背景 ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(ellipse 60% 40% at 70% 20%, rgba(160,120,64,0.05) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 50% at 20% 80%, rgba(74,126,168,0.04) 0%, transparent 60%);
+    pointer-events: none; z-index: 0;
+  }
+
+  /* ── ヘッダー ── */
+  header {
+    position: sticky; top: 0; z-index: 100;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(236,234,230,0.92);
+    backdrop-filter: blur(16px);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .logo {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.1rem;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+  }
+  .logo span { color: var(--text); opacity: 0.6; font-size: 0.75rem; letter-spacing: 0.1em; margin-left: 8px; font-family: 'Noto Sans JP', sans-serif; }
+  #datetime-display { font-size: 0.72rem; color: var(--muted); letter-spacing: 0.05em; text-align: right; line-height: 1.6; }
+
+  /* ── メインレイアウト ── */
+  main {
+    position: relative; z-index: 1;
+    max-width: 960px; margin: 0 auto;
+    padding: 24px 16px 80px;
+  }
+
+  /* ── タブ ── */
+  .tabs {
+    display: flex; gap: 4px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 4px; margin-bottom: 28px;
+  }
+  .tab {
+    flex: 1; padding: 10px 4px;
+    background: transparent; border: none; cursor: pointer;
+    color: var(--muted); font-size: 0.75rem;
+    font-family: 'Noto Sans JP', sans-serif;
+    border-radius: 8px; transition: all 0.2s;
+    letter-spacing: 0.03em;
+  }
+  .tab.active {
+    background: rgba(201,169,110,0.15);
+    color: var(--accent);
+  }
+
+  /* ── パネル ── */
+  .panel { display: none; animation: fadeIn 0.3s ease; }
+  .panel.active { display: block; }
+  @keyframes fadeIn { from { opacity:0; transform: translateY(6px); } to { opacity:1; transform: none; } }
+
+  /* ── セクションタイトル ── */
+  .section-title {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 0.8rem; letter-spacing: 0.12em;
+    color: var(--accent); text-transform: uppercase;
+    margin-bottom: 16px; padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ── カード ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px; padding: 20px;
+    margin-bottom: 16px;
+  }
+
+  /* ── 九宮グリッド ── */
+  .grid-wrap { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+  .palace-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px; width: 100%;
+    max-width: 400px;
+  }
+  .palace {
+    aspect-ratio: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 8px; gap: 3px;
+    position: relative; overflow: hidden;
+    transition: border-color 0.2s;
+    cursor: pointer;
+  }
+  .palace.center { background: rgba(201,169,110,0.06); border-color: rgba(201,169,110,0.2); }
+  .palace:hover { border-color: rgba(201,169,110,0.3); }
+  .palace-num { font-size: 0.6rem; color: var(--muted); position: absolute; top: 5px; left: 7px; }
+  .palace-dir { font-size: 0.62rem; color: var(--muted); position: absolute; top: 5px; right: 7px; }
+  .palace-star { font-size: 1rem; line-height: 1; }
+  .palace-name { font-size: 0.65rem; color: var(--accent); font-family: 'Noto Serif JP', serif; }
+  .palace-gate { font-size: 0.6rem; color: var(--accent2); }
+  .palace-god { font-size: 0.6rem; color: var(--muted); }
+  .palace-stem { font-size: 0.6rem; }
+  .palace-stem.good { color: var(--good); }
+  .palace-stem.bad { color: var(--bad); }
+  .palace.highlight { border-color: var(--accent); box-shadow: 0 0 12px rgba(201,169,110,0.15); }
+
+  /* ── 凡例 ── */
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    font-size: 0.65rem; color: var(--muted);
+  }
+  .legend-item { display: flex; align-items: center; gap: 4px; }
+  .dot { width: 6px; height: 6px; border-radius: 50%; }
+
+  /* ── 時間スライダー ── */
+  .time-controls {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 16px;
+  }
+  .time-controls label { font-size: 0.72rem; color: var(--muted); white-space: nowrap; }
+  input[type=range] {
+    flex: 1; accent-color: var(--accent); cursor: pointer;
+  }
+  .time-val { font-size: 0.75rem; color: var(--accent); min-width: 40px; text-align: right; }
+
+  /* ── 方位タイミング ── */
+  .direction-list { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .dir-item {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .dir-name { font-size: 0.8rem; color: var(--text); }
+  .dir-score { font-size: 1.1rem; font-family: 'DM Serif Display', serif; }
+  .dir-detail { font-size: 0.65rem; color: var(--muted); line-height: 1.5; }
+  .score-good { color: var(--good); }
+  .score-mid { color: var(--accent); }
+  .score-bad { color: var(--bad); }
+
+  /* ── タイミング ── */
+  .timing-list { display: flex; flex-direction: column; gap: 6px; }
+  .timing-item {
+    display: flex; align-items: center; gap: 12px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 14px;
+  }
+  .timing-hour { font-size: 0.75rem; color: var(--muted); min-width: 36px; }
+  .timing-bar-wrap { flex: 1; height: 4px; background: rgba(255,255,255,0.06); border-radius: 2px; }
+  .timing-bar { height: 4px; border-radius: 2px; transition: width 0.6s; }
+  .timing-label { font-size: 0.7rem; min-width: 28px; text-align: right; }
+  .timing-gate { font-size: 0.65rem; color: var(--accent2); min-width: 24px; }
+
+  /* ── 読み解き ── */
+  .reading-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; padding: 20px; margin-bottom: 12px;
+  }
+  .reading-title { font-family: 'Noto Serif JP', serif; font-size: 0.82rem; color: var(--accent); margin-bottom: 10px; }
+  .reading-text { font-size: 0.78rem; line-height: 1.9; color: var(--text); }
+  .reading-tag {
+    display: inline-block; padding: 2px 8px;
+    background: rgba(201,169,110,0.1); border-radius: 20px;
+    font-size: 0.65rem; color: var(--accent); margin: 2px;
+  }
+
+  /* ── 用語辞典 ── */
+  .glossary { display: flex; flex-direction: column; gap: 8px; }
+  .gloss-item { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; }
+  .gloss-header {
+    padding: 12px 14px; cursor: pointer;
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 0.8rem;
+  }
+  .gloss-header .label { font-family: 'Noto Serif JP', serif; color: var(--accent); }
+  .gloss-arrow { color: var(--muted); font-size: 0.7rem; transition: transform 0.2s; }
+  .gloss-item.open .gloss-arrow { transform: rotate(180deg); }
+  .gloss-body { display: none; padding: 0 14px 14px; font-size: 0.75rem; line-height: 1.8; color: var(--muted); }
+  .gloss-item.open .gloss-body { display: block; }
+
+  /* ── 時柱情報 ── */
+  .pillar-row {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+    margin-bottom: 16px;
+  }
+  .pillar {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 8px;
+    text-align: center;
+  }
+  .pillar-type { font-size: 0.62rem; color: var(--muted); margin-bottom: 4px; }
+  .pillar-val { font-size: 1rem; font-family: 'Noto Serif JP', serif; color: var(--accent); }
+  .pillar-sub { font-size: 0.65rem; color: var(--muted); margin-top: 2px; }
+
+  /* ── バッジ ── */
+  .badge {
+    display: inline-flex; align-items: center;
+    padding: 3px 10px; border-radius: 20px;
+    font-size: 0.65rem; letter-spacing: 0.05em;
+  }
+  .badge-yin { background: rgba(110,158,201,0.12); color: var(--accent2); }
+  .badge-yang { background: rgba(201,169,110,0.12); color: var(--accent); }
+
+  /* ── 全体運 ── */
+  .overall-bar {
+    width: 100%; height: 6px;
+    background: rgba(255,255,255,0.06); border-radius: 3px; margin: 10px 0;
+  }
+  .overall-fill { height: 100%; border-radius: 3px; }
+
+  /* スクロールバー */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">奇門遁甲 <span>QIMEN DUNJIA</span></div>
+  <div id="datetime-display">読み込み中...</div>
+</header>
+
+<main>
+
+  <!-- タブ -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('board')">九宮盤</button>
+    <button class="tab" onclick="switchTab('direction')">方位</button>
+    <button class="tab" onclick="switchTab('timing')">時運</button>
+    <button class="tab" onclick="switchTab('reading')">読み解き</button>
+    <button class="tab" onclick="switchTab('glossary')">用語集</button>
+  </div>
+
+  <!-- ① 九宮盤 -->
+  <div class="panel active" id="panel-board">
+
+    <div class="card">
+      <div class="pillar-row" id="pillar-row"></div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px;">
+        <span id="badge-yin-yang" class="badge"></span>
+        <span id="cycle-label" style="font-size:0.7rem;color:var(--muted);"></span>
+        <span id="xun-label" style="font-size:0.7rem;color:var(--muted);"></span>
+      </div>
+      <div class="time-controls">
+        <label>時柱を変更</label>
+        <input type="range" id="hour-slider" min="0" max="23" step="1" oninput="onSlider(this.value)">
+        <span class="time-val" id="slider-val">--時</span>
+      </div>
+    </div>
+
+    <div class="section-title">九宮配置</div>
+    <div class="grid-wrap">
+      <div class="palace-grid" id="palace-grid"></div>
+      <div class="legend">
+        <div class="legend-item"><div class="dot" style="background:var(--accent)"></div>星</div>
+        <div class="legend-item"><div class="dot" style="background:var(--accent2)"></div>八門</div>
+        <div class="legend-item"><div class="dot" style="background:var(--good)"></div>吉干</div>
+        <div class="legend-item"><div class="dot" style="background:var(--bad)"></div>凶干</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ② 方位 -->
+  <div class="panel" id="panel-direction">
+    <div class="section-title">本日の方位吉凶</div>
+    <div class="direction-list" id="direction-list"></div>
+  </div>
+
+  <!-- ③ 時運 -->
+  <div class="panel" id="panel-timing">
+    <div class="section-title">時辰別 吉凶バー</div>
+    <div class="timing-list" id="timing-list"></div>
+  </div>
+
+  <!-- ④ 読み解き -->
+  <div class="panel" id="panel-reading">
+    <div class="section-title">今の時の読み解き</div>
+    <div id="reading-content"></div>
+  </div>
+
+  <!-- ⑤ 用語集 -->
+  <div class="panel" id="panel-glossary">
+    <div class="section-title">奇門遁甲 用語集</div>
+    <div class="glossary" id="glossary"></div>
+  </div>
+
+</main>
+
+<script>
+// ═══════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════
+
+const NINE_STARS = ['一白水星','二黒土星','三碧木星','四緑木星','五黄土星','六白金星','七赤金星','八白土星','九紫火星'];
+const STAR_EMOJI = ['💧','🌑','🌿','🍃','⭐','⚪','🔴','⬜','🔥'];
+
+const EIGHT_GATES = ['開門','休門','生門','傷門','杜門','景門','死門','驚門'];
+const GATE_TYPE = {
+  '開門':'大吉','休門':'吉','生門':'大吉','傷門':'凶',
+  '杜門':'小凶','景門':'吉','死門':'大凶','驚門':'凶'
+};
+
+const EIGHT_GODS = ['値符','螣蛇','太陰','六合','白虎','玄武','九地','九天'];
+
+const STEMS = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
+const THREE_QI = ['乙','丙','丁']; // 三奇
+const EVIL_STEMS = ['庚','辛']; // 凶干
+
+const DIRECTIONS = ['北','北東','東','南東','南','南西','西','北西'];
+const PALACE_ORDER = [4,9,2,3,5,7,8,1,6]; // 洛書順 (宮番号)
+const PALACE_DISPLAY = [
+  {num:4,dir:'南東'},{num:9,dir:'南'},{num:2,dir:'南西'},
+  {num:3,dir:'東'}, {num:5,dir:'中'},{num:7,dir:'西'},
+  {num:8,dir:'北東'},{num:1,dir:'北'},{num:6,dir:'北西'}
+];
+
+const BRANCHES = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+const HOUR_TO_BRANCH = [0,0,1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10,11,11];
+
+const XUN_NAMES = ['甲子旬','甲戌旬','甲申旬','甲午旬','甲辰旬','甲寅旬'];
+
+// ═══════════════════════════════════════════════
+// 計算
+// ═══════════════════════════════════════════════
+
+function getJD(date) {
+  const y=date.getFullYear(),m=date.getMonth()+1,d=date.getDate();
+  const a=Math.floor((14-m)/12), yy=y+4800-a, mm=m+12*a-3;
+  return d+Math.floor((153*mm+2)/5)+365*yy+Math.floor(yy/4)-Math.floor(yy/100)+Math.floor(yy/400)-32045;
+}
+
+function getDayStem(date) {
+  const jd = getJD(date);
+  return ((jd + 4) % 10 + 10) % 10;
+}
+
+function getDayBranch(date) {
+  const jd = getJD(date);
+  return ((jd + 8) % 12 + 12) % 12;
+}
+
+function getXun(stemIdx, branchIdx) {
+  // 旬首を決定
+  const diff = ((branchIdx - stemIdx) % 12 + 12) % 12;
+  return Math.floor(diff / 2) % 6;
+}
+
+function isYangDun(month) {
+  // 冬至〜夏至: 陽遁 (11月〜5月ごろ)
+  return month >= 11 || month <= 4;
+}
+
+function getBaseStarForHour(hour, date) {
+  const hourBranch = HOUR_TO_BRANCH[hour];
+  const dayStemIdx = getDayStem(date);
+  const dayBranchIdx = getDayBranch(date);
+  const xunIdx = getXun(dayStemIdx, dayBranchIdx);
+  const month = date.getMonth(); // 0-indexed
+  const yang = isYangDun(month);
+
+  // 時頭星 = 旬首に対応する基本星を時に合わせてシフト
+  // 陽遁: 順布, 陰遁: 逆布
+  const xunBaseStars = [1,7,4,2,8,5]; // 旬首別基本星(一白起点簡略)
+  const baseStar = xunBaseStars[xunIdx] - 1;
+  const shift = yang ? hourBranch : -hourBranch;
+  return ((baseStar + shift) % 9 + 9) % 9;
+}
+
+function buildPalaceData(hour, date) {
+  const baseStar = getBaseStarForHour(hour, date);
+  const yang = isYangDun(date.getMonth());
+  const dayStemIdx = getDayStem(date);
+
+  return PALACE_DISPLAY.map((p, i) => {
+    const palaceIdx = p.num === 5 ? 4 : (p.num - 1);
+    const starIdx = ((baseStar + (yang ? palaceIdx : -palaceIdx)) % 9 + 9) % 9;
+    const gateIdx = (i + hour) % 8;
+    const godIdx = (i + Math.floor(hour / 2)) % 8;
+    const stemIdx = (dayStemIdx + i) % 10;
+
+    return {
+      num: p.num, dir: p.dir,
+      star: NINE_STARS[starIdx],
+      starEmoji: STAR_EMOJI[starIdx],
+      gate: EIGHT_GATES[gateIdx],
+      gateType: GATE_TYPE[EIGHT_GATES[gateIdx]],
+      god: EIGHT_GODS[godIdx],
+      stem: STEMS[stemIdx],
+      isThreeQi: THREE_QI.includes(STEMS[stemIdx]),
+      isEvil: EVIL_STEMS.includes(STEMS[stemIdx]),
+    };
+  });
+}
+
+function calcPalaceScore(palace) {
+  let s = 50;
+  if (palace.gateType === '大吉') s += 30;
+  else if (palace.gateType === '吉') s += 15;
+  else if (palace.gateType === '凶') s -= 15;
+  else if (palace.gateType === '大凶') s -= 30;
+  else if (palace.gateType === '小凶') s -= 8;
+  if (palace.isThreeQi) s += 20;
+  if (palace.isEvil) s -= 20;
+  return Math.max(5, Math.min(95, s));
+}
+
+// ═══════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════
+
+let currentDate = new Date();
+let currentHour = currentDate.getHours();
+let palaceData = [];
+
+// ═══════════════════════════════════════════════
+// UI描画
+// ═══════════════════════════════════════════════
+
+function formatDatetime(d) {
+  const opts = { year:'numeric',month:'2-digit',day:'2-digit',weekday:'short' };
+  const dateStr = d.toLocaleDateString('ja-JP', opts);
+  const timeStr = d.toLocaleTimeString('ja-JP', { hour:'2-digit', minute:'2-digit' });
+  return dateStr + '\n' + timeStr;
+}
+
+function updateHeader() {
+  document.getElementById('datetime-display').textContent = formatDatetime(currentDate);
+}
+
+function updatePillars() {
+  const stemIdx = getDayStem(currentDate);
+  const branchIdx = getDayBranch(currentDate);
+  const hourBranch = HOUR_TO_BRANCH[currentHour];
+  const xunIdx = getXun(stemIdx, branchIdx);
+  const yang = isYangDun(currentDate.getMonth());
+
+  const pillars = [
+    { type:'日干', val: STEMS[stemIdx], sub: '' },
+    { type:'日支', val: BRANCHES[branchIdx], sub: '' },
+    { type:'時支', val: BRANCHES[hourBranch], sub: currentHour + '時台' },
+    { type:'旬首', val: XUN_NAMES[xunIdx], sub: '' },
+  ];
+
+  document.getElementById('pillar-row').innerHTML = pillars.map(p => `
+    <div class="pillar">
+      <div class="pillar-type">${p.type}</div>
+      <div class="pillar-val">${p.val}</div>
+      ${p.sub ? `<div class="pillar-sub">${p.sub}</div>` : ''}
+    </div>
+  `).join('');
+
+  document.getElementById('badge-yin-yang').className = 'badge ' + (yang ? 'badge-yang' : 'badge-yin');
+  document.getElementById('badge-yin-yang').textContent = yang ? '陽遁' : '陰遁';
+  document.getElementById('cycle-label').textContent = yang ? '順布（星が順行）' : '逆布（星が逆行）';
+  document.getElementById('xun-label').textContent = '旬: ' + XUN_NAMES[xunIdx];
+}
+
+function updateSlider() {
+  const s = document.getElementById('hour-slider');
+  s.value = currentHour;
+  document.getElementById('slider-val').textContent = currentHour + '時';
+}
+
+function renderGrid() {
+  palaceData = buildPalaceData(currentHour, currentDate);
+  const grid = document.getElementById('palace-grid');
+  grid.innerHTML = palaceData.map((p, i) => {
+    const isCenter = p.num === 5;
+    const score = calcPalaceScore(p);
+    const stemClass = p.isThreeQi ? 'good' : (p.isEvil ? 'bad' : '');
+    return `
+      <div class="palace ${isCenter ? 'center' : ''}" onclick="showPalaceDetail(${i})">
+        <div class="palace-num">${p.num}</div>
+        <div class="palace-dir">${p.dir}</div>
+        <div class="palace-star">${p.starEmoji}</div>
+        <div class="palace-name">${p.star.slice(0,2)}</div>
+        <div class="palace-gate">${p.gate}</div>
+        <div class="palace-god">${p.god}</div>
+        <div class="palace-stem ${stemClass}">${p.stem}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function showPalaceDetail(i) {
+  const p = palaceData[i];
+  const score = calcPalaceScore(p);
+  alert(`【第${p.num}宮 ${p.dir}】\n\n星: ${p.star}\n八門: ${p.gate}（${p.gateType}）\n八神: ${p.god}\n天干: ${p.stem}${p.isThreeQi ? '（三奇✦）' : ''}${p.isEvil ? '（凶干✕）' : ''}\n\n吉凶スコア: ${score}/100`);
+}
+
+function renderDirections() {
+  palaceData = buildPalaceData(currentHour, currentDate);
+  const list = document.getElementById('direction-list');
+  // 8方位のパレスを方位別に並べ替え
+  const dirPalaces = palaceData.filter(p => p.num !== 5);
+  list.innerHTML = dirPalaces.map(p => {
+    const score = calcPalaceScore(p);
+    const cls = score >= 65 ? 'score-good' : score >= 45 ? 'score-mid' : 'score-bad';
+    const bar = score >= 65 ? '▲▲▲' : score >= 45 ? '▲▲△' : '▲△△';
+    const advice = getDirectionAdvice(p, score);
+    return `
+      <div class="dir-item">
+        <div class="dir-name">${p.dir} <span style="font-size:0.65rem;color:var(--muted)">第${p.num}宮</span></div>
+        <div class="dir-score ${cls}">${score >= 65 ? '吉 ' : score >= 45 ? '中 ' : '凶 '}${bar}</div>
+        <div class="dir-detail">${p.gate}・${p.star.slice(0,2)}<br>${advice}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function getDirectionAdvice(p, score) {
+  const advices = {
+    '開門': '動き始め・新規に◎', '休門': '休養・内向きに◎',
+    '生門': '出会い・商談に吉', '景門': '文書・情報収集に吉',
+    '傷門': '争い・トラブルに注意', '杜門': '停滞・待機が無難',
+    '死門': '動かず静観が最善', '驚門': '混乱・変動に注意'
+  };
+  return advices[p.gate] || '';
+}
+
+function renderTiming() {
+  const list = document.getElementById('timing-list');
+  let html = '';
+  for (let h = 0; h < 24; h += 2) {
+    const d = buildPalaceData(h, currentDate);
+    const scores = d.map(calcPalaceScore);
+    const avg = Math.round(scores.reduce((a,b)=>a+b,0) / scores.length);
+    const gateIdx = h % 8;
+    const gate = EIGHT_GATES[gateIdx];
+    const cls = avg >= 65 ? 'var(--good)' : avg >= 45 ? 'var(--accent)' : 'var(--bad)';
+    const label = avg >= 65 ? '吉' : avg >= 45 ? '中' : '凶';
+    const isNow = (currentHour >= h && currentHour < h + 2);
+    html += `
+      <div class="timing-item" style="${isNow ? 'border-color:var(--accent);' : ''}">
+        <div class="timing-hour">${String(h).padStart(2,'0')}〜${String(h+1).padStart(2,'0')}</div>
+        <div class="timing-gate">${gate}</div>
+        <div class="timing-bar-wrap">
+          <div class="timing-bar" style="width:${avg}%;background:${cls}"></div>
+        </div>
+        <div class="timing-label" style="color:${cls}">${label}</div>
+        ${isNow ? '<div style="font-size:0.6rem;color:var(--accent);min-width:20px">◀</div>' : '<div style="min-width:20px"></div>'}
+      </div>
+    `;
+  }
+  list.innerHTML = html;
+}
+
+function renderReading() {
+  palaceData = buildPalaceData(currentHour, currentDate);
+  const hourBranch = BRANCHES[HOUR_TO_BRANCH[currentHour]];
+  const yang = isYangDun(currentDate.getMonth());
+  const scores = palaceData.map(calcPalaceScore);
+  const overall = Math.round(scores.reduce((a,b)=>a+b,0) / scores.length);
+  const bestPalace = palaceData.reduce((a,b) => calcPalaceScore(a) > calcPalaceScore(b) ? a : b);
+  const worstPalace = palaceData.reduce((a,b) => calcPalaceScore(a) < calcPalaceScore(b) ? a : b);
+
+  const overallColor = overall >= 65 ? 'var(--good)' : overall >= 45 ? 'var(--accent)' : 'var(--bad)';
+
+  const readings = [
+    {
+      title: '📊 今の時の総合運',
+      text: `現在（${hourBranch}時）の盤面スコアは <strong style="color:${overallColor}">${overall}/100</strong>。${yang ? '陽遁' : '陰遁'}の局面で、気の流れは${overall >= 65 ? '活発で動きに適した時' : overall >= 45 ? '平衡状態。慎重な行動が吉' : '停滞気味。守りの時'}です。`,
+      tags: [yang ? '陽遁' : '陰遁', hourBranch + '時', overall >= 65 ? '行動推奨' : overall >= 45 ? '慎重行動' : '静観推奨']
+    },
+    {
+      title: `✦ 最良の方位 — ${bestPalace.dir}（第${bestPalace.num}宮）`,
+      text: `${bestPalace.gate}が開き、${bestPalace.star}が位置する${bestPalace.dir}方向がもっとも気の流れが良好。${getDirectionAdvice(bestPalace, calcPalaceScore(bestPalace))} 天干「${bestPalace.stem}」${bestPalace.isThreeQi ? 'は三奇の一つで特別な吉兆。' : 'が配される。'}`,
+      tags: [bestPalace.gate, bestPalace.star.slice(0,2), '吉方']
+    },
+    {
+      title: `⚠ 注意すべき方位 — ${worstPalace.dir}（第${worstPalace.num}宮）`,
+      text: `${worstPalace.gate}が開いている${worstPalace.dir}方向は、この時間帯は避けるのが賢明。${getDirectionAdvice(worstPalace, calcPalaceScore(worstPalace))} 天干「${worstPalace.stem}」${worstPalace.isEvil ? 'は凶干とされ、注意が必要。' : '。'}`,
+      tags: [worstPalace.gate, worstPalace.star.slice(0,2), '要注意']
+    },
+    {
+      title: '💡 この時間の行動指針',
+      text: buildActionAdvice(bestPalace, overall),
+      tags: []
+    }
+  ];
+
+  document.getElementById('reading-content').innerHTML = `
+    <div class="card" style="margin-bottom:16px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <span style="font-size:0.75rem;color:var(--muted)">盤面スコア</span>
+        <span style="font-size:1.1rem;font-family:'DM Serif Display',serif;color:${overallColor}">${overall}</span>
+      </div>
+      <div class="overall-bar"><div class="overall-fill" style="width:${overall}%;background:${overallColor}"></div></div>
+    </div>
+    ${readings.map(r => `
+      <div class="reading-card">
+        <div class="reading-title">${r.title}</div>
+        <div class="reading-text">${r.text}</div>
+        ${r.tags.length ? '<div style="margin-top:8px">' + r.tags.map(t => `<span class="reading-tag">${t}</span>`).join('') + '</div>' : ''}
+      </div>
+    `).join('')}
+  `;
+}
+
+function buildActionAdvice(best, score) {
+  const gate = best.gate;
+  const advMap = {
+    '開門': '新しいことを始める、外出する、人と会うのに最適な時間帯です。積極的に動いて吉。',
+    '休門': '休息、内省、学習に向く時間。無理に動かず、エネルギーを蓄えましょう。',
+    '生門': '商談、出会い、お金の動きに吉。人間関係を深めるアクションを。',
+    '傷門': '争いごとや急いだ判断は避けて。スポーツや発散には使えます。',
+    '杜門': '物事が進みにくい時。焦らず、現状維持に徹するのが賢明。',
+    '景門': '文章・SNS・情報発信に吉。美的センスが冴える時間帯。',
+    '死門': 'できるだけ動かず、内にこもる時。重要な決断は避けて。',
+    '驚門': '突然の変化や驚きに注意。計画外の行動は慎みましょう。'
+  };
+  return advMap[gate] || ' 状況を見極めながら慎重に行動を。';
+}
+
+function renderGlossary() {
+  const items = [
+    { label:'九宮（きゅうきゅう）', body:'洛書の9マスを基盤とした空間マトリクス。1〜9の数字と方位が対応し、星・門・神・干が配置される。' },
+    { label:'陽遁・陰遁', body:'冬至〜夏至が陽遁（星が順行）、夏至〜冬至が陰遁（星が逆行）。季節によって九星の布局方向が変わる。' },
+    { label:'三奇（さんき）', body:'乙・丙・丁の三つの天干。特別な吉干とされ、この干が宮に入ると吉の効果が高まる。' },
+    { label:'八門（はちもん）', body:'開・休・生・傷・杜・景・死・驚の8つの門。行動の種類や方向性の吉凶を示す。開門・生門・休門が三吉門。' },
+    { label:'八神（はっしん）', body:'値符・螣蛇・太陰・六合・白虎・玄武・九地・九天の8神。それぞれ象徴する事象や人物像を持つ。' },
+    { label:'旬首（じゅんしゅ）', body:'甲が隠れる（遁甲）先の支を旬首という。甲子・甲戌・甲申・甲午・甲辰・甲寅の6種がある。' },
+    { label:'値符（ちふ）', body:'八神のリーダー的存在。値符が位置する宮は吉の影響を受けやすく、重要な方位となりやすい。' },
+    { label:'庚（かのえ）', body:'凶干の代表。星のない甲を追いかけるとされ、値符と同宮になると「飛干格」と呼ばれる凶格を形成。' },
+  ];
+  document.getElementById('glossary').innerHTML = items.map((item, i) => `
+    <div class="gloss-item" id="gi-${i}">
+      <div class="gloss-header" onclick="toggleGloss(${i})">
+        <span class="label">${item.label}</span>
+        <span class="gloss-arrow">▼</span>
+      </div>
+      <div class="gloss-body">${item.body}</div>
+    </div>
+  `).join('');
+}
+
+function toggleGloss(i) {
+  document.getElementById('gi-' + i).classList.toggle('open');
+}
+
+// ═══════════════════════════════════════════════
+// コントロール
+// ═══════════════════════════════════════════════
+
+function switchTab(name) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  event.target.classList.add('active');
+  if (name === 'direction') renderDirections();
+  if (name === 'timing') renderTiming();
+  if (name === 'reading') renderReading();
+  if (name === 'glossary') renderGlossary();
+}
+
+function onSlider(val) {
+  currentHour = parseInt(val);
+  document.getElementById('slider-val').textContent = currentHour + '時';
+  updatePillars();
+  renderGrid();
+}
+
+// ═══════════════════════════════════════════════
+// 初期化
+// ═══════════════════════════════════════════════
+
+function init() {
+  currentDate = new Date();
+  currentHour = currentDate.getHours();
+  updateHeader();
+  updatePillars();
+  updateSlider();
+  renderGrid();
+  renderGlossary();
+
+  // 1分ごとに時刻更新
+  setInterval(() => {
+    currentDate = new Date();
+    if (currentDate.getHours() !== currentHour) {
+      currentHour = currentDate.getHours();
+      updateSlider();
+    }
+    updateHeader();
+  }, 60000);
+}
+
+init();
+</script>
+</body>
+</html>

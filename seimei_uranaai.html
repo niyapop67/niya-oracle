@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>吉凶占い — 陰陽師の眼</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;700;900&family=Cinzel:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #1a1410;
+  --paper: #f0ebe0;
+  --paper2: #e8e0cc;
+  --gold: #b8903a;
+  --gold2: #d4aa55;
+  --red: #8b2020;
+  --blue: #1a3a5c;
+  --muted: #7a6e5e;
+  --border: rgba(90,70,40,0.18);
+  --shadow: rgba(26,20,16,0.12);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'Noto Serif JP', serif;
+  font-weight: 500;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* 和紙テクスチャ */
+body::before {
+  content:'';
+  position:fixed; inset:0; pointer-events:none; z-index:0;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  opacity: 0.6;
+}
+
+/* 背景の墨流し */
+body::after {
+  content:'';
+  position:fixed; inset:0; pointer-events:none; z-index:0;
+  background:
+    radial-gradient(ellipse 80% 40% at 50% 0%, rgba(184,144,58,0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 60% at 10% 50%, rgba(139,32,32,0.04) 0%, transparent 50%),
+    radial-gradient(ellipse 50% 40% at 90% 80%, rgba(26,58,92,0.04) 0%, transparent 50%);
+}
+
+/* ── ヘッダー ── */
+header {
+  position: relative; z-index: 10;
+  text-align: center;
+  padding: 36px 20px 24px;
+  border-bottom: 2px solid var(--border);
+  background: linear-gradient(180deg, rgba(240,235,224,0.98) 0%, transparent 100%);
+}
+
+.header-deco {
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  margin-bottom: 8px;
+}
+.header-deco::before, .header-deco::after {
+  content:''; flex:1; max-width:80px;
+  height:1px; background: linear-gradient(90deg, transparent, var(--gold));
+}
+.header-deco::after { background: linear-gradient(90deg, var(--gold), transparent); }
+
+.seimei-mark {
+  font-size: 1.5rem; color: var(--gold);
+  text-shadow: 0 0 20px rgba(184,144,58,0.4);
+}
+
+h1 {
+  font-family: 'Noto Serif JP', serif;
+  font-size: 1.6rem; font-weight: 700;
+  letter-spacing: 0.25em;
+  color: var(--ink);
+  text-shadow: 1px 1px 0 rgba(255,255,255,0.5);
+}
+.subtitle {
+  font-size: 0.72rem; letter-spacing: 0.2em;
+  color: var(--muted); margin-top: 4px;
+  font-family: 'Cinzel', serif;
+}
+
+/* ── メイン ── */
+main {
+  position: relative; z-index: 1;
+  max-width: 600px; margin: 0 auto;
+  padding: 28px 16px 80px;
+}
+
+/* ── ステップ表示 ── */
+.steps {
+  display: flex; gap: 6px; margin-bottom: 28px;
+  justify-content: center;
+}
+.step-dot {
+  width: 28px; height: 28px; border-radius: 50%;
+  border: 1.5px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.65rem; color: var(--muted);
+  transition: all 0.3s;
+}
+.step-dot.active {
+  border-color: var(--gold);
+  background: rgba(184,144,58,0.1);
+  color: var(--gold);
+}
+.step-dot.done {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: var(--paper);
+}
+.step-line {
+  flex: 1; max-width: 40px;
+  height: 1px; background: var(--border);
+  align-self: center;
+}
+
+/* ── カード ── */
+.card {
+  background: rgba(255,252,244,0.85);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 24px 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 16px var(--shadow), inset 0 1px 0 rgba(255,255,255,0.6);
+  position: relative;
+}
+.card::before {
+  content:''; position:absolute;
+  top:6px; left:6px; right:6px; bottom:6px;
+  border: 1px solid rgba(184,144,58,0.12);
+  border-radius: 2px; pointer-events: none;
+}
+
+.card-title {
+  font-size: 0.85rem; letter-spacing: 0.15em;
+  color: var(--gold); margin-bottom: 16px;
+  font-weight: 700;
+  display: flex; align-items: center; gap: 8px;
+}
+.card-title::after {
+  content:''; flex:1; height:1px;
+  background: linear-gradient(90deg, var(--border), transparent);
+}
+
+/* ── フォーム ── */
+.form-row { margin-bottom: 14px; }
+.form-label {
+  display: block; font-size: 0.78rem;
+  color: var(--muted); margin-bottom: 6px;
+  letter-spacing: 0.08em; font-weight: 600;
+}
+.form-input {
+  width: 100%; padding: 10px 12px;
+  background: rgba(240,235,224,0.6);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  font-family: 'Noto Serif JP', serif;
+  font-size: 0.85rem; color: var(--ink);
+  outline: none; transition: border-color 0.2s;
+  -webkit-appearance: none;
+}
+.form-input:focus { border-color: var(--gold); }
+
+.name-row { display: flex; gap: 10px; }
+
+/* ── テーマ選択 ── */
+.theme-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.theme-btn {
+  padding: 12px 8px;
+  background: rgba(240,235,224,0.5);
+  border: 1px solid var(--border);
+  border-radius: 3px; cursor: pointer;
+  text-align: center; transition: all 0.2s;
+  font-family: 'Noto Serif JP', serif;
+}
+.theme-btn:hover { border-color: var(--gold); background: rgba(184,144,58,0.06); }
+.theme-btn.selected { border-color: var(--gold); background: rgba(184,144,58,0.12); }
+.theme-icon { font-size: 1.3rem; display: block; margin-bottom: 4px; }
+.theme-name { font-size: 0.82rem; color: var(--ink); display: block; font-weight: 700; }
+.theme-sub { font-size: 0.68rem; color: var(--muted); display: block; margin-top: 2px; }
+
+/* ── ボタン ── */
+.btn-divine {
+  width: 100%; padding: 14px;
+  background: linear-gradient(135deg, #1a1410 0%, #2e2418 100%);
+  color: var(--gold2); border: none; cursor: pointer;
+  font-family: 'Noto Serif JP', serif;
+  font-size: 0.88rem; letter-spacing: 0.25em;
+  border-radius: 3px;
+  position: relative; overflow: hidden;
+  transition: all 0.3s; margin-top: 8px;
+  box-shadow: 0 4px 16px rgba(26,20,16,0.25);
+}
+.btn-divine::before {
+  content:'';
+  position:absolute; inset:0;
+  background: linear-gradient(135deg, transparent 0%, rgba(184,144,58,0.15) 50%, transparent 100%);
+  transform: translateX(-100%);
+  transition: transform 0.5s;
+}
+.btn-divine:hover::before { transform: translateX(100%); }
+.btn-divine:hover { box-shadow: 0 6px 20px rgba(26,20,16,0.35); }
+.btn-divine:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.btn-back {
+  background: transparent; border: 1px solid var(--border);
+  color: var(--muted); padding: 10px 20px;
+  font-family: 'Noto Serif JP', serif; font-size: 0.78rem;
+  cursor: pointer; border-radius: 3px; letter-spacing: 0.1em;
+  margin-bottom: 12px; transition: all 0.2s;
+}
+.btn-back:hover { border-color: var(--gold); color: var(--gold); }
+
+/* ── 結果 ── */
+#result-panel { display: none; }
+
+.result-header {
+  text-align: center; padding: 20px 0 16px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 20px;
+}
+.result-name { font-size: 1.1rem; letter-spacing: 0.12em; color: var(--ink); }
+.result-theme { font-size: 0.72rem; color: var(--muted); margin-top: 4px; letter-spacing: 0.1em; }
+
+/* 天象 */
+.tenshō {
+  text-align: center; margin: 20px 0;
+  position: relative;
+}
+.tenshō-circle {
+  width: 110px; height: 110px; margin: 0 auto 12px;
+  border-radius: 50%;
+  border: 2px solid var(--gold);
+  background: radial-gradient(circle, rgba(184,144,58,0.08) 0%, transparent 70%);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  position: relative;
+  box-shadow: 0 0 30px rgba(184,144,58,0.12), inset 0 0 20px rgba(184,144,58,0.05);
+  animation: pulse-circle 3s ease-in-out infinite;
+}
+@keyframes pulse-circle {
+  0%,100% { box-shadow: 0 0 20px rgba(184,144,58,0.12), inset 0 0 20px rgba(184,144,58,0.05); }
+  50% { box-shadow: 0 0 40px rgba(184,144,58,0.2), inset 0 0 30px rgba(184,144,58,0.08); }
+}
+.tenshō-circle::before {
+  content:''; position:absolute;
+  width: 126px; height: 126px;
+  border-radius: 50%; border: 1px solid rgba(184,144,58,0.2);
+  animation: rotate 20s linear infinite;
+}
+@keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.tenshō-kanji { font-size: 1.8rem; font-weight: 700; color: var(--gold); line-height: 1; }
+.tenshō-yomi { font-size: 0.6rem; color: var(--muted); margin-top: 3px; letter-spacing: 0.1em; }
+.tenshō-label { font-size: 0.72rem; color: var(--muted); letter-spacing: 0.1em; }
+
+/* 五行バー */
+.gogyo {
+  display: flex; gap: 6px; margin: 16px 0;
+  align-items: flex-end; justify-content: center;
+  height: 60px;
+}
+.gogyo-col { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.gogyo-bar {
+  width: 28px; border-radius: 2px 2px 0 0;
+  transition: height 1s cubic-bezier(0.34,1.56,0.64,1);
+  min-height: 4px;
+}
+.gogyo-name { font-size: 0.6rem; color: var(--muted); }
+
+/* 卦辞 */
+.kaji-block {
+  background: rgba(240,235,224,0.6);
+  border-left: 3px solid var(--gold);
+  padding: 14px 16px; margin: 16px 0;
+  border-radius: 0 3px 3px 0;
+}
+.kaji-main {
+  font-size: 1.05rem; font-weight: 700;
+  letter-spacing: 0.12em; color: var(--ink);
+  margin-bottom: 6px; line-height: 1.6;
+}
+.kaji-sub {
+  font-size: 0.82rem; color: var(--muted);
+  line-height: 1.9; font-weight: 500;
+}
+
+/* 禍福リスト */
+.kafu-list { display: flex; flex-direction: column; gap: 8px; margin: 12px 0; }
+.kafu-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 12px;
+  background: rgba(255,252,244,0.7);
+  border: 1px solid var(--border); border-radius: 3px;
+  font-size: 0.82rem; line-height: 1.8; font-weight: 500;
+}
+.kafu-icon { font-size: 1rem; flex-shrink: 0; margin-top: 2px; }
+
+/* 除災法 */
+.josaihō {
+  background: linear-gradient(135deg, rgba(26,20,16,0.04) 0%, rgba(184,144,58,0.04) 100%);
+  border: 1px solid rgba(184,144,58,0.2);
+  border-radius: 3px; padding: 16px;
+  margin: 16px 0;
+}
+.josaihō-title {
+  font-size: 0.72rem; color: var(--gold);
+  letter-spacing: 0.15em; margin-bottom: 10px;
+  display: flex; align-items: center; gap: 6px;
+}
+.josaihō-title::before { content:'⛩'; }
+.josaihō-item {
+  font-size: 0.82rem; color: var(--ink); font-weight: 500;
+  line-height: 1.8; padding: 4px 0;
+  border-bottom: 1px solid rgba(184,144,58,0.1);
+  display: flex; gap: 8px;
+}
+.josaihō-item:last-child { border-bottom: none; }
+.josaihō-item::before { content:'✦'; color: var(--gold); font-size: 0.6rem; margin-top: 5px; }
+
+/* 吉方位 */
+.kippō {
+  display: grid; grid-template-columns: repeat(3,1fr); gap: 6px;
+  margin: 12px 0;
+}
+.kippō-dir {
+  text-align: center; padding: 10px 6px;
+  border: 1px solid var(--border); border-radius: 3px;
+  font-size: 0.72rem;
+}
+.kippō-dir.good { border-color: var(--gold); background: rgba(184,144,58,0.08); color: var(--gold); }
+.kippō-dir.bad { opacity: 0.5; }
+.kippō-dir-name { display: block; font-size: 0.9rem; margin-bottom: 3px; }
+.kippō-dir-label { font-size: 0.6rem; color: var(--muted); }
+
+/* 日柱 */
+.nichichū {
+  display: flex; justify-content: center; gap: 16px;
+  margin: 10px 0;
+}
+.nichichū-item { text-align: center; }
+.nichichū-val { font-size: 1.1rem; color: var(--gold); font-weight: 700; }
+.nichichū-label { font-size: 0.6rem; color: var(--muted); }
+
+/* ローディング */
+#loading {
+  display: none; text-align: center;
+  padding: 40px 20px;
+}
+.loading-brush {
+  font-size: 2rem;
+  animation: brush 1.5s ease-in-out infinite;
+  display: block; margin-bottom: 12px;
+}
+@keyframes brush {
+  0%,100% { opacity: 0.3; transform: rotate(-5deg) scale(0.9); }
+  50% { opacity: 1; transform: rotate(5deg) scale(1.1); }
+}
+.loading-text { font-size: 0.8rem; color: var(--muted); letter-spacing: 0.2em; }
+
+/* フッター */
+footer {
+  position: relative; z-index: 1;
+  text-align: center; padding: 20px;
+  font-size: 0.62rem; color: var(--muted);
+  letter-spacing: 0.1em;
+  border-top: 1px solid var(--border);
+}
+
+/* アニメーション */
+@keyframes fadeUp {
+  from { opacity:0; transform: translateY(12px); }
+  to { opacity:1; transform: none; }
+}
+.fade-up { animation: fadeUp 0.5s ease forwards; }
+.fade-up-2 { animation: fadeUp 0.5s ease 0.1s forwards; opacity:0; }
+.fade-up-3 { animation: fadeUp 0.5s ease 0.2s forwards; opacity:0; }
+.fade-up-4 { animation: fadeUp 0.5s ease 0.3s forwards; opacity:0; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-deco">
+    <div class="seimei-mark">☽ ✦ ☾</div>
+  </div>
+  <h1>吉　凶　占　い</h1>
+  <div class="subtitle">ONMYŌJI DIVINATION · KIKKYO URANAI</div>
+</header>
+
+<main>
+
+  <!-- ステップ -->
+  <div class="steps" id="steps">
+    <div class="step-dot active" id="step1">一</div>
+    <div class="step-line"></div>
+    <div class="step-dot" id="step2">二</div>
+    <div class="step-line"></div>
+    <div class="step-dot" id="step3">三</div>
+  </div>
+
+  <!-- 入力パネル -->
+  <div id="input-panel">
+
+    <!-- Step 1: 名前・生年月日 -->
+    <div id="step-panel-1">
+      <div class="card fade-up">
+        <div class="card-title">一ノ問 — 御名と生まれを教えよ</div>
+
+        <div class="form-row name-row">
+          <div style="flex:1">
+            <label class="form-label">お名前（姓）</label>
+            <input class="form-input" type="text" id="sei" placeholder="例：安倍">
+          </div>
+          <div style="flex:1">
+            <label class="form-label">お名前（名）</label>
+            <input class="form-input" type="text" id="mei" placeholder="例：晴明">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <label class="form-label">生年月日</label>
+          <input class="form-input" type="date" id="birthdate">
+        </div>
+
+        <div class="form-row">
+          <label class="form-label">性別</label>
+          <select class="form-input" id="gender">
+            <option value="">選択してください</option>
+            <option value="male">男</option>
+            <option value="female">女</option>
+            <option value="other">その他</option>
+          </select>
+        </div>
+
+        <button class="btn-divine" onclick="goStep2()">次へ進む</button>
+      </div>
+    </div>
+
+    <!-- Step 2: テーマ選択 -->
+    <div id="step-panel-2" style="display:none">
+      <button class="btn-back" onclick="goStep1()">← 戻る</button>
+      <div class="card fade-up">
+        <div class="card-title">二ノ問 — 何を占いたいか</div>
+        <div class="theme-grid" id="theme-grid">
+          <div class="theme-btn" onclick="selectTheme(this,'love')">
+            <span class="theme-icon">🌸</span>
+            <span class="theme-name">恋愛・縁</span>
+            <span class="theme-sub">縁結び・別れ・出会い</span>
+          </div>
+          <div class="theme-btn" onclick="selectTheme(this,'work')">
+            <span class="theme-icon">⚔️</span>
+            <span class="theme-name">仕事・勝負</span>
+            <span class="theme-sub">昇進・商談・試験</span>
+          </div>
+          <div class="theme-btn" onclick="selectTheme(this,'health')">
+            <span class="theme-icon">🌿</span>
+            <span class="theme-name">健康・気</span>
+            <span class="theme-sub">病気・体調・気の流れ</span>
+          </div>
+          <div class="theme-btn" onclick="selectTheme(this,'money')">
+            <span class="theme-icon">🪙</span>
+            <span class="theme-name">財運・福</span>
+            <span class="theme-sub">金運・投資・豊かさ</span>
+          </div>
+          <div class="theme-btn" onclick="selectTheme(this,'trouble')">
+            <span class="theme-icon">🌑</span>
+            <span class="theme-name">難・障り</span>
+            <span class="theme-sub">悩み・厄・人間関係</span>
+          </div>
+          <div class="theme-btn" onclick="selectTheme(this,'direction')">
+            <span class="theme-icon">🧭</span>
+            <span class="theme-name">方位・移動</span>
+            <span class="theme-sub">引越し・旅・転居</span>
+          </div>
+        </div>
+        <button class="btn-divine" id="btn-step3" onclick="goStep3()" disabled style="margin-top:16px">占う</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ローディング -->
+  <div id="loading">
+    <span class="loading-brush">🖋</span>
+    <div class="loading-text">天象を読み解いております…</div>
+  </div>
+
+  <!-- 結果パネル -->
+  <div id="result-panel">
+    <button class="btn-back" onclick="goBack()">← 最初から占う</button>
+
+    <div class="card fade-up">
+      <div class="result-header">
+        <div class="result-name" id="res-name"></div>
+        <div class="result-theme" id="res-theme"></div>
+        <div class="nichichū" id="res-nichichu"></div>
+      </div>
+
+      <!-- 天象 -->
+      <div class="tenshō">
+        <div class="tenshō-circle">
+          <div class="tenshō-kanji" id="res-tensho-kanji"></div>
+          <div class="tenshō-yomi" id="res-tensho-yomi"></div>
+        </div>
+        <div class="tenshō-label" id="res-tensho-label"></div>
+      </div>
+
+      <!-- 五行 -->
+      <div class="gogyo" id="res-gogyo"></div>
+    </div>
+
+    <div class="card fade-up-2">
+      <div class="card-title">卦 辞 — 晴明の眼</div>
+      <div class="kaji-block">
+        <div class="kaji-main" id="res-kaji-main"></div>
+        <div class="kaji-sub" id="res-kaji-sub"></div>
+      </div>
+    </div>
+
+    <div class="card fade-up-3">
+      <div class="card-title">禍福 — 起こりうること</div>
+      <div class="kafu-list" id="res-kafu"></div>
+    </div>
+
+    <div class="card fade-up-4">
+      <div class="card-title">除災法 — 晴明の処方</div>
+      <div class="josaihō" id="res-josai"></div>
+    </div>
+
+    <div class="card fade-up-4" id="kippō-card">
+      <div class="card-title">吉方位</div>
+      <div class="kippō" id="res-kippō"></div>
+    </div>
+
+  </div>
+
+</main>
+
+<footer>陰陽師 安倍晴明の術にならいし占い — 娯楽目的</footer>
+
+<script>
+// ═════════════════════════════════
+// STATE
+// ═════════════════════════════════
+let selectedTheme = null;
+const themeNames = {
+  love:'恋愛・縁', work:'仕事・勝負', health:'健康・気',
+  money:'財運・福', trouble:'難・障り', direction:'方位・移動'
+};
+
+// ═════════════════════════════════
+// NAVIGATION
+// ═════════════════════════════════
+function goStep1() {
+  document.getElementById('step-panel-1').style.display = 'block';
+  document.getElementById('step-panel-2').style.display = 'none';
+  setStep(1);
+}
+function goStep2() {
+  const sei = document.getElementById('sei').value.trim();
+  const mei = document.getElementById('mei').value.trim();
+  const bd = document.getElementById('birthdate').value;
+  if (!sei && !mei) { alert('お名前をご記入ください'); return; }
+  if (!bd) { alert('生年月日をご記入ください'); return; }
+  document.getElementById('step-panel-1').style.display = 'none';
+  document.getElementById('step-panel-2').style.display = 'block';
+  setStep(2);
+}
+function goStep3() {
+  if (!selectedTheme) return;
+  document.getElementById('input-panel').style.display = 'none';
+  document.getElementById('steps').style.display = 'none';
+  document.getElementById('loading').style.display = 'block';
+  setStep(3);
+  setTimeout(() => {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('result-panel').style.display = 'block';
+    buildResult();
+  }, 2200);
+}
+function goBack() {
+  document.getElementById('result-panel').style.display = 'none';
+  document.getElementById('input-panel').style.display = 'block';
+  document.getElementById('steps').style.display = 'flex';
+  selectedTheme = null;
+  document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById('btn-step3').disabled = true;
+  goStep1();
+}
+
+function setStep(n) {
+  for (let i = 1; i <= 3; i++) {
+    const el = document.getElementById('step' + i);
+    el.className = 'step-dot ' + (i < n ? 'done' : i === n ? 'active' : '');
+  }
+}
+
+function selectTheme(el, theme) {
+  selectedTheme = theme;
+  document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('btn-step3').disabled = false;
+}
+
+// ═════════════════════════════════
+// 算命計算
+// ═════════════════════════════════
+const STEMS = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
+const BRANCHES = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+const GOGYŌ = ['木','火','土','金','水'];
+const GOGYŌ_COLORS = ['#4a7a3a','#8b2020','#8a6430','#2a5a7a','#1a3a5c'];
+const GOGYŌ_EMOJI = ['🌿','🔥','⛰','⚔️','💧'];
+
+function getJD(y,m,d) {
+  const a=Math.floor((14-m)/12),yy=y+4800-a,mm=m+12*a-3;
+  return d+Math.floor((153*mm+2)/5)+365*yy+Math.floor(yy/4)-Math.floor(yy/100)+Math.floor(yy/400)-32045;
+}
+
+function getBirthStem(date) {
+  const jd = getJD(date.getFullYear(), date.getMonth()+1, date.getDate());
+  return ((jd+4)%10+10)%10;
+}
+function getBirthBranch(date) {
+  const jd = getJD(date.getFullYear(), date.getMonth()+1, date.getDate());
+  return ((jd+8)%12+12)%12;
+}
+function getMeikyū(date) {
+  // 命宮（簡略: 生年の九星）
+  const y = date.getFullYear();
+  return ((((y - 4) % 9) + 9) % 9); // 0-indexed
+}
+function getYearStem(y) { return ((y-4)%10+10)%10; }
+function getYearBranch(y) { return ((y-4)%12+12)%12; }
+
+const TENSHO_TABLE = [
+  {kanji:'大安',yomi:'だいあん',label:'大いなる安寧'},
+  {kanji:'留連',yomi:'りゅうれん',label:'縁が留まる'},
+  {kanji:'速喜',yomi:'そっき',label:'速やかな喜び'},
+  {kanji:'赤口',yomi:'しゃっこう',label:'刃に注意'},
+  {kanji:'小吉',yomi:'しょうきち',label:'小さな吉'},
+  {kanji:'空亡',yomi:'くうぼう',label:'空虚・再起の前'},
+  {kanji:'大安',yomi:'だいあん',label:'大いなる安寧'},
+  {kanji:'不将',yomi:'ふしょう',label:'進まず待て'},
+  {kanji:'友引',yomi:'ともびき',label:'縁を引く'},
+];
+
+const NINE_STAR_NAMES = ['一白水星','二黒土星','三碧木星','四緑木星','五黄土星','六白金星','七赤金星','八白土星','九紫火星'];
+
+// ─────────────────────────────────
+// テーマ別データ
+// ─────────────────────────────────
+function getThemeData(theme, stemIdx, branchIdx, meikyū, tenshoIdx, today) {
+  const stem = STEMS[stemIdx];
+  const branch = BRANCHES[branchIdx];
+  const star = NINE_STAR_NAMES[meikyū];
+  const tensho = TENSHO_TABLE[tenshoIdx];
+  const todayStem = STEMS[getBirthStem(today)];
+  const todayBranch = BRANCHES[getBirthBranch(today)];
+
+  const compatibility = (stemIdx + meikyū) % 5;
+  const isGoodDay = ['大安','速喜','小吉','友引'].includes(tensho.kanji);
+
+  const themes = {
+    love: {
+      kajiMain: isGoodDay ? `縁、今まさに動く時` : `縁はまだ熟さず、静かに待て`,
+      kajiSub: `${star}に生まれし者は、${stem}の気を持つ。恋の縁は${branch}の刻に動き始める。焦れば縁は離れ、穏やかに在れば自ずと結ばれる。`,
+      kafu: isGoodDay ? [
+        {icon:'🌸', text:'思いがけない出会い、または既存の縁が深まる気配あり'},
+        {icon:'✦', text:'自分の気持ちを素直に伝えることで道が開ける'},
+        {icon:'⚠️', text:'嫉妬や焦りは禁物。気の乱れが縁を遠ざける'},
+      ] : [
+        {icon:'🌑', text:'今は縁が休む時。無理に動けば縁が絡まる'},
+        {icon:'✦', text:'内省の時。自分を磨くことが次の縁への備えとなる'},
+        {icon:'⚠️', text:'三角関係・二重の縁に注意。一つを選ぶ時が来る'},
+      ],
+      josai: [
+        `${branch}の刻（${getBranchHour(branchIdx)}）に東南を向き、縁結びの祈りを捧げよ`,
+        `紅・白の花を飾り、恋文を書くならば${todayStem}の日を選べ`,
+        `縁を結ぶ呪符として、己の名前を${stem}の方角に向けて書き記すべし`,
+      ],
+      showKippō: true,
+    },
+    work: {
+      kajiMain: isGoodDay ? `剣は今、敵に向く` : `兵を引き、機を待て`,
+      kajiSub: `${star}の命を持つ者は、${stem}の日に力を増す。勝負は準備にあり、今の盤面を読めば先が見える。`,
+      kafu: isGoodDay ? [
+        {icon:'⚔️', text:'昇進・昇格の兆し。上位の者に積極的に働きかけよ'},
+        {icon:'✦', text:'新たな仕事・契約が舞い込む。慎重に見極めて受けよ'},
+        {icon:'⚠️', text:'口の禍に注意。言葉が運命を変える時期'},
+      ] : [
+        {icon:'🌑', text:'現状維持が最善。大きな動きは見送れ'},
+        {icon:'✦', text:'足元を固める時。書類・記録の整理が後に功を奏す'},
+        {icon:'⚠️', text:'上司・同僚との摩擦に注意。小さな誤解が大事になる'},
+      ],
+      josai: [
+        `勝負の前日、${todayStem}の夜に北を向き、意志を言葉に出して唱えよ`,
+        `文書・書類には${stem}の印を押す前に見直しを怠るな`,
+        `勝負の場には水晶か白石を懐に入れ、気を清めよ`,
+      ],
+      showKippō: false,
+    },
+    health: {
+      kajiMain: isGoodDay ? `気、巡り良し` : `気の滞り、注意せよ`,
+      kajiSub: `${star}の命を宿す者の体は、${stem}の気と深く結びつく。心の波紋は体に映る。気の流れを整えることが、すべての根本。`,
+      kafu: isGoodDay ? [
+        {icon:'🌿', text:'体の調子が上向く。長引いた不調が快方に向かう兆し'},
+        {icon:'✦', text:'精気が充実する時期。新しい養生法を始めるに吉'},
+        {icon:'⚠️', text:'過信は禁物。気が充ちている時こそ無理をしがち'},
+      ] : [
+        {icon:'🌑', text:'気の滞りがある。消化器・関節に注意が必要'},
+        {icon:'✦', text:'休養が最大の薬。睡眠と食事を整えることを最優先に'},
+        {icon:'⚠️', text:'精神的な疲れが体に出やすい時。心の声を聞け'},
+      ],
+      josai: [
+        `毎朝${getBranchHour(branchIdx)}に東を向き、深呼吸を三回。気の入口を開け`,
+        `緑・青の色を身につけ、木の気を補え。観葉植物を部屋に置くも吉`,
+        `塩水で手足を清め、憑き物を払う簡単な祓いを行え`,
+      ],
+      showKippō: true,
+    },
+    money: {
+      kajiMain: isGoodDay ? `財、流れ込む兆し` : `財は伏す、出を慎め`,
+      kajiSub: `${star}に宿る者の財運は、${branch}の方角と深く結びつく。今の時の流れを読み、動く時と蓄える時を見極めることが富の道。`,
+      kafu: isGoodDay ? [
+        {icon:'🪙', text:'予期せぬ収入・臨時の財が入る可能性'},
+        {icon:'✦', text:'投資・商談は積極的に動くと良い結果が出やすい'},
+        {icon:'⚠️', text:'散財に注意。入りがあれば出もある。記録をつけよ'},
+      ] : [
+        {icon:'🌑', text:'今は財が伏す時。大きな出費・投資は見合わせよ'},
+        {icon:'✦', text:'蓄財の時。無駄を省き、足元を固めることが後の豊かさに'},
+        {icon:'⚠️', text:'詐欺・騙しに注意。うまい話には必ず裏がある'},
+      ],
+      josai: [
+        `財布に${stem}の一文字を書いた小紙を忍ばせよ。財の気が集まる`,
+        `${todayStem}の日に、不要なものを捨てよ。古い気が出て行き新しい財の気が入る`,
+        `${branch}の方角に向けて働く環境を整えよ`,
+      ],
+      showKippō: true,
+    },
+    trouble: {
+      kajiMain: isGoodDay ? `障り、今は薄らぐ時` : `障り深し、祓いを急げ`,
+      kajiSub: `${star}の命を持つ者に今、${stem}の試練が訪れている。これは破壊ではなく変容の徴。正しく祓えば、苦は転じて力となる。`,
+      kafu: isGoodDay ? [
+        {icon:'🌿', text:'困難の底を脱しつつある。光が差し込む兆し'},
+        {icon:'✦', text:'助けてくれる人物が現れる。縁を大切に'},
+        {icon:'⚠️', text:'完全には油断できない。祓いを怠るな'},
+      ] : [
+        {icon:'🌑', text:'今が最も困難な時。ただし必ず通り過ぎる'},
+        {icon:'✦', text:'一人で抱えるな。信頼できる者に話すことで気が軽くなる'},
+        {icon:'⚠️', text:'夜道・人混みに注意。気の弱い場所に近づくな'},
+      ],
+      josai: [
+        `塩を三箇所の角に置き、部屋の気を清めよ。三日後に捨てること`,
+        `${todayStem}の日の夕方、南を向いて「祓え、清め、祓い給え」と三度唱えよ`,
+        `白い紙に悩みを書き、火で焼くか土に埋めよ。気の転換を促す`,
+      ],
+      showKippō: false,
+    },
+    direction: {
+      kajiMain: isGoodDay ? `吉方、今開いている` : `方位、今は閉じている`,
+      kajiSub: `${star}に生まれし者の吉方は、今の天象により変化する。${stem}の気が流れる方角への移動・転居は、命運を大きく動かす。`,
+      kafu: isGoodDay ? [
+        {icon:'🧭', text:'引越し・旅行に吉。特に東・南東方向への動きが効果的'},
+        {icon:'✦', text:'吉方位への短期旅行だけでも運気の転換になる'},
+        {icon:'⚠️', text:'北西方向は今期避けた方が無難。障りあり'},
+      ] : [
+        {icon:'🌑', text:'今は大きな移動を避けよ。時が熟すまで待て'},
+        {icon:'✦', text:'現在地での内部改善が先。掃除・模様替えで気の流れを変えよ'},
+        {icon:'⚠️', text:'衝動的な引越し・転職は後悔の元。熟考せよ'},
+      ],
+      josai: [
+        `転居を考えるならば${getBranchHour(branchIdx)}に、行き先の方角を向いて三分間静かに立て`,
+        `移動の前日、枕を吉方位に向けて眠れ。気が整う`,
+        `引越しの荷物の中心に塩ひとつまみを置き、新居の気を清めよ`,
+      ],
+      showKippō: true,
+    },
+  };
+  return themes[theme];
+}
+
+function getBranchHour(idx) {
+  const hours = ['23〜1時','1〜3時','3〜5時','5〜7時','7〜9時','9〜11時',
+                 '11〜13時','13〜15時','15〜17時','17〜19時','19〜21時','21〜23時'];
+  return hours[idx];
+}
+
+// ═════════════════════════════════
+// 結果生成
+// ═════════════════════════════════
+function buildResult() {
+  const sei = document.getElementById('sei').value.trim();
+  const mei = document.getElementById('mei').value.trim();
+  const bdStr = document.getElementById('birthdate').value;
+  const bd = new Date(bdStr);
+  const today = new Date();
+
+  const stemIdx = getBirthStem(bd);
+  const branchIdx = getBirthBranch(bd);
+  const meikyū = getMeikyū(bd);
+  const tenshoIdx = (getBirthStem(today) + meikyū) % 9;
+  const tensho = TENSHO_TABLE[tenshoIdx];
+
+  // 名前・テーマ
+  document.getElementById('res-name').textContent = (sei + ' ' + mei).trim() + ' 殿';
+  document.getElementById('res-theme').textContent = themeNames[selectedTheme] + ' の占';
+
+  // 日柱
+  const todayStemIdx = getBirthStem(today);
+  const todayBranchIdx = getBirthBranch(today);
+  document.getElementById('res-nichichu').innerHTML = `
+    <div class="nichichū-item"><div class="nichichū-val">${STEMS[stemIdx]}${BRANCHES[branchIdx]}</div><div class="nichichū-label">命柱</div></div>
+    <div class="nichichū-item"><div class="nichichū-val">${NINE_STAR_NAMES[meikyū].slice(0,2)}</div><div class="nichichū-label">命宮</div></div>
+    <div class="nichichū-item"><div class="nichichū-val">${STEMS[todayStemIdx]}${BRANCHES[todayBranchIdx]}</div><div class="nichichū-label">今日の柱</div></div>
+  `;
+
+  // 天象
+  document.getElementById('res-tensho-kanji').textContent = tensho.kanji;
+  document.getElementById('res-tensho-yomi').textContent = tensho.yomi;
+  document.getElementById('res-tensho-label').textContent = tensho.label;
+
+  // 五行バー
+  const gogyōVals = [
+    40 + (stemIdx % 5 === 0 ? 30 : 0) + (meikyū % 5 === 0 ? 15 : 0),
+    40 + (stemIdx % 5 === 1 ? 30 : 0) + (meikyū % 5 === 1 ? 15 : 0),
+    40 + (stemIdx % 5 === 2 ? 30 : 0) + (meikyū % 5 === 2 ? 15 : 0),
+    40 + (stemIdx % 5 === 3 ? 30 : 0) + (meikyū % 5 === 3 ? 15 : 0),
+    40 + (stemIdx % 5 === 4 ? 30 : 0) + (meikyū % 5 === 4 ? 15 : 0),
+  ];
+  const maxV = Math.max(...gogyōVals);
+  document.getElementById('res-gogyo').innerHTML = GOGYŌ.map((g,i) => `
+    <div class="gogyo-col">
+      <div class="gogyo-bar" style="height:${Math.round(gogyōVals[i]/maxV*50)}px;background:${GOGYŌ_COLORS[i]}"></div>
+      <div class="gogyo-name">${GOGYŌ_EMOJI[i]}${g}</div>
+    </div>
+  `).join('');
+
+  // テーマデータ
+  const td = getThemeData(selectedTheme, stemIdx, branchIdx, meikyū, tenshoIdx, today);
+
+  // 卦辞
+  document.getElementById('res-kaji-main').textContent = td.kajiMain;
+  document.getElementById('res-kaji-sub').textContent = td.kajiSub;
+
+  // 禍福
+  document.getElementById('res-kafu').innerHTML = td.kafu.map(k => `
+    <div class="kafu-item"><div class="kafu-icon">${k.icon}</div><div>${k.text}</div></div>
+  `).join('');
+
+  // 除災法
+  document.getElementById('res-josai').innerHTML = `
+    <div class="josaihō-title">晴明が授ける除災の法</div>
+    ${td.josai.map(j => `<div class="josaihō-item">${j}</div>`).join('')}
+  `;
+
+  // 吉方位
+  const kippōCard = document.getElementById('kippō-card');
+  if (td.showKippō) {
+    kippōCard.style.display = 'block';
+    const dirs = ['北','北東','東','南東','南','南西','西','北西','（中央）'];
+    const goodIdx = [(stemIdx + branchIdx) % 8, (meikyū + 2) % 8];
+    document.getElementById('res-kippō').innerHTML = dirs.map((d,i) => `
+      <div class="kippō-dir ${goodIdx.includes(i) ? 'good' : 'bad'}">
+        <span class="kippō-dir-name">${d}</span>
+        <span class="kippō-dir-label">${goodIdx.includes(i) ? '吉' : '—'}</span>
+      </div>
+    `).join('');
+  } else {
+    kippōCard.style.display = 'none';
+  }
+}
+
+// ─── 初期化 ───
+document.getElementById('birthdate').max = new Date().toISOString().split('T')[0];
+</script>
+</body>
+</html>

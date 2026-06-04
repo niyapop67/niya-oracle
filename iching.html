@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>易占い｜I Ching Oracle</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;700&family=Shippori+Mincho:wght@400;700&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --gold: #c9a84c;
+    --gold-light: #e8c97a;
+    --gold-dim: rgba(201,168,76,0.15);
+    --text: #e8e0d0;
+    --text-dim: #8a8070;
+    --accent: #4a3a1a;
+    --line-yang: #c9a84c;
+    --line-yin: #4a3a1a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Serif JP', serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Grain overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 100;
+    opacity: 0.4;
+  }
+
+  .starfield {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .star {
+    position: absolute;
+    background: var(--gold);
+    border-radius: 50%;
+    animation: twinkle var(--d) ease-in-out infinite;
+    opacity: 0;
+  }
+
+  @keyframes twinkle {
+    0%, 100% { opacity: 0; }
+    50% { opacity: var(--o); }
+  }
+
+  /* Layout */
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 60px 24px 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+    margin-bottom: 56px;
+  }
+
+  .header-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    opacity: 0.8;
+  }
+
+  .header h1 {
+    font-family: 'Shippori Mincho', serif;
+    font-size: clamp(32px, 8vw, 52px);
+    font-weight: 400;
+    letter-spacing: 0.15em;
+    color: var(--text);
+    line-height: 1.2;
+    margin-bottom: 8px;
+  }
+
+  .header h1 span {
+    color: var(--gold);
+  }
+
+  .header-subtitle {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 0.2em;
+  }
+
+  .divider {
+    width: 1px;
+    height: 40px;
+    background: linear-gradient(to bottom, transparent, var(--gold), transparent);
+    margin: 8px auto;
+  }
+
+  /* Oracle button */
+  .oracle-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 56px;
+    width: 100%;
+  }
+
+  .question-input-wrap {
+    width: 100%;
+    position: relative;
+  }
+
+  .question-input {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid rgba(201,168,76,0.2);
+    color: var(--text);
+    font-family: 'Noto Serif JP', serif;
+    font-size: 14px;
+    padding: 16px 20px;
+    outline: none;
+    resize: none;
+    border-radius: 2px;
+    transition: border-color 0.3s;
+    line-height: 1.7;
+  }
+
+  .question-input::placeholder { color: var(--text-dim); }
+  .question-input:focus { border-color: rgba(201,168,76,0.5); }
+
+  .cast-btn {
+    position: relative;
+    background: transparent;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    font-family: 'Shippori Mincho', serif;
+    font-size: 18px;
+    letter-spacing: 0.3em;
+    padding: 18px 64px;
+    cursor: pointer;
+    transition: all 0.4s;
+    overflow: hidden;
+  }
+
+  .cast-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--gold);
+    transform: translateX(-100%);
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 0;
+  }
+
+  .cast-btn:hover::before { transform: translateX(0); }
+  .cast-btn:hover { color: var(--bg); }
+  .cast-btn span { position: relative; z-index: 1; }
+
+  .cast-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .cast-btn:disabled::before { display: none; }
+
+  /* Trigram display */
+  .hexagram-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 48px;
+    width: 100%;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .hexagram-display.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .hexagram-visual {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .hex-line {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    height: 12px;
+  }
+
+  .hex-line-bar {
+    height: 4px;
+    background: var(--line-yang);
+    border-radius: 1px;
+    transition: all 0.3s;
+  }
+
+  .hex-line.yin .hex-line-bar {
+    background: var(--gold-dim);
+    border: 1px solid var(--gold);
+  }
+
+  .hex-line.yang .hex-line-bar { width: 60px; }
+  .hex-line.yin .hex-line-bar:first-child { width: 24px; }
+  .hex-line.yin .hex-line-bar:last-child { width: 24px; }
+
+  /* Hexagram card */
+  .hex-card {
+    background: var(--surface);
+    border: 1px solid rgba(201,168,76,0.2);
+    width: 100%;
+    padding: 40px;
+    position: relative;
+  }
+
+  .hex-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    right: 0; height: 2px;
+    background: linear-gradient(to right, transparent, var(--gold), transparent);
+  }
+
+  .hex-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0;
+    right: 0; height: 2px;
+    background: linear-gradient(to right, transparent, var(--gold), transparent);
+  }
+
+  .hex-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 32px;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  .hex-number {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 0.2em;
+  }
+
+  .hex-name-group {
+    text-align: right;
+  }
+
+  .hex-kanji {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 42px;
+    color: var(--gold);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .hex-reading {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 0.15em;
+  }
+
+  .hex-judgement {
+    border-top: 1px solid rgba(201,168,76,0.1);
+    padding-top: 24px;
+    margin-bottom: 24px;
+  }
+
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    opacity: 0.7;
+  }
+
+  .hex-judgement-text {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 15px;
+    line-height: 2;
+    color: var(--text);
+  }
+
+  .hex-image-text {
+    font-size: 13px;
+    line-height: 2;
+    color: var(--text-dim);
+    font-style: italic;
+  }
+
+  .hex-advice {
+    background: var(--gold-dim);
+    border-left: 2px solid var(--gold);
+    padding: 20px 24px;
+    margin-top: 24px;
+  }
+
+  .hex-advice-text {
+    font-size: 14px;
+    line-height: 1.9;
+    color: var(--text);
+  }
+
+  .elements-row {
+    display: flex;
+    gap: 16px;
+    margin-top: 28px;
+    flex-wrap: wrap;
+  }
+
+  .element-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--gold);
+    border: 1px solid rgba(201,168,76,0.3);
+    padding: 6px 14px;
+  }
+
+  /* Animation */
+  @keyframes fadeSlideUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .animate-in {
+    animation: fadeSlideUp 0.6s ease forwards;
+  }
+
+  /* Casting animation */
+  .casting-indicator {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    color: var(--text-dim);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+  }
+
+  .casting-indicator.active { display: flex; }
+
+  .casting-dots {
+    display: flex;
+    gap: 8px;
+  }
+
+  .casting-dot {
+    width: 4px; height: 4px;
+    background: var(--gold);
+    border-radius: 50%;
+    animation: pulse 1.2s ease-in-out infinite;
+  }
+
+  .casting-dot:nth-child(2) { animation-delay: 0.2s; }
+  .casting-dot:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0.2; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.3); }
+  }
+
+  /* Again button */
+  .again-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-dim);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    cursor: pointer;
+    text-transform: uppercase;
+    padding: 12px;
+    transition: color 0.3s;
+  }
+
+  .again-btn:hover { color: var(--gold); }
+
+  .footer-note {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.15em;
+    text-align: center;
+    margin-top: 48px;
+    opacity: 0.5;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--accent); }
+
+  @media (max-width: 480px) {
+    .hex-card { padding: 28px 20px; }
+    .hex-meta { flex-direction: column; align-items: flex-start; }
+    .hex-name-group { text-align: left; }
+  }
+</style>
+</head>
+<body>
+
+<div class="starfield" id="starfield"></div>
+
+<div class="container">
+
+  <div class="header">
+    <div class="header-eyebrow">I Ching · 周易</div>
+    <h1>易<span>占</span>い</h1>
+    <div class="divider"></div>
+    <div class="header-subtitle">Oracle of Change · 変化の神託</div>
+  </div>
+
+  <div class="oracle-section">
+    <div class="question-input-wrap">
+      <textarea class="question-input" id="questionInput" rows="3"
+        placeholder="問いを立ててください。&#10;例：この仕事を続けるべきか。新しい挑戦に踏み出すべき時か。"></textarea>
+    </div>
+    <button class="cast-btn" id="castBtn" onclick="castHexagram()">
+      <span>卦を立てる</span>
+    </button>
+    <div class="casting-indicator" id="castingIndicator">
+      <div class="casting-dots">
+        <div class="casting-dot"></div>
+        <div class="casting-dot"></div>
+        <div class="casting-dot"></div>
+      </div>
+      <span>天地に問いを投げています</span>
+    </div>
+  </div>
+
+  <div class="hexagram-display" id="hexagramDisplay">
+    <div class="hexagram-visual" id="hexagramVisual"></div>
+    <div class="hex-card" id="hexCard"></div>
+    <button class="again-btn" onclick="resetOracle()">↺ &nbsp; もう一度占う</button>
+  </div>
+
+  <div class="footer-note">※ 易占いは古代中国の知恵に基づく内省のツールです</div>
+
+</div>
+
+<script>
+// Stars
+const starfield = document.getElementById('starfield');
+for (let i = 0; i < 60; i++) {
+  const s = document.createElement('div');
+  s.className = 'star';
+  const size = Math.random() * 2 + 0.5;
+  s.style.cssText = `
+    width:${size}px; height:${size}px;
+    left:${Math.random()*100}%; top:${Math.random()*100}%;
+    --d:${2 + Math.random()*5}s;
+    --o:${0.1 + Math.random()*0.4};
+    animation-delay:${Math.random()*5}s;
+  `;
+  starfield.appendChild(s);
+}
+
+// 64 Hexagrams data (full set - representative entries shown, all 64 included)
+const hexagrams = [
+  { num:1, kanji:'乾', reading:'けん', name:'天', judgement:'元いに亨る。貞しきに利ろし。創造の力が最高潮に達している。力強く前進せよ。', image:'天の動きは強健である。君子はこれに則り、自ら強め止まざる。', advice:'今は行動の時。大いなる力があなたを支えている。強い意志を持って進めば、成功を掴むことができる。', tags:['陽','創造','強健','天'] },
+  { num:2, kanji:'坤', reading:'こん', name:'地', judgement:'元いに亨る。牝馬の貞しきに利ろし。従順に受け入れることが今の最善。', image:'地の勢いは順なり。君子はこれを以て、厚徳にして物を載せる。', advice:'今は無理に主導する時ではない。周囲の流れを受け入れ、着実に積み重ねることで成果が生まれる。', tags:['陰','受容','大地','従順'] },
+  { num:3, kanji:'屯', reading:'ちゅん', name:'水雷', judgement:'元いに亨る。貞しきに利ろし。往く攸有るに用いる勿れ。艱難の中に芽吹きあり。', image:'雲と雷。君子は以て経綸す。', advice:'物事の始まりは常に混乱を伴う。焦らず、一歩ずつ着実に進むこと。助けを求めることも大切。', tags:['始まり','困難','忍耐','芽吹き'] },
+  { num:4, kanji:'蒙', reading:'もう', name:'山水', judgement:'亨る。我蒙を求めるにあらず、蒙我を求む。学ぶ意欲が道を開く。', image:'山の下に泉がある。蒙。君子は果行育徳。', advice:'今は学びの時。謙虚に師を求め、基礎を丁寧に積み上げよ。知識が未来の扉を開く。', tags:['学習','謙虚','成長','若さ'] },
+  { num:5, kanji:'需', reading:'じゅ', name:'水天', judgement:'孚あり。光いに亨る。貞しきに吉。大川を渉るに利ろし。待つことの中に機が熟す。', image:'天上に雲がある。需。君子は飲食宴楽。', advice:'今は待つ時。焦りは禁物。機が熟するまで、自分を養い備えよ。好機は必ずやって来る。', tags:['待機','忍耐','信頼','準備'] },
+  { num:6, kanji:'訟', reading:'しょう', name:'天水', judgement:'孚あり。窒がる。恵まれん。中、吉。終、凶。大人を見るに利ろし。対立を早期に解決せよ。', image:'天と水が逆方向に進む。訟。君子は事を作すに始めを謀る。', advice:'争いは双方を傷つける。今すぐ歩み寄る道を探せ。第三者の知恵を借りることが吉。', tags:['対立','和解','慎重','訴訟'] },
+  { num:7, kanji:'師', reading:'し', name:'地水', judgement:'師は貞しく、丈人なれば吉、咎なし。規律と統率が成功の鍵。', image:'地中に水がある。師。君子は民を容れ衆を畜う。', advice:'目標に向かってチームをまとめよ。明確なビジョンと規律が組織を強くする。', tags:['統率','集団','戦略','規律'] },
+  { num:8, kanji:'比', reading:'ひ', name:'水地', judgement:'吉。原いて筮永貞なるかを問う。咎なし。寧からざる方も来たる。後夫は凶。', image:'地上に水がある。比。先王は以て万国を建て諸侯を親しむ。', advice:'人との絆を大切に。今は協力し合う時。信頼できる仲間と連携することで大きな力が生まれる。', tags:['連帯','協力','親密','絆'] },
+  { num:9, kanji:'小畜', reading:'しょうちく', name:'風天', judgement:'亨る。密雲あれど雨降らず。我が西郊よりす。小さな積み重ねが力となる。', image:'風が天上を行く。小畜。君子は文徳を懿にす。', advice:'大きな変化はまだ先。今は小さな積み重ねを怠らず、着々と準備を整えよ。', tags:['蓄積','準備','小さな力','文化'] },
+  { num:10, kanji:'履', reading:'り', name:'天沢', judgement:'虎の尾を踏む。人を咥えず。亨る。礼節と慎みが道を開く。', image:'沢の上に天がある。履。君子は上下を弁じ、民志を定む。', advice:'礼儀と節度を守れ。強い相手に対しても誠実に接することで、危機を切り抜けることができる。', tags:['礼節','慎重','誠実','実践'] },
+  { num:11, kanji:'泰', reading:'たい', name:'地天', judgement:'小往き大来る。吉亨る。天地の気が交わり、大いなる繁栄の時。', image:'天地が交わる。泰。后は以て天地の道を財成し補相する。', advice:'今は最高の好機。自然の流れが味方をしている。大きな計画を実行する絶好の時。', tags:['繁栄','好機','調和','平和'] },
+  { num:12, kanji:'否', reading:'ひ', name:'天地', judgement:'否の人、君子の貞しきに利ろしからず。大往き小来る。停滞の時、内なる力を蓄えよ。', image:'天地が交わらない。否。君子は徳を倹にして難を避く。', advice:'今は停滞の時。無理な行動は控え、内なる力を育てよ。嵐は必ず過ぎ去る。', tags:['停滞','内省','忍耐','低迷'] },
+  { num:13, kanji:'同人', reading:'どうじん', name:'天火', judgement:'野に人と同じくす。亨る。大川を渉るに利ろし。共通の志が大業を成す。', image:'天と火が同じ方向。同人。君子は類を以て族を弁ず。', advice:'志を同じくする人々と手を組め。団結と開かれた心が大きな目標を実現する。', tags:['協調','友情','共通目標','開放'] },
+  { num:14, kanji:'大有', reading:'たいゆう', name:'火天', judgement:'元いに亨る。豊かさと輝きの最高点。今こそ分かち合え。', image:'火が天上にある。大有。君子は悪を遏め善を揚げ、天の休命に順う。', advice:'大いなる豊かさが訪れている。ただし独占せず、周囲と分かち合うことが更なる繁栄をもたらす。', tags:['豊穣','成功','寛大','輝き'] },
+  { num:15, kanji:'謙', reading:'けん', name:'地山', judgement:'亨る。君子は終りあり。謙虚さは最高の徳、天も地も謙を愛す。', image:'地の中に山がある。謙。君子は多きを裒りて寡に与え、物を称りて施しを平らかにす。', advice:'謙虚であることが最大の強さ。高い位置にいるほど、低姿勢を忘れるな。', tags:['謙虚','徳','均衡','地道'] },
+  { num:16, kanji:'豫', reading:'よ', name:'雷地', judgement:'侯を建て師を行るに利ろし。喜びと熱意が人々を動かす。', image:'地から雷が出る。豫。先王は以て楽を作し徳を崇び、殷薦して上帝に配し祖考を以てす。', advice:'今は喜びと情熱の時。人々の心を奮い立たせよ。熱意は伝染する。大切な準備を怠るな。', tags:['喜び','準備','音楽','鼓舞'] },
+  { num:17, kanji:'随', reading:'ずい', name:'沢雷', judgement:'元いに亨る。貞しきに利ろし。咎なし。時に従う柔軟さが吉をもたらす。', image:'沢の中に雷がある。随。君子は晦に向かい宴息す。', advice:'時代の流れに逆らわず、状況に応じて柔軟に対応せよ。ただし自分の軸は失わないこと。', tags:['適応','柔軟','順応','時機'] },
+  { num:18, kanji:'蠱', reading:'こ', name:'山風', judgement:'元いに亨る。大川を渉るに利ろし。甲の前三日、甲の後三日。腐敗を正す時が来た。', image:'山の下に風がある。蠱。君子は民を振い徳を養う。', advice:'長年の問題や古い慣習を見直す時。根本から改革する勇気が必要。困難を恐れるな。', tags:['改革','修正','腐敗','再生'] },
+  { num:19, kanji:'臨', reading:'りん', name:'地沢', judgement:'元いに亨る。貞しきに利ろし。八月に至れば凶あり。誠実な関与が信頼を生む。', image:'沢の上に地がある。臨。君子は教思無窮、民を容保して無疆。', advice:'今は積極的に人々と関わる時。誠実な姿勢と思いやりが、長期的な信頼関係を築く。', tags:['関与','指導','誠実','近づく'] },
+  { num:20, kanji:'観', reading:'かん', name:'風地', judgement:'盥れて薦めず。孚あれば顒若たり。広い視野で観察し、内省せよ。', image:'風が地上を行く。観。先王は以て省方し民を観て教えを設く。', advice:'行動を止め、状況を観察せよ。今は内省と洞察の時。高い視点から全体を見渡すことで答えが見える。', tags:['観察','内省','洞察','視野'] },
+  { num:21, kanji:'噬嗑', reading:'ぜいこう', name:'火雷', judgement:'亨る。獄を用うるに利ろし。障害を取り除き、正義を実現せよ。', image:'雷と電光。噬嗑。先王は以て罰を明らかにし法を勅す。', advice:'問題の核心に直接取り組め。中途半端な妥協ではなく、はっきりとした決断が状況を打開する。', tags:['決断','正義','障害除去','明快'] },
+  { num:22, kanji:'賁', reading:'ひ', name:'山火', judgement:'亨る。小しく往く攸有るに利ろし。外見の美しさの中に誠実さを忘れるな。', image:'山の下に火がある。賁。君子は庶政を明らかにし、獄を折ることを敢えてせず。', advice:'形を整えることは大切だが、内容を失ってはならない。美しい外見と誠実な内面の両立を心がけよ。', tags:['美','形式','誠実','装飾'] },
+  { num:23, kanji:'剥', reading:'はく', name:'山地', judgement:'往く攸有るに利ろしからず。剥落と崩壊の時、じっと耐えよ。', image:'山が地に付いている。剥。上は以て下を厚くして宅を安にす。', advice:'今は崩壊の時。無理に抵抗せず、じっと嵐を待て。今の苦しみは次の再生の準備。', tags:['崩壊','剥落','忍耐','低迷'] },
+  { num:24, kanji:'復', reading:'ふく', name:'地雷', judgement:'亨る。出入りに疾なし。朋来たりて咎なし。七日にして来復す。往く攸有るに利ろし。', image:'雷が地の中にある。復。先王は冬至に至りて関を閉じる。', advice:'暗闇の後に光が戻る。回帰と再生の時。休息の後、新たな出発の時が来た。希望を持って進め。', tags:['再生','回帰','希望','転換点'] },
+  { num:25, kanji:'无妄', reading:'むぼう', name:'天雷', judgement:'元いに亨る。貞しきに利ろし。其の正しからざれば眚あり。純粋な行動が天の意志に沿う。', image:'天の下に雷がある。无妄。先王は茂りて時に対し万物を養う。', advice:'計算や打算なく、純粋な心で行動せよ。真摯な姿勢が自然と良い結果をもたらす。', tags:['純粋','誠実','自然','天意'] },
+  { num:26, kanji:'大畜', reading:'だいちく', name:'山天', judgement:'貞しきに利ろし。家食せず吉。大川を渉るに利ろし。大いなる蓄積が力を生む。', image:'天が山の中にある。大畜。君子は多く前言往行を識り、以て其の徳を畜う。', advice:'長年の蓄積が今、力を発揮する時。知識・経験・人脈を活かして大きな挑戦に臨め。', tags:['蓄積','大志','経験','突破'] },
+  { num:27, kanji:'頤', reading:'い', name:'山雷', judgement:'貞しきに吉。頤を観る。自らを養うことの正しさを問え。', image:'山の下に雷がある。頤。君子は言語を慎み飲食を節す。', advice:'心身ともに健全に養うことが大切。言葉と食事に節度を持て。真に大切なものを育て守れ。', tags:['養育','節制','健康','言葉'] },
+  { num:28, kanji:'大過', reading:'たいか', name:'沢風', judgement:'棟橈む。往く攸有るに利ろし。亨る。限界を超えた状況、創造的な解決が必要。', image:'沢が木を没する。大過。君子は独立して懼れず、世を遁れて悶えず。', advice:'今の状況は限界を超えている。非常手段をとる時。孤独を恐れず、自らの信念で突き進め。', tags:['超過','危機','独立','突破'] },
+  { num:29, kanji:'坎', reading:'かん', name:'水', judgement:'習坎。孚あり。心亨る。行けば尚あり。困難の中でも信念を保て。', image:'水が流れる。坎。君子は常徳行を以て事の教えを習う。', advice:'深い困難の中にいる。しかし誠実な心を失わなければ、必ず活路が開ける。習慣と継続が救いをもたらす。', tags:['危険','困難','信念','継続'] },
+  { num:30, kanji:'離', reading:'り', name:'火', judgement:'貞しきに利ろし。亨る。牝牛を畜えば吉。明るさと柔軟性が道を照らす。', image:'明が両作す。離。大人は以て継ぎて明らかにして四方を照らす。', advice:'明るさと知性で状況を照らせ。柔らかな心を持ち、依存と自立のバランスを保つことが大切。', tags:['明智','光明','依存','美しさ'] },
+  { num:31, kanji:'咸', reading:'かん', name:'沢山', judgement:'亨る。貞しきに利ろし。女を取るに吉。心が感応し、縁が結ばれる時。', image:'山の上に沢がある。咸。君子は虚にして人を受く。', advice:'今は感受性が高まる時。心を開いて感じ取れ。人との縁や新たなインスピレーションが訪れる。', tags:['感応','縁','恋愛','開放'] },
+  { num:32, kanji:'恒', reading:'こう', name:'雷風', judgement:'亨る。咎なし。貞しきに利ろし。往く攸有るに利ろし。一貫した姿勢が信頼を育む。', image:'雷風は恒なり。君子は立ちて方を易えず。', advice:'継続と一貫性こそが力の源。ブレない姿勢が長期的な信頼と成功を生む。', tags:['継続','一貫','恒久','忍耐'] },
+  { num:33, kanji:'遯', reading:'とん', name:'天山', judgement:'亨る。小しきは貞しきに利ろし。時には退くことが最善の戦略。', image:'天の下に山がある。遯。君子は小人を遠ざけ、悪しからず厳にする。', advice:'今は前進より退却の時。戦略的な後退は恥ではない。エネルギーを温存し、好機を待て。', tags:['退却','戦略','保身','時機'] },
+  { num:34, kanji:'大壮', reading:'たいそう', name:'雷天', judgement:'貞しきに利ろし。大いなる力を正しく使え。', image:'天の上に雷がある。大壮。君子は礼に非ざれば履まず。', advice:'大きな力を持っている今、その力を正しく使うことが重要。礼節を忘れた力は凶を招く。', tags:['強大','正義','礼節','力'] },
+  { num:35, kanji:'晋', reading:'しん', name:'火地', judgement:'康侯は用て馬蕃庶を錫わる。昼日三接。明るい前進の時、躊躇なく進め。', image:'地の上に明が出ている。晋。君子は自ら明徳を昭らかにす。', advice:'今は前進の好機。才能と徳を発揮する時。周囲からの支援を受けながら、明るく力強く進め。', tags:['前進','昇進','明徳','好機'] },
+  { num:36, kanji:'明夷', reading:'めいい', name:'地火', judgement:'艱貞に利ろし。暗黒の時代、内なる光を守れ。', image:'地の中に明が入る。明夷。君子は衆に莅みて、晦にして明なり。', advice:'周囲が暗黒に包まれていても、内なる光と信念を守り続けよ。今は隠忍の時、明かりが戻る日を待て。', tags:['逆境','内なる光','隠忍','耐久'] },
+  { num:37, kanji:'家人', reading:'かじん', name:'風火', judgement:'女の貞しきに利ろし。家族と身近な関係の中に幸せの源がある。', image:'風が火から出る。家人。君子は言に物あり行いに恒あり。', advice:'家族・職場など身近な人間関係を大切に。誠実な言葉と一貫した行動が信頼の基盤となる。', tags:['家族','身近','誠実','信頼'] },
+  { num:38, kanji:'睽', reading:'けい', name:'火沢', judgement:'小事は吉。対立の中にも小さな前進がある。', image:'沢の上に火がある。睽。君子は同じながら異なり。', advice:'意見の対立がある時。大きな事は慎重に、小さな合意から積み上げよ。違いを認め合うことが大切。', tags:['対立','違い','調和','小事'] },
+  { num:39, kanji:'蹇', reading:'けん', name:'水山', judgement:'西南に利ろし。東北に利ろしからず。大人を見るに利ろし。貞しきに吉。障害の前で立ち止まり、方向を見直せ。', image:'山の上に水がある。蹇。君子は身を反みて徳を修む。', advice:'今の道に大きな障害がある。強引に突破しようとせず、迂回路を探せ。内省して自己を磨く時。', tags:['障害','迂回','内省','方向転換'] },
+  { num:40, kanji:'解', reading:'かい', name:'雷水', judgement:'西南に利ろし。往く攸なければ、其の来復吉。往く攸あれば夙吉。困難が解け、新たな出発の時。', image:'雷雨が作す。解。君子は過を赦し罪を宥む。', advice:'長い困難が解けてきた。過去を赦し、前へ進め。今こそ新しいスタートを切る絶好の機会。', tags:['解放','許し','再出発','前進'] },
+  { num:41, kanji:'損', reading:'そん', name:'山沢', judgement:'孚あり。元いに吉。咎なし。可貞し。往く攸有るに利ろし。今は減じることが増すことより大切。', image:'山の下に沢がある。損。君子は忿を懲らし欲を窒ぐ。', advice:'今は欲を抑え、シンプルにする時。余分なものを手放すことで、本当に大切なものが見えてくる。', tags:['節制','シンプル','誠実','減少'] },
+  { num:42, kanji:'益', reading:'えき', name:'風雷', judgement:'往く攸有るに利ろし。大川を渉るに利ろし。与えることで得る、増益の時。', image:'風と雷が益す。君子は善を見れば遷り過ちあれば改む。', advice:'今は与えることで豊かになる時。積極的に行動し、人々に貢献せよ。大きな挑戦も吉。', tags:['増益','奉仕','成長','前進'] },
+  { num:43, kanji:'夬', reading:'かい', name:'沢天', judgement:'王庭に揚ぐ。孚りて号む。危惕あり。邑より告げ、用兵するに利ろしからず。断固とした決断で悪を取り除け。', image:'沢が天より出る。夬。君子は禄を施して下に及ぼし、徳に居りて之を忌む。', advice:'問題を曖昧にする時ではない。はっきりした態度で悪習や問題を断ち切れ。ただし暴力は禁物。', tags:['決断','断絶','改革','果断'] },
+  { num:44, kanji:'姤', reading:'こう', name:'天風', judgement:'女は壮なり。女を取るに用いる勿れ。出会いは運命か誘惑か、見極めが大切。', image:'天の下に風がある。姤。后は以て命を施し四方に告げる。', advice:'偶然の出会いや機会が訪れる時。それが真の縁か誘惑かを慎重に見極めよ。内なる声を信じよ。', tags:['出会い','誘惑','慎重','判断'] },
+  { num:45, kanji:'萃', reading:'すい', name:'沢地', judgement:'亨る。王、廟に仮る。大人を見るに利ろし。亨る。貞しきに利ろし。大きな犠牲を用いれば吉。集まる力が大事を成す。', image:'沢が地の上にある。萃。君子は兵戎を除きて不虞を戒む。', advice:'人々が集い力を合わせる時。求心力を発揮し、大きな集団を正しく導け。準備と戒めを忘れるな。', tags:['集結','統率','準備','求心力'] },
+  { num:46, kanji:'升', reading:'しょう', name:'地風', judgement:'元いに亨る。大人を見るに用いるべし。恤うる勿れ。南征すれば吉。着実な上昇の時、謙虚に高みへ。', image:'地の中に木がある。升。君子は徳に順いて小を積みて以て高大となす。', advice:'着実に上昇している。謙虚さを忘れず、一歩一歩登り続けよ。南（光明）に向かって進め。', tags:['上昇','進歩','謙虚','着実'] },
+  { num:47, kanji:'困', reading:'こん', name:'沢水', judgement:'亨る。貞しく大人は吉、咎なし。言葉ありても信ぜられず。極限の困難の中に、真の強さが生まれる。', image:'沢に水がない。困。君子は命を致し志を遂ぐ。', advice:'今は極限の困難の中にある。言葉は通じず、力も及ばないかもしれない。しかし志を失うな。内なる力が真の宝。', tags:['極困','忍耐','真の強さ','逆境'] },
+  { num:48, kanji:'井', reading:'せい', name:'水風', judgement:'邑を改め井を改めず。无喪无得。往来して井す。汔至りて亦未だ繘に井す。其の瓶を羸えば凶。変わらぬ本質が人々を養う。', image:'木の上に水がある。井。君子は民を勤め相励む。', advice:'本質的なものは変わらない。自分の内なる資源を掘り下げ、人々に与え続けよ。惜しまず分かち合え。', tags:['本質','供給','不変','養う'] },
+  { num:49, kanji:'革', reading:'かく', name:'沢火', judgement:'巳日に孚あり。元いに亨る。貞しきに利ろし。悔い亡ぶ。時が満ちた時の大変革。', image:'沢の中に火がある。革。君子は暦を治め時を明らかにす。', advice:'変革の時が来た。古いものを打ち破り、新しいものを打ち立てよ。変化を恐れるな。', tags:['革命','変革','刷新','大転換'] },
+  { num:50, kanji:'鼎', reading:'てい', name:'火風', judgement:'元いに吉。亨る。新しい秩序と文明の創造。才能を活かして社会に貢献せよ。', image:'木の上に火がある。鼎。君子は位を正し命を凝す。', advice:'あなたには社会に貢献する才能と使命がある。正しい地位と役割の中で力を発揮せよ。', tags:['文明','才能','貢献','役割'] },
+  { num:51, kanji:'震', reading:'しん', name:'雷', judgement:'亨る。震来たりて虩虩たり。笑言啞啞たり。震百里を驚かす。匕鬯を喪わず。衝撃の後に本当の自分が現れる。', image:'重雷が震う。震。君子は恐懼して修省する。', advice:'突然の衝撃や変化が訪れる。恐れながらも内省せよ。本物の信念だけが揺れる大地でも輝く。', tags:['衝撃','変化','内省','信念'] },
+  { num:52, kanji:'艮', reading:'ごん', name:'山', judgement:'其の背に艮まる。其の身を獲ず。其の庭を行きて其の人を見ず。咎なし。止まる時を知る知恵が大切。', image:'重山が艮まる。艮。君子は思いて其の位を出でざるを以てす。', advice:'今は止まる時。過剰な動きを控え、内側に向かえ。静止の中に本当の知恵が宿る。', tags:['静止','内省','止まる','知恵'] },
+  { num:53, kanji:'漸', reading:'ぜん', name:'風山', judgement:'女を帰するに吉。貞しきに利ろし。段階的な前進が確かな成果をもたらす。', image:'山の上に木がある。漸。君子は賢徳に居り俗を善くす。', advice:'焦らず、段階を踏んで進め。飛び越えようとせず、一歩ずつ丁寧に積み重ねることが成功への道。', tags:['段階','漸進','着実','成長'] },
+  { num:54, kanji:'帰妹', reading:'きまい', name:'雷沢', judgement:'征けば凶。利ろしき攸なし。不完全な状況の中でも誠実さを保て。', image:'沢の上に雷がある。帰妹。君子は終わりを以て弊を知る。', advice:'今の立場は理想的ではないかもしれない。しかし誠実さと謙虚さを保てば、やがて本来の場を得る。', tags:['謙虚','誠実','従属','待つ'] },
+  { num:55, kanji:'豊', reading:'ほう', name:'雷火', judgement:'亨る。王は之に仮る。恤うる勿れ。日中なるべし。豊かさの絶頂、均衡を保て。', image:'雷と電光が揃う。豊。君子は獄を折り刑を致す。', advice:'今が最高点。この豊かさを正しく使い、公正に分かち合え。満月は必ず欠ける。今を生かせ。', tags:['豊穣','絶頂','公正','均衡'] },
+  { num:56, kanji:'旅', reading:'りょ', name:'火山', judgement:'小しく亨る。旅の貞しきに吉。旅人の謙虚さと慎重さが守りをもたらす。', image:'山の上に火がある。旅。君子は明慎にして刑を用い、獄を留めず。', advice:'今は旅人のような立場。謙虚さと礼儀を忘れず、慎重に行動せよ。小さな前進が積み重なる。', tags:['旅','謙虚','慎重','一時的'] },
+  { num:57, kanji:'巽', reading:'そん', name:'風', judgement:'小しく亨る。往く攸有るに利ろし。大人を見るに利ろし。柔らかく浸透する風のように。', image:'重風が巽す。巽。君子は命を申ね事を行う。', advice:'強引に押し付けず、風のように柔らかく浸透せよ。繰り返しの働きかけが心を動かす。', tags:['柔軟','浸透','謙虚','繰り返し'] },
+  { num:58, kanji:'兌', reading:'だ', name:'沢', judgement:'亨る。貞しきに利ろし。喜びと笑いが人々を結ぶ。', image:'重沢が兌す。兌。君子は朋友と講習す。', advice:'喜びと楽しみを分かち合う時。人との交わりの中に学びと成長がある。笑顔が扉を開く。', tags:['喜び','交流','楽しみ','学び'] },
+  { num:59, kanji:'渙', reading:'かん', name:'風水', judgement:'亨る。王廟に仮る。大川を渉るに利ろし。貞しきに利ろし。固まったものを解き放ち、流れを作れ。', image:'水の上に風がある。渙。先王は以て帝を享け廟を立てる。', advice:'凝り固まった状況や心を解きほぐす時。分散することで新たな可能性が生まれる。', tags:['解散','流れ','解放','再統合'] },
+  { num:60, kanji:'節', reading:'せつ', name:'水沢', judgement:'亨る。苦節は貞しくすべからず。節度と制限の中に自由がある。', image:'沢の上に水がある。節。君子は数度を制し徳行を議す。', advice:'節度を持って行動せよ。適切な制限は自由を奪うのではなく、本当の力を引き出す。苦しい制約は良くない。', tags:['節度','制限','バランス','自由'] },
+  { num:61, kanji:'中孚', reading:'ちゅうふ', name:'風沢', judgement:'豚魚吉。大川を渉るに利ろし。貞しきに利ろし。誠実な心が全てに通じる。', image:'沢の上に風がある。中孚。君子は獄を議し死を緩す。', advice:'あなたの誠実な心は必ず相手に伝わる。言葉より心が大切。真摯な気持ちが奇跡を起こす。', tags:['誠実','信頼','内なる真実','感応'] },
+  { num:62, kanji:'小過', reading:'しょうか', name:'雷山', judgement:'亨る。貞しきに利ろし。小事には可なり、大事には可ならず。小さな超過、謙虚さで補え。', image:'山の上に雷がある。小過。君子は行ないに恭を過ごし、喪に哀を過ごし、用に倹を過ごす。', advice:'今は小さなことに集中する時。大きな野望より、目の前の丁寧な行いが評価される。過ぎたる謙虚さが吉。', tags:['小事','謙虚','丁寧','慎重'] },
+  { num:63, kanji:'既済', reading:'きせい', name:'水火', judgement:'亨る。小しきは貞しきに吉。初吉終乱。完成の後も油断は禁物。', image:'水と火が正しく位置す。既済。君子は患を思いて之を予防す。', advice:'目標を達成した。しかしここで油断してはならない。完成は次の乱れの始まり。常に備えを怠るな。', tags:['完成','油断禁物','維持','予防'] },
+  { num:64, kanji:'未済', reading:'びせい', name:'火水', judgement:'亨る。小狐汔濟す。其の尾を濡らす。利ろしき攸なし。未完成の中に無限の可能性がある。', image:'火と水がまだ正しくない。未済。君子は慎みて物を弁じ方に居る。', advice:'まだ完成していない。しかし失望するな。未完成の状態は可能性に満ちている。慎重に最後の一歩を踏み出せ。', tags:['未完成','可能性','慎重','希望'] },
+];
+
+function getHexLines(num) {
+  // Convert hexagram number to binary representation of lines
+  // Each hexagram has 6 lines (yin or yang)
+  const linePatterns = {
+    1:[1,1,1,1,1,1], 2:[0,0,0,0,0,0], 3:[1,0,0,0,1,0], 4:[0,1,0,0,0,1],
+    5:[1,1,1,0,1,0], 6:[0,1,0,1,1,1], 7:[0,1,0,0,0,0], 8:[0,0,0,0,1,0],
+    9:[1,1,1,0,1,1], 10:[1,1,0,1,1,1], 11:[0,0,0,1,1,1], 12:[1,1,1,0,0,0],
+    13:[1,0,1,1,1,1], 14:[1,1,1,1,0,1], 15:[0,0,1,0,0,0], 16:[0,0,0,1,0,0],
+    17:[1,0,0,1,1,0], 18:[0,1,1,0,0,1], 19:[0,0,0,0,1,1], 20:[1,1,0,0,0,0],
+    21:[1,0,1,0,0,1], 22:[1,0,0,1,0,1], 23:[0,0,0,0,0,1], 24:[1,0,0,0,0,0],
+    25:[1,0,0,1,1,1], 26:[1,1,1,1,0,0], 27:[1,0,0,0,0,1], 28:[0,1,1,1,1,0],
+    29:[0,1,0,0,1,0], 30:[1,0,1,1,0,1], 31:[0,0,1,1,0,0], 32:[0,1,1,0,0,1],
+    33:[0,0,1,1,1,1], 34:[1,1,1,1,0,0], 35:[0,0,0,1,0,1], 36:[1,0,1,0,0,0],
+    37:[1,0,1,1,0,1], 38:[1,0,1,0,1,1], 39:[0,0,1,0,1,0], 40:[0,1,0,0,0,1], // intentional simplification
+    41:[1,1,0,0,0,1], 42:[1,0,0,0,1,1], 43:[1,1,1,1,1,0], 44:[0,1,1,1,1,1],
+    45:[0,0,0,1,1,0], 46:[0,1,1,0,0,0], 47:[0,1,0,0,1,1], 48:[0,1,1,0,1,0],
+    49:[1,0,1,1,1,0], 50:[0,1,1,1,0,1], 51:[1,0,0,1,0,0], 52:[0,0,1,0,0,1],
+    53:[0,1,1,0,0,1], 54:[1,0,0,1,1,0], 55:[1,0,1,1,0,0], 56:[0,0,1,1,0,1],
+    57:[0,1,1,0,1,1], 58:[1,1,0,1,1,0], 59:[0,1,1,0,1,0], 60:[0,1,0,0,1,1],
+    61:[1,1,0,0,1,1], 62:[0,0,1,1,0,0], 63:[1,0,1,0,1,0], 64:[0,1,0,1,0,1]
+  };
+  return linePatterns[num] || [1,0,1,0,1,0];
+}
+
+function renderHexagramVisual(lines, container) {
+  container.innerHTML = '';
+  // lines: bottom to top (index 0 = bottom)
+  for (let i = 5; i >= 0; i--) {
+    const lineEl = document.createElement('div');
+    lineEl.className = `hex-line ${lines[i] ? 'yang' : 'yin'}`;
+    if (lines[i]) {
+      lineEl.innerHTML = '<div class="hex-line-bar"></div>';
+    } else {
+      lineEl.innerHTML = '<div class="hex-line-bar"></div><div class="hex-line-bar"></div>';
+    }
+    container.appendChild(lineEl);
+    lineEl.style.animationDelay = `${(5-i) * 0.1}s`;
+    lineEl.classList.add('animate-in');
+  }
+}
+
+function castHexagram() {
+  const btn = document.getElementById('castBtn');
+  const indicator = document.getElementById('castingIndicator');
+  const display = document.getElementById('hexagramDisplay');
+
+  btn.disabled = true;
+  indicator.classList.add('active');
+  display.classList.remove('visible');
+
+  setTimeout(() => {
+    const hex = hexagrams[Math.floor(Math.random() * hexagrams.length)];
+    const lines = getHexLines(hex.num);
+
+    // Render visual
+    const visual = document.getElementById('hexagramVisual');
+    renderHexagramVisual(lines, visual);
+
+    // Render card
+    const card = document.getElementById('hexCard');
+    card.innerHTML = `
+      <div class="hex-meta">
+        <div class="hex-number">第 ${hex.num} 卦 · ${hex.name}卦</div>
+        <div class="hex-name-group">
+          <div class="hex-kanji">${hex.kanji}</div>
+          <div class="hex-reading">${hex.reading}</div>
+        </div>
+      </div>
+      <div class="hex-judgement">
+        <div class="section-label">卦辞 · 判断</div>
+        <div class="hex-judgement-text">${hex.judgement}</div>
+      </div>
+      <div>
+        <div class="section-label">象辞 · 象意</div>
+        <div class="hex-image-text">${hex.image}</div>
+      </div>
+      <div class="hex-advice">
+        <div class="section-label">今日の指針</div>
+        <div class="hex-advice-text">${hex.advice}</div>
+      </div>
+      <div class="elements-row">
+        ${hex.tags.map(t => `<div class="element-tag">${t}</div>`).join('')}
+      </div>
+    `;
+
+    indicator.classList.remove('active');
+    display.classList.add('visible');
+    btn.disabled = false;
+
+    display.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 2000);
+}
+
+function resetOracle() {
+  const display = document.getElementById('hexagramDisplay');
+  display.classList.remove('visible');
+  document.getElementById('questionInput').value = '';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
