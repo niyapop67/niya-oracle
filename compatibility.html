@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>相性診断</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@300;400;700;800&family=Zen+Maru+Gothic:wght@400;700&display=swap');
+
+  :root {
+    --bg: #fff0f5;
+    --bg2: #fde8f0;
+    --card: #ffffff;
+    --pink: #f472b6;
+    --pink2: #ec4899;
+    --pink-light: #fce7f3;
+    --lavender: #c084fc;
+    --lav-light: #f3e8ff;
+    --mint: #34d399;
+    --yellow: #fbbf24;
+    --text: #4a3040;
+    --muted: #b08090;
+    --border: rgba(244,114,182,0.2);
+    --shadow: 0 4px 24px rgba(244,114,182,0.15);
+    --shadow-lg: 0 8px 40px rgba(244,114,182,0.25);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* ふわふわ背景 */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 10% 15%, rgba(244,114,182,0.12) 0%, transparent 50%),
+      radial-gradient(ellipse at 90% 85%, rgba(192,132,252,0.12) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 50%, rgba(251,191,36,0.05) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* 浮かぶハート */
+  .hearts-bg { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+  .heart-float {
+    position: absolute;
+    font-size: var(--fs, 1rem);
+    opacity: 0;
+    animation: floatUp var(--dur, 8s) ease-in infinite var(--delay, 0s);
+  }
+  @keyframes floatUp {
+    0%   { opacity: 0; transform: translateY(0) rotate(0deg) scale(0.8); }
+    10%  { opacity: 0.4; }
+    90%  { opacity: 0.1; }
+    100% { opacity: 0; transform: translateY(-100vh) rotate(30deg) scale(1.2); }
+  }
+
+  .container {
+    position: relative; z-index: 1;
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 0 16px 60px;
+  }
+
+  /* ヘッダー */
+  header {
+    text-align: center;
+    padding: 44px 0 32px;
+  }
+
+  .header-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #f9a8d4, #c084fc);
+    font-size: 2rem;
+    margin-bottom: 14px;
+    box-shadow: 0 6px 24px rgba(244,114,182,0.4);
+    animation: bounce 3s ease-in-out infinite;
+  }
+  @keyframes bounce {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+
+  header h1 {
+    font-size: 1.7rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #ec4899, #c084fc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 6px;
+    letter-spacing: 0.1em;
+  }
+
+  header p {
+    font-size: 0.75rem;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+  }
+
+  /* タブ */
+  .tab-bar {
+    display: flex;
+    background: white;
+    border-radius: 50px;
+    padding: 5px;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow);
+    gap: 4px;
+  }
+
+  .tab-btn {
+    flex: 1;
+    padding: 10px 6px;
+    border: none;
+    border-radius: 50px;
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+    background: transparent;
+    color: var(--muted);
+  }
+
+  .tab-btn.active {
+    background: linear-gradient(135deg, #f472b6, #c084fc);
+    color: white;
+    box-shadow: 0 4px 16px rgba(244,114,182,0.4);
+  }
+
+  /* カード */
+  .card {
+    background: var(--card);
+    border-radius: 24px;
+    padding: 28px 24px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow);
+    border: 1.5px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 20px; right: 20px;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, #f9a8d4, #c084fc, transparent);
+    border-radius: 0 0 3px 3px;
+  }
+
+  .section-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.25em;
+    color: var(--pink);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1.5px;
+    background: linear-gradient(90deg, var(--pink-light), transparent);
+    border-radius: 1px;
+  }
+
+  /* 人物カード */
+  .person-card {
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    padding: 18px;
+    margin-bottom: 12px;
+  }
+
+  .person-card h3 {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--pink2);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .field-group { margin-bottom: 12px; }
+  .field-group:last-child { margin-bottom: 0; }
+
+  label {
+    display: block;
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: var(--muted);
+    margin-bottom: 5px;
+    letter-spacing: 0.05em;
+  }
+
+  input[type="text"], input[type="date"] {
+    width: 100%;
+    background: white;
+    border: 1.5px solid rgba(244,114,182,0.25);
+    border-radius: 10px;
+    padding: 10px 12px;
+    color: var(--text);
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+    font-size: 0.88rem;
+    transition: all 0.25s;
+    outline: none;
+  }
+
+  input:focus {
+    border-color: var(--pink);
+    box-shadow: 0 0 0 3px rgba(244,114,182,0.15);
+  }
+
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(0.4) sepia(1) saturate(3) hue-rotate(290deg);
+    cursor: pointer;
+  }
+
+  /* VS */
+  .vs-divider {
+    text-align: center;
+    padding: 10px 0;
+    position: relative;
+  }
+
+  .vs-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #f9a8d4, #c084fc);
+    font-size: 0.7rem;
+    font-weight: 800;
+    color: white;
+    box-shadow: 0 4px 14px rgba(244,114,182,0.4);
+    position: relative;
+    z-index: 1;
+    letter-spacing: 0.05em;
+  }
+
+  .vs-divider::before {
+    content: '';
+    position: absolute;
+    top: 50%; left: 0; right: 0;
+    height: 1.5px;
+    background: var(--border);
+  }
+
+  /* ボタン */
+  .btn-diagnose {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 50px;
+    background: linear-gradient(135deg, #f472b6, #c084fc);
+    color: white;
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 800;
+    letter-spacing: 0.15em;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-top: 12px;
+    box-shadow: 0 6px 20px rgba(244,114,182,0.4);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-diagnose::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .btn-diagnose:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(244,114,182,0.5);
+  }
+
+  .btn-diagnose:hover::after { opacity: 1; }
+  .btn-diagnose:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  /* ローディング */
+  .loading { display: none; text-align: center; padding: 40px 20px; }
+  .loading.show { display: block; }
+
+  .loading-icon {
+    font-size: 3rem;
+    display: block;
+    margin-bottom: 16px;
+    animation: spinBounce 1.5s ease-in-out infinite;
+  }
+
+  @keyframes spinBounce {
+    0%,100% { transform: scale(1) rotate(-10deg); }
+    50% { transform: scale(1.15) rotate(10deg); }
+  }
+
+  .loading-dots {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 14px;
+  }
+
+  .loading-dots span {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--pink);
+    animation: dotBounce 1.2s ease-in-out infinite;
+  }
+
+  .loading-dots span:nth-child(2) { animation-delay: 0.2s; background: var(--lavender); }
+  .loading-dots span:nth-child(3) { animation-delay: 0.4s; background: var(--mint); }
+
+  @keyframes dotBounce {
+    0%,80%,100% { transform: scale(0.6); opacity: 0.4; }
+    40% { transform: scale(1); opacity: 1; }
+  }
+
+  .loading p {
+    font-size: 0.82rem;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+    font-weight: 700;
+  }
+
+  /* 結果 */
+  .result-card { display: none; animation: popIn 0.5s cubic-bezier(0.34,1.56,0.64,1); }
+  .result-card.show { display: block; }
+
+  @keyframes popIn {
+    from { opacity: 0; transform: scale(0.92) translateY(20px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  /* スコアリング */
+  .score-area {
+    text-align: center;
+    padding: 24px 0 20px;
+    position: relative;
+  }
+
+  .score-ring {
+    width: 150px; height: 150px;
+    margin: 0 auto 16px;
+    position: relative;
+  }
+
+  .score-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+
+  .score-ring .track { fill: none; stroke: #fce7f3; stroke-width: 10; }
+  .score-ring .progress {
+    fill: none;
+    stroke: url(#cuteGrad);
+    stroke-width: 10;
+    stroke-linecap: round;
+    stroke-dasharray: 345;
+    stroke-dashoffset: 345;
+    transition: stroke-dashoffset 1.5s cubic-bezier(0.4,0,0.2,1);
+    filter: drop-shadow(0 0 6px rgba(244,114,182,0.5));
+  }
+
+  .score-center {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+  }
+
+  .score-center .num {
+    font-size: 2.8rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #ec4899, #c084fc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+  }
+
+  .score-center .unit { font-size: 0.75rem; color: var(--muted); font-weight: 700; }
+
+  .result-title {
+    font-size: 1.3rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #ec4899, #c084fc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 4px;
+  }
+
+  .result-subtitle {
+    font-size: 0.72rem;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+    font-weight: 700;
+    margin-bottom: 20px;
+  }
+
+  /* 詳細スコア */
+  .detail-scores { display: grid; gap: 12px; margin-top: 20px; }
+
+  .d-item { display: flex; align-items: center; gap: 10px; }
+
+  .d-item .dlabel {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--text);
+    width: 75px;
+    flex-shrink: 0;
+  }
+
+  .d-item .dbar {
+    flex: 1;
+    height: 8px;
+    background: var(--pink-light);
+    border-radius: 50px;
+    overflow: hidden;
+  }
+
+  .d-item .dfill {
+    height: 100%;
+    border-radius: 50px;
+    width: 0%;
+    transition: width 1.2s cubic-bezier(0.4,0,0.2,1) 0.3s;
+  }
+
+  .d-item .dscore {
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: var(--pink2);
+    width: 32px;
+    text-align: right;
+  }
+
+  /* 鑑定文 */
+  .reading-box {
+    background: var(--bg);
+    border-radius: 16px;
+    padding: 20px;
+    margin-top: 20px;
+    border: 1.5px solid var(--border);
+  }
+
+  .reading-label {
+    font-size: 0.65rem;
+    font-weight: 800;
+    color: var(--pink);
+    letter-spacing: 0.2em;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .reading-text {
+    font-family: 'Zen Maru Gothic', serif;
+    font-size: 0.85rem;
+    line-height: 2;
+    color: var(--text);
+    white-space: pre-wrap;
+  }
+
+  /* エラー */
+  .error-msg {
+    display: none;
+    background: #fef2f2;
+    border: 1.5px solid #fca5a5;
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #ef4444;
+    margin-top: 10px;
+    text-align: center;
+  }
+
+  .error-msg.show { display: block; }
+
+  /* リセット */
+  .btn-reset {
+    width: 100%;
+    margin-top: 12px;
+    padding: 13px;
+    border: 2px dashed var(--border);
+    border-radius: 50px;
+    background: transparent;
+    color: var(--muted);
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+    letter-spacing: 0.1em;
+  }
+
+  .btn-reset:hover {
+    border-color: var(--pink);
+    color: var(--pink);
+    background: var(--pink-light);
+  }
+</style>
+</head>
+<body>
+
+<!-- 浮かぶハート -->
+<div class="hearts-bg" id="hearts"></div>
+
+<div class="container">
+  <header>
+    <div class="header-icon">💕</div>
+    <h1>相性診断</h1>
+    <p>ふたりの縁を、姓名と生年月日から占います</p>
+  </header>
+
+  <!-- タブ -->
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('name')">📛 姓名判断</button>
+    <button class="tab-btn" onclick="switchTab('birth')">🎂 生年月日</button>
+    <button class="tab-btn" onclick="switchTab('both')">✨ 総合診断</button>
+  </div>
+
+  <!-- 姓名判断 -->
+  <div id="tab-name" class="tab-content">
+    <div class="card">
+      <div class="section-label">あなたの名前</div>
+      <div class="person-card">
+        <h3>🌸 あなた</h3>
+        <div class="field-row">
+          <div class="field-group">
+            <label>姓（漢字）</label>
+            <input type="text" id="name-a-sei" placeholder="例：山田">
+          </div>
+          <div class="field-group">
+            <label>名（漢字）</label>
+            <input type="text" id="name-a-mei" placeholder="例：花子">
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field-group">
+            <label>姓（ふりがな）</label>
+            <input type="text" id="name-a-sei-kana" placeholder="例：やまだ">
+          </div>
+          <div class="field-group">
+            <label>名（ふりがな）</label>
+            <input type="text" id="name-a-mei-kana" placeholder="例：はなこ">
+          </div>
+        </div>
+      </div>
+
+      <div class="vs-divider"><span class="vs-badge">VS</span></div>
+
+      <div class="section-label" style="margin-top:12px">お相手の名前</div>
+      <div class="person-card">
+        <h3>💫 お相手</h3>
+        <div class="field-row">
+          <div class="field-group">
+            <label>姓（漢字）</label>
+            <input type="text" id="name-b-sei" placeholder="例：鈴木">
+          </div>
+          <div class="field-group">
+            <label>名（漢字）</label>
+            <input type="text" id="name-b-mei" placeholder="例：太郎">
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field-group">
+            <label>姓（ふりがな）</label>
+            <input type="text" id="name-b-sei-kana" placeholder="例：すずき">
+          </div>
+          <div class="field-group">
+            <label>名（ふりがな）</label>
+            <input type="text" id="name-b-mei-kana" placeholder="例：たろう">
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-diagnose" onclick="diagnose('name')">💕 姓名で相性を診断する</button>
+    </div>
+  </div>
+
+  <!-- 生年月日 -->
+  <div id="tab-birth" class="tab-content" style="display:none">
+    <div class="card">
+      <div class="section-label">あなたの情報</div>
+      <div class="person-card">
+        <h3>🌸 あなた</h3>
+        <div class="field-group">
+          <label>名前</label>
+          <input type="text" id="birth-a-name" placeholder="例：山田花子">
+        </div>
+        <div class="field-group">
+          <label>生年月日</label>
+          <input type="date" id="birth-a-date">
+        </div>
+      </div>
+
+      <div class="vs-divider"><span class="vs-badge">VS</span></div>
+
+      <div class="section-label" style="margin-top:12px">お相手の情報</div>
+      <div class="person-card">
+        <h3>💫 お相手</h3>
+        <div class="field-group">
+          <label>名前</label>
+          <input type="text" id="birth-b-name" placeholder="例：鈴木太郎">
+        </div>
+        <div class="field-group">
+          <label>生年月日</label>
+          <input type="date" id="birth-b-date">
+        </div>
+      </div>
+
+      <button class="btn-diagnose" onclick="diagnose('birth')">🎂 生年月日で相性を診断する</button>
+    </div>
+  </div>
+
+  <!-- 総合 -->
+  <div id="tab-both" class="tab-content" style="display:none">
+    <div class="card">
+      <div class="section-label">あなたの情報</div>
+      <div class="person-card">
+        <h3>🌸 あなた</h3>
+        <div class="field-row">
+          <div class="field-group">
+            <label>姓（漢字）</label>
+            <input type="text" id="both-a-sei" placeholder="山田">
+          </div>
+          <div class="field-group">
+            <label>名（漢字）</label>
+            <input type="text" id="both-a-mei" placeholder="花子">
+          </div>
+        </div>
+        <div class="field-group">
+          <label>生年月日</label>
+          <input type="date" id="both-a-date">
+        </div>
+      </div>
+
+      <div class="vs-divider"><span class="vs-badge">VS</span></div>
+
+      <div class="section-label" style="margin-top:12px">お相手の情報</div>
+      <div class="person-card">
+        <h3>💫 お相手</h3>
+        <div class="field-row">
+          <div class="field-group">
+            <label>姓（漢字）</label>
+            <input type="text" id="both-b-sei" placeholder="鈴木">
+          </div>
+          <div class="field-group">
+            <label>名（漢字）</label>
+            <input type="text" id="both-b-mei" placeholder="太郎">
+          </div>
+        </div>
+        <div class="field-group">
+          <label>生年月日</label>
+          <input type="date" id="both-b-date">
+        </div>
+      </div>
+
+      <button class="btn-diagnose" onclick="diagnose('both')">✨ 総合相性を診断する</button>
+    </div>
+  </div>
+
+  <!-- エラー -->
+  <div class="error-msg" id="error-msg"></div>
+
+  <!-- ローディング -->
+  <div class="loading card" id="loading">
+    <span class="loading-icon">💌</span>
+    <p>鑑定中… ふたりの相性を読み解いています</p>
+    <div class="loading-dots">
+      <span></span><span></span><span></span>
+    </div>
+  </div>
+
+  <!-- 結果 -->
+  <div class="result-card card" id="result-card">
+    <div class="section-label">診断結果</div>
+
+    <div class="score-area">
+      <div class="score-ring">
+        <svg viewBox="0 0 120 120">
+          <defs>
+            <linearGradient id="cuteGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#f472b6"/>
+              <stop offset="100%" stop-color="#c084fc"/>
+            </linearGradient>
+          </defs>
+          <circle class="track" cx="60" cy="60" r="55"/>
+          <circle class="progress" id="ring-progress" cx="60" cy="60" r="55"/>
+        </svg>
+        <div class="score-center">
+          <span class="num" id="score-num">0</span>
+          <span class="unit">点</span>
+        </div>
+      </div>
+      <div class="result-title" id="result-title"></div>
+      <div class="result-subtitle" id="result-subtitle"></div>
+    </div>
+
+    <div class="detail-scores" id="detail-scores"></div>
+
+    <div class="reading-box">
+      <div class="reading-label">🔮 鑑定メッセージ</div>
+      <div class="reading-text" id="result-body"></div>
+    </div>
+
+    <button class="btn-reset" onclick="resetAll()">← もう一度診断する</button>
+  </div>
+</div>
+
+<!-- SVG グラデ定義 -->
+<svg style="position:absolute;width:0;height:0">
+  <defs>
+    <linearGradient id="bG1" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#f472b6"/><stop offset="100%" stop-color="#fb7185"/>
+    </linearGradient>
+    <linearGradient id="bG2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#c084fc"/><stop offset="100%" stop-color="#818cf8"/>
+    </linearGradient>
+    <linearGradient id="bG3" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#34d399"/><stop offset="100%" stop-color="#6ee7b7"/>
+    </linearGradient>
+    <linearGradient id="bG4" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#fde68a"/>
+    </linearGradient>
+  </defs>
+</svg>
+
+<script>
+// ハート背景
+const hc = document.getElementById('hearts');
+const hEmojis = ['💕','💗','💝','🌸','⭐','✨','💫'];
+for (let i = 0; i < 18; i++) {
+  const el = document.createElement('div');
+  el.className = 'heart-float';
+  el.textContent = hEmojis[Math.floor(Math.random()*hEmojis.length)];
+  el.style.cssText = `left:${Math.random()*100}%;bottom:-5%;--fs:${0.7+Math.random()*1}rem;--dur:${7+Math.random()*8}s;--delay:${Math.random()*10}s;`;
+  hc.appendChild(el);
+}
+
+// タブ
+function switchTab(t) {
+  document.querySelectorAll('.tab-content').forEach(el => el.style.display='none');
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-'+t).style.display='block';
+  const btns = document.querySelectorAll('.tab-btn');
+  btns[{name:0,birth:1,both:2}[t]].classList.add('active');
+  resetAll(false);
+}
+
+// 診断
+async function diagnose(mode) {
+  let prompt='', valid=true;
+
+  if (mode==='name') {
+    const aS=v('name-a-sei'),aM=v('name-a-mei'),aSk=v('name-a-sei-kana'),aMk=v('name-a-mei-kana');
+    const bS=v('name-b-sei'),bM=v('name-b-mei'),bSk=v('name-b-sei-kana'),bMk=v('name-b-mei-kana');
+    if (!aS||!aM||!bS||!bM) { valid=false; }
+    else {
+      prompt=`【姓名判断 相性診断】
+Aさん：${aS+aM}（よみ：${(aSk+' '+aMk).trim()}）
+Bさん：${bS+bM}（よみ：${(bSk+' '+bMk).trim()}）
+姓名判断（画数・五行・天格・人格・地格・外格・総格）を用いて詳しく鑑定してください。`;
+    }
+  } else if (mode==='birth') {
+    const aN=v('birth-a-name'),aD=v('birth-a-date');
+    const bN=v('birth-b-name'),bD=v('birth-b-date');
+    if (!aD||!bD) { valid=false; }
+    else {
+      prompt=`【生年月日 相性診断】
+Aさん：${aN||'Aさん'}、生年月日 ${fmt(aD)}
+Bさん：${bN||'Bさん'}、生年月日 ${fmt(bD)}
+西洋占星術・数秘術・四柱推命・九星気学を用いて詳しく鑑定してください。`;
+    }
+  } else {
+    const aS=v('both-a-sei'),aM=v('both-a-mei'),aD=v('both-a-date');
+    const bS=v('both-b-sei'),bM=v('both-b-mei'),bD=v('both-b-date');
+    if (!aS||!aM||!bS||!bM||!aD||!bD) { valid=false; }
+    else {
+      prompt=`【総合相性診断】
+Aさん：${aS+aM}、生年月日 ${fmt(aD)}
+Bさん：${bS+bM}、生年月日 ${fmt(bD)}
+姓名判断と生年月日占いの両方を組み合わせて総合的に鑑定してください。`;
+    }
+  }
+
+  if (!valid) { showError('必須項目を入力してください ✏️'); return; }
+  showError('',false);
+  showLoading(true);
+  hideResult();
+
+  const full = prompt + `
+
+必ず以下のJSON形式のみで回答してください（マークダウン記号・前置き・後書き一切なし）：
+{
+  "score": 総合相性スコア(0〜100の整数),
+  "title": "相性タイトル（例：「運命のふたり」「最高のパートナー」など）",
+  "subtitle": "英語のサブタイトル（例：Perfect Match）",
+  "details": [
+    {"label":"心の相性","score":0〜100},
+    {"label":"恋愛運","score":0〜100},
+    {"label":"信頼度","score":0〜100},
+    {"label":"未来力","score":0〜100}
+  ],
+  "reading": "鑑定メッセージ（400字程度、温かく親しみやすい文体で、改行あり）"
+}`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: full }]
+      })
+    });
+    const data = await res.json();
+    const raw = data.content?.find(b=>b.type==='text')?.text||'';
+    const result = JSON.parse(raw.replace(/```json|```/g,'').trim());
+    showLoading(false);
+    showResult(result);
+  } catch(e) {
+    showLoading(false);
+    showError('エラーが発生しました。もう一度お試しください 🙏');
+    console.error(e);
+  }
+}
+
+function v(id) { return document.getElementById(id).value.trim(); }
+function fmt(d) { if(!d) return ''; const [y,m,dy]=d.split('-'); return `${y}年${+m}月${+dy}日`; }
+function showLoading(b) { document.getElementById('loading').classList.toggle('show',b); }
+function hideResult() { document.getElementById('result-card').classList.remove('show'); }
+function showError(msg,show=true) {
+  const el=document.getElementById('error-msg');
+  el.textContent=msg;
+  el.classList.toggle('show',show&&!!msg);
+}
+
+function showResult(r) {
+  const card=document.getElementById('result-card');
+  card.classList.add('show');
+
+  const score=Math.min(100,Math.max(0,r.score||0));
+  document.getElementById('result-title').textContent=r.title||'';
+  document.getElementById('result-subtitle').textContent=r.subtitle||'';
+  document.getElementById('result-body').textContent=r.reading||'';
+
+  // リングアニメ
+  const numEl=document.getElementById('score-num');
+  const ring=document.getElementById('ring-progress');
+  ring.style.strokeDashoffset=345;
+  numEl.textContent='0';
+  requestAnimationFrame(()=>{
+    setTimeout(()=>{
+      ring.style.strokeDashoffset=345-(score/100)*345;
+      let cur=0, step=score/60;
+      const t=setInterval(()=>{ cur=Math.min(score,cur+step); numEl.textContent=Math.round(cur); if(cur>=score) clearInterval(t); },25);
+    },100);
+  });
+
+  // 詳細バー
+  const grads=['url(#bG1)','url(#bG2)','url(#bG3)','url(#bG4)'];
+  const cont=document.getElementById('detail-scores');
+  cont.innerHTML='';
+  (r.details||[]).forEach((d,i)=>{
+    const pct=Math.min(100,Math.max(0,d.score||0));
+    const div=document.createElement('div');
+    div.className='d-item';
+    div.innerHTML=`<span class="dlabel">${d.label}</span><div class="dbar"><div class="dfill" style="background:${grads[i%4]}" data-w="${pct}"></div></div><span class="dscore">${pct}</span>`;
+    cont.appendChild(div);
+  });
+  setTimeout(()=>{ document.querySelectorAll('.dfill').forEach(el=>el.style.width=el.dataset.w+'%'); },200);
+
+  card.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function resetAll(scroll=true) {
+  hideResult(); showError('',false); showLoading(false);
+  if(scroll) window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body>
+</html>
