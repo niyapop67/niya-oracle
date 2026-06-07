@@ -7,80 +7,110 @@
 <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Noto+Serif+JP:wght@300;400&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#0a0812;--surface:#110f1e;--surface2:#1a1730;--gold:#c9a84c;--gold-light:#e8c97a;--gold-dim:#7a6330;--silver:#9ba8b8;--text:#e8e0d0;--text-dim:#7a7465}
+:root{
+  --bg:#faf7f2;
+  --bg2:#f3ede3;
+  --surface:#ffffff;
+  --surface2:#f7f2ea;
+  --gold:#b8892a;
+  --gold-light:#9a6f1e;
+  --gold-dim:#c9a84c;
+  --gold-pale:#f0e6cc;
+  --silver:#7a7080;
+  --text:#2e2620;
+  --text-dim:#9a9090;
+  --border:rgba(184,137,42,.18);
+}
 html{scroll-behavior:smooth}
 body{background:var(--bg);color:var(--text);font-family:'Cormorant Garamond','Noto Serif JP',serif;min-height:100vh;overflow-x:hidden}
+
+/* 背景 */
 .bg{position:fixed;inset:0;z-index:0;pointer-events:none}
 .nebula{position:absolute;border-radius:50%}
-.n1{top:-10%;left:-10%;width:60%;height:60%;background:radial-gradient(ellipse,rgba(107,79,168,.16) 0%,transparent 70%)}
-.n2{bottom:-10%;right:-5%;width:55%;height:60%;background:radial-gradient(ellipse,rgba(176,80,112,.11) 0%,transparent 70%)}
-.moon{position:fixed;pointer-events:none;z-index:1;border-radius:50%;border:1px solid rgba(201,168,76,.08)}
+.n1{top:-10%;left:-10%;width:60%;height:60%;background:radial-gradient(ellipse,rgba(201,168,76,.08) 0%,transparent 70%)}
+.n2{bottom:-10%;right:-5%;width:55%;height:60%;background:radial-gradient(ellipse,rgba(180,140,200,.07) 0%,transparent 70%)}
+.n3{top:40%;left:30%;width:40%;height:40%;background:radial-gradient(ellipse,rgba(210,170,120,.05) 0%,transparent 70%)}
+
+/* 装飾円 */
+.moon{position:fixed;pointer-events:none;z-index:1;border-radius:50%;border:1px solid rgba(184,137,42,.12)}
 .m1{top:-90px;right:-90px;width:260px;height:260px}
-.m2{top:-65px;right:-65px;width:210px;height:210px;border-color:rgba(201,168,76,.05)}
+.m2{top:-65px;right:-65px;width:210px;height:210px;border-color:rgba(184,137,42,.07)}
+
 header{position:relative;z-index:10;text-align:center;padding:56px 24px 36px}
-.eyebrow{font-family:'Cinzel Decorative',serif;font-size:9px;letter-spacing:.45em;color:var(--gold);text-transform:uppercase;margin-bottom:16px;animation:fadeUp .8s .1s both}
-.logo{font-family:'Cinzel Decorative',serif;font-size:clamp(24px,5vw,48px);font-weight:700;color:var(--gold-light);letter-spacing:.06em;line-height:1.1;text-shadow:0 0 40px rgba(201,168,76,.4),0 0 80px rgba(201,168,76,.15);animation:fadeUp .9s .3s both}
+.eyebrow{font-family:'Cinzel Decorative',serif;font-size:9px;letter-spacing:.45em;color:var(--gold-dim);text-transform:uppercase;margin-bottom:16px;animation:fadeUp .8s .1s both}
+.logo{font-family:'Cinzel Decorative',serif;font-size:clamp(24px,5vw,48px);font-weight:700;color:var(--gold-light);letter-spacing:.06em;line-height:1.1;text-shadow:0 2px 20px rgba(184,137,42,.2);animation:fadeUp .9s .3s both}
 .tagline{margin-top:12px;font-style:italic;font-size:15px;color:var(--silver);letter-spacing:.1em;animation:fadeUp .9s .5s both}
 .divider{display:flex;align-items:center;gap:14px;max-width:280px;margin:24px auto 0;animation:fadeUp .8s .7s both}
 .div-line{flex:1;height:1px;background:linear-gradient(to right,transparent,var(--gold-dim))}
 .div-line:last-child{background:linear-gradient(to left,transparent,var(--gold-dim))}
+
 main{position:relative;z-index:10;max-width:1020px;margin:0 auto;padding:0 20px 72px}
 .section-label{font-family:'Cinzel Decorative',serif;font-size:9px;letter-spacing:.5em;color:var(--gold-dim);text-transform:uppercase;margin-bottom:22px;text-align:center;animation:fadeUp .8s .9s both}
-.grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;width:100%;align-items:start}　
+.grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;width:100%;align-items:start}
 @media(max-width:720px){.grid{grid-template-columns:1fr 1fr}}
 @media(max-width:480px){.grid{grid-template-columns:1fr}}
-.card{position:relative;background:var(--surface);border:1px solid rgba(201,168,76,.13);border-radius:4px;padding:26px 22px;display:flex;flex-direction:column;
+
+/* カード */
+.card{position:relative;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:26px 22px;display:flex;flex-direction:column;text-decoration:none;color:inherit;transition:transform .3s,box-shadow .3s,border-color .3s;animation:fadeUp .8s both;box-shadow:0 2px 12px rgba(184,137,42,.06)}
 .card:nth-child(1){animation-delay:1.0s}.card:nth-child(2){animation-delay:1.1s}.card:nth-child(3){animation-delay:1.2s}
 .card:nth-child(4){animation-delay:1.3s}.card:nth-child(5){animation-delay:1.4s}.card:nth-child(6){animation-delay:1.5s}
 .card:nth-child(7){animation-delay:1.6s}.card:nth-child(8){animation-delay:1.7s}.card:nth-child(9){animation-delay:1.8s}
 .card:nth-child(10){animation-delay:1.9s}.card:nth-child(11){animation-delay:2.0s}
-.card[data-color="violet"]:hover{border-color:rgba(124,92,191,.55);box-shadow:0 0 36px rgba(124,92,191,.28),0 8px 28px rgba(0,0,0,.4);transform:translateY(-5px)}
-.card[data-color="teal"]:hover{border-color:rgba(60,160,150,.55);box-shadow:0 0 36px rgba(60,160,150,.25),0 8px 28px rgba(0,0,0,.4);transform:translateY(-5px)}
-.card[data-color="amber"]:hover{border-color:rgba(210,130,40,.55);box-shadow:0 0 36px rgba(210,130,40,.25),0 8px 28px rgba(0,0,0,.4);transform:translateY(-5px)}
-.card[data-color="indigo"]:hover{border-color:rgba(80,100,200,.55);box-shadow:0 0 36px rgba(80,100,200,.25),0 8px 28px rgba(0,0,0,.4);transform:translateY(-5px)}
-.card[data-color="rose"]:hover{border-color:rgba(176,80,112,.55);box-shadow:0 0 36px rgba(176,80,112,.25),0 8px 28px rgba(0,0,0,.4);transform:translateY(-5px)}
-.card[data-color="emerald"]:hover{border-color:rgba(50,160,100,.55);box-shadow:0 0 36px rgba(50,160,100,.25),0 8px 28px rgba(0,0,0,.4);transform:translateY(-5px)}
-.card[data-color="crimson"]:hover{border-color:rgba(180,40,60,.55);box-shadow:0 0 36px rgba(180,40,60,.25),0 8px 28px rgba(0,0,0,.4);transform:translateY(-5px)}
-.card[data-color="gold"]:hover{border-color:rgba(201,168,76,.5);box-shadow:0 0 36px rgba(201,168,76,.22),0 8px 28px rgba(0,0,0,.4);transform:translateY(-5px)}
-.card[data-color="sky"]:hover{border-color:rgba(80,160,220,.55);box-shadow:0 0 36px rgba(80,160,220,.25),0 8px 28px rgba(0,0,0,.4);transform:translateY(-5px)}
-.card[data-color="pink"]:hover{border-color:rgba(220,100,160,.55);box-shadow:0 0 36px rgba(220,100,160,.25),0 8px 28px rgba(0,0,0,.4);transform:translateY(-5px)}
-.card::after{content:'';position:absolute;top:0;left:0;right:0;height:1px;opacity:0;transition:opacity .4s}
-.card[data-color="violet"]::after{background:linear-gradient(to right,transparent,rgba(124,92,191,.9),transparent)}
-.card[data-color="teal"]::after{background:linear-gradient(to right,transparent,rgba(60,160,150,.9),transparent)}
-.card[data-color="amber"]::after{background:linear-gradient(to right,transparent,rgba(210,130,40,.9),transparent)}
-.card[data-color="indigo"]::after{background:linear-gradient(to right,transparent,rgba(80,100,200,.9),transparent)}
-.card[data-color="rose"]::after{background:linear-gradient(to right,transparent,rgba(176,80,112,.9),transparent)}
-.card[data-color="emerald"]::after{background:linear-gradient(to right,transparent,rgba(50,160,100,.9),transparent)}
-.card[data-color="crimson"]::after{background:linear-gradient(to right,transparent,rgba(180,40,60,.9),transparent)}
-.card[data-color="gold"]::after{background:linear-gradient(to right,transparent,var(--gold),transparent)}
-.card[data-color="sky"]::after{background:linear-gradient(to right,transparent,rgba(80,160,220,.9),transparent)}
-.card[data-color="pink"]::after{background:linear-gradient(to right,transparent,rgba(220,100,160,.9),transparent)}
+
+.card[data-color="violet"]:hover{border-color:rgba(124,92,191,.4);box-shadow:0 8px 32px rgba(124,92,191,.15),0 2px 12px rgba(184,137,42,.06);transform:translateY(-5px)}
+.card[data-color="teal"]:hover{border-color:rgba(60,160,150,.4);box-shadow:0 8px 32px rgba(60,160,150,.15),0 2px 12px rgba(184,137,42,.06);transform:translateY(-5px)}
+.card[data-color="amber"]:hover{border-color:rgba(210,130,40,.4);box-shadow:0 8px 32px rgba(210,130,40,.15),0 2px 12px rgba(184,137,42,.06);transform:translateY(-5px)}
+.card[data-color="indigo"]:hover{border-color:rgba(80,100,200,.4);box-shadow:0 8px 32px rgba(80,100,200,.15),0 2px 12px rgba(184,137,42,.06);transform:translateY(-5px)}
+.card[data-color="rose"]:hover{border-color:rgba(176,80,112,.4);box-shadow:0 8px 32px rgba(176,80,112,.15),0 2px 12px rgba(184,137,42,.06);transform:translateY(-5px)}
+.card[data-color="emerald"]:hover{border-color:rgba(50,160,100,.4);box-shadow:0 8px 32px rgba(50,160,100,.15),0 2px 12px rgba(184,137,42,.06);transform:translateY(-5px)}
+.card[data-color="crimson"]:hover{border-color:rgba(180,40,60,.4);box-shadow:0 8px 32px rgba(180,40,60,.15),0 2px 12px rgba(184,137,42,.06);transform:translateY(-5px)}
+.card[data-color="gold"]:hover{border-color:rgba(184,137,42,.5);box-shadow:0 8px 32px rgba(184,137,42,.18),0 2px 12px rgba(184,137,42,.06);transform:translateY(-5px)}
+.card[data-color="sky"]:hover{border-color:rgba(80,160,220,.4);box-shadow:0 8px 32px rgba(80,160,220,.15),0 2px 12px rgba(184,137,42,.06);transform:translateY(-5px)}
+.card[data-color="pink"]:hover{border-color:rgba(220,100,160,.4);box-shadow:0 8px 32px rgba(220,100,160,.15),0 2px 12px rgba(184,137,42,.06);transform:translateY(-5px)}
+
+.card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;opacity:0;transition:opacity .4s;border-radius:6px 6px 0 0}
+.card[data-color="violet"]::after{background:linear-gradient(to right,transparent,rgba(124,92,191,.7),transparent)}
+.card[data-color="teal"]::after{background:linear-gradient(to right,transparent,rgba(60,160,150,.7),transparent)}
+.card[data-color="amber"]::after{background:linear-gradient(to right,transparent,rgba(210,130,40,.7),transparent)}
+.card[data-color="indigo"]::after{background:linear-gradient(to right,transparent,rgba(80,100,200,.7),transparent)}
+.card[data-color="rose"]::after{background:linear-gradient(to right,transparent,rgba(176,80,112,.7),transparent)}
+.card[data-color="emerald"]::after{background:linear-gradient(to right,transparent,rgba(50,160,100,.7),transparent)}
+.card[data-color="crimson"]::after{background:linear-gradient(to right,transparent,rgba(180,40,60,.7),transparent)}
+.card[data-color="gold"]::after{background:linear-gradient(to right,transparent,var(--gold-dim),transparent)}
+.card[data-color="sky"]::after{background:linear-gradient(to right,transparent,rgba(80,160,220,.7),transparent)}
+.card[data-color="pink"]::after{background:linear-gradient(to right,transparent,rgba(220,100,160,.7),transparent)}
 .card:hover::after{opacity:1}
-.card-glow{position:absolute;inset:0;opacity:0;transition:opacity .4s;pointer-events:none}
+
+.card-glow{position:absolute;inset:0;opacity:0;transition:opacity .4s;pointer-events:none;border-radius:6px}
 .card:hover .card-glow{opacity:1}
-.card-badge{display:inline-block;font-family:'Cinzel Decorative',serif;font-size:7.5px;letter-spacing:.3em;color:var(--gold-dim);text-transform:uppercase;border:1px solid rgba(201,168,76,.18);padding:2px 8px;border-radius:2px;margin-bottom:10px}
+
+.card-badge{display:inline-block;font-family:'Cinzel Decorative',serif;font-size:7.5px;letter-spacing:.3em;color:var(--gold-dim);text-transform:uppercase;border:1px solid rgba(184,137,42,.25);padding:2px 8px;border-radius:2px;margin-bottom:10px;background:var(--gold-pale)}
 .card-title{font-family:'Cinzel Decorative',serif;font-size:15px;font-weight:700;color:var(--gold-light);margin-bottom:8px;line-height:1.3;transition:color .3s}
-.card:hover .card-title{color:#fff}
+.card:hover .card-title{color:var(--text)}
 .card-desc{font-size:13px;line-height:1.75;color:var(--silver);font-style:italic;margin-bottom:16px}
 .features{list-style:none;margin-bottom:18px;display:flex;flex-direction:column;gap:5px}
 .features li{font-size:11.5px;color:var(--text-dim);display:flex;align-items:flex-start;gap:7px;line-height:1.4}
 .features li::before{content:'✦';font-size:7px;color:var(--gold-dim);flex-shrink:0;margin-top:3px}
-.cta{margin-top:auto;display:flex;align-items:center;
+.cta{margin-top:auto;display:flex;align-items:center;gap:8px;font-size:12px;font-family:'Cinzel Decorative',serif;letter-spacing:.12em;color:var(--gold-dim);transition:gap .3s}
 .card:hover .cta{gap:13px}
 .cta-off{color:var(--text-dim)}
-.wip{position:absolute;top:12px;right:12px;background:var(--surface2);border:1px solid rgba(201,168,76,.18);color:var(--gold-dim);font-family:'Cinzel Decorative',serif;font-size:6.5px;letter-spacing:.18em;padding:3px 9px;border-radius:2px}
-.slot{border-style:dashed;opacity:.3;pointer-events:none;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:180px}
-footer{position:relative;z-index:10;text-align:center;padding:20px 24px 44px;border-top:1px solid rgba(201,168,76,.1)}
+
+.wip{position:absolute;top:12px;right:12px;background:var(--surface2);border:1px solid var(--border);color:var(--gold-dim);font-family:'Cinzel Decorative',serif;font-size:6.5px;letter-spacing:.18em;padding:3px 9px;border-radius:2px}
+.slot{border-style:dashed;opacity:.4;pointer-events:none;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:180px;background:transparent;box-shadow:none}
+
+footer{position:relative;z-index:10;text-align:center;padding:20px 24px 44px;border-top:1px solid rgba(184,137,42,.15)}
 .footer-logo{font-family:'Cinzel Decorative',serif;font-size:10px;letter-spacing:.4em;color:var(--gold-dim);margin-bottom:6px}
 .footer-copy{font-size:12px;color:var(--text-dim);font-style:italic}
+
 @keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
-@keyframes twinkle{from{opacity:.2}to{opacity:.85}}
+@keyframes twinkle{from{opacity:.15}to{opacity:.5}}
 </style>
 </head>
 <body>
 <div class="bg">
   <div class="nebula n1"></div>
   <div class="nebula n2"></div>
+  <div class="nebula n3"></div>
 </div>
 <div class="moon m1"></div>
 <div class="moon m2"></div>
@@ -91,7 +121,7 @@ footer{position:relative;z-index:10;text-align:center;padding:20px 24px 44px;bor
   <p class="tagline">古より伝わる天地の理</p>
   <div class="divider">
     <div class="div-line"></div>
-    <span style="color:var(--gold);font-size:10px">◈</span>
+    <span style="color:var(--gold-dim);font-size:10px">◈</span>
     <div class="div-line"></div>
   </div>
 </header>
@@ -101,7 +131,7 @@ footer{position:relative;z-index:10;text-align:center;padding:20px 24px 44px;bor
   <div class="grid">
 
     <a class="card" data-color="violet" href="rune.html">
-      <div class="card-glow" style="background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(124,92,191,.07) 0%,transparent 70%)"></div>
+      <div class="card-glow" style="background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(124,92,191,.06) 0%,transparent 70%)"></div>
       <span class="card-badge">Rune Oracle</span>
       <h2 class="card-title">ルーン占い</h2>
       <p class="card-desc">古代北欧のルーン文字が、問いへの答えを示す。</p>
@@ -110,7 +140,7 @@ footer{position:relative;z-index:10;text-align:center;padding:20px 24px 44px;bor
     </a>
 
     <a class="card" data-color="teal" href="iching.html">
-      <div class="card-glow" style="background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(60,160,150,.07) 0%,transparent 70%)"></div>
+      <div class="card-glow" style="background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(60,160,150,.06) 0%,transparent 70%)"></div>
       <span class="card-badge">I Ching</span>
       <h2 class="card-title">易占い</h2>
       <p class="card-desc">64卦が天地の変化を映し、今の流れを読み解く。</p>
@@ -119,7 +149,7 @@ footer{position:relative;z-index:10;text-align:center;padding:20px 24px 44px;bor
     </a>
 
     <a class="card" data-color="pink" href="iching-love.html">
-      <div class="card-glow" style="background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(220,100,160,.07) 0%,transparent 70%)"></div>
+      <div class="card-glow" style="background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(220,100,160,.06) 0%,transparent 70%)"></div>
       <span class="card-badge">I Ching Love</span>
       <h2 class="card-title">易占い（恋愛）</h2>
       <p class="card-desc">易の知恵で恋愛の流れと縁の行方を読み解く。</p>
@@ -128,7 +158,7 @@ footer{position:relative;z-index:10;text-align:center;padding:20px 24px 44px;bor
     </a>
 
     <a class="card" data-color="amber" href="shiju.html">
-      <div class="card-glow" style="background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(210,130,40,.07) 0%,transparent 70%)"></div>
+      <div class="card-glow" style="background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(210,130,40,.06) 0%,transparent 70%)"></div>
       <span class="card-badge">Four Pillars</span>
       <h2 class="card-title">四柱推命</h2>
       <p class="card-desc">生年月日時から命式を算出し、運命の流れを解読する。</p>
@@ -137,7 +167,7 @@ footer{position:relative;z-index:10;text-align:center;padding:20px 24px 44px;bor
     </a>
 
     <a class="card" data-color="indigo" href="numerology.html">
-      <div class="card-glow" style="background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(80,100,200,.07) 0%,transparent 70%)"></div>
+      <div class="card-glow" style="background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(80,100,200,.06) 0%,transparent 70%)"></div>
       <span class="card-badge">Numerology</span>
       <h2 class="card-title">数秘術</h2>
       <p class="card-desc">名前と生年月日に秘められた数字が、魂の使命を明かす。</p>
@@ -146,7 +176,7 @@ footer{position:relative;z-index:10;text-align:center;padding:20px 24px 44px;bor
     </a>
 
     <a class="card" data-color="rose" href="tarot.html">
-      <div class="card-glow" style="background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(176,80,112,.07) 0%,transparent 70%)"></div>
+      <div class="card-glow" style="background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(176,80,112,.06) 0%,transparent 70%)"></div>
       <span class="card-badge">Tarot</span>
       <h2 class="card-title">タロット占い</h2>
       <p class="card-desc">78枚の象徴が潜在意識の声を引き出し、道を照らす。</p>
@@ -155,7 +185,7 @@ footer{position:relative;z-index:10;text-align:center;padding:20px 24px 44px;bor
     </a>
 
     <a class="card" data-color="emerald" href="kimen_tongko.html">
-      <div class="card-glow" style="background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(50,160,100,.07) 0%,transparent 70%)"></div>
+      <div class="card-glow" style="background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(50,160,100,.06) 0%,transparent 70%)"></div>
       <span class="card-badge">Qi Men Dun Jia</span>
       <h2 class="card-title">奇門遁甲</h2>
       <p class="card-desc">時空の気の流れを読み、最善の方位と行動の刻を示す。</p>
@@ -164,7 +194,7 @@ footer{position:relative;z-index:10;text-align:center;padding:20px 24px 44px;bor
     </a>
 
     <a class="card" data-color="crimson" href="seimei_uranaai.html">
-      <div class="card-glow" style="background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(180,40,60,.07) 0%,transparent 70%)"></div>
+      <div class="card-glow" style="background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(180,40,60,.06) 0%,transparent 70%)"></div>
       <span class="card-badge">Fortune</span>
       <h2 class="card-title">吉凶占い</h2>
       <p class="card-desc">今日の運気・行動の吉凶を、天の声が告げる。</p>
@@ -173,7 +203,7 @@ footer{position:relative;z-index:10;text-align:center;padding:20px 24px 44px;bor
     </a>
 
     <a class="card" data-color="sky" href="astrology.html">
-      <div class="card-glow" style="background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(80,160,220,.07) 0%,transparent 70%)"></div>
+      <div class="card-glow" style="background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(80,160,220,.06) 0%,transparent 70%)"></div>
       <span class="card-badge">Astrology</span>
       <h2 class="card-title">星占い</h2>
       <p class="card-desc">天体の配置があなたの運命と個性を映し出す。</p>
@@ -181,16 +211,15 @@ footer{position:relative;z-index:10;text-align:center;padding:20px 24px 44px;bor
       <div class="cta"><span>占いを始める</span><span>→</span></div>
     </a>
 
-　  <a class="card" data-color="pink" href="compatibility.html">
-　　  <div class="card-glow" style="background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(220,100,160,.07) 0%,transparent 70%)"></div>
-　　  <span class="card-badge">Compatibility</span>
-　　  <h2 class="card-title">相性診断</h2>
-　　  <p class="card-desc">姓名と生年月日から、ふたりの縁と相性を読み解く。</p>
-　　  <ul class="features"><li>姓名・生年月日・総合の3モード</li><li>AI鑑定メッセージ付き</li></ul>
-　　  <div class="cta"><span>占いを始める</span><span>→</span></div>
-　　</a>
- 
-    
+    <a class="card" data-color="pink" href="compatibility.html">
+      <div class="card-glow" style="background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(220,100,160,.06) 0%,transparent 70%)"></div>
+      <span class="card-badge">Compatibility</span>
+      <h2 class="card-title">相性診断</h2>
+      <p class="card-desc">姓名と生年月日から、ふたりの縁と相性を読み解く。</p>
+      <ul class="features"><li>姓名・生年月日・総合の3モード</li><li>AI鑑定メッセージ付き</li></ul>
+      <div class="cta"><span>占いを始める</span><span>→</span></div>
+    </a>
+
     <div class="card slot">
       <span style="font-size:22px;color:var(--text-dim);margin-bottom:10px">✦</span>
       <span style="font-size:12px;color:var(--text-dim);font-style:italic">次のアプリを追加</span>
@@ -206,10 +235,19 @@ footer{position:relative;z-index:10;text-align:center;padding:20px 24px 44px;bor
 
 <script>
 const bg=document.querySelector('.bg');
-for(let i=0;i<65;i++){
+for(let i=0;i<40;i++){
   const s=document.createElement('div');
   const size=Math.random()*1.5+0.5,delay=Math.random()*3;
-  Object.assign(s.style,{position:'absolute',left:Math.random()*100+'%',top:Math.random()*100+'%',width:size+'px',height:size+'px',borderRadius:'50%',background:i%7===0?'#c9a84c':'#fff',opacity:Math.random()*0.5+0.2,animation:`twinkle ${2+delay}s ease-in-out ${delay}s infinite alternate`,pointerEvents:'none'});
+  Object.assign(s.style,{
+    position:'absolute',
+    left:Math.random()*100+'%',
+    top:Math.random()*100+'%',
+    width:size+'px',height:size+'px',
+    borderRadius:'50%',
+    background:i%5===0?'rgba(184,137,42,.6)':'rgba(180,160,120,.4)',
+    animation:`twinkle ${2+delay}s ease-in-out ${delay}s infinite alternate`,
+    pointerEvents:'none'
+  });
   bg.appendChild(s);
 }
 </script>
