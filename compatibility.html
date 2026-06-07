@@ -9,20 +9,17 @@
 
   :root {
     --bg: #fff0f5;
-    --bg2: #fde8f0;
     --card: #ffffff;
     --pink: #f472b6;
     --pink2: #ec4899;
     --pink-light: #fce7f3;
     --lavender: #c084fc;
-    --lav-light: #f3e8ff;
     --mint: #34d399;
     --yellow: #fbbf24;
     --text: #4a3040;
     --muted: #b08090;
     --border: rgba(244,114,182,0.2);
     --shadow: 0 4px 24px rgba(244,114,182,0.15);
-    --shadow-lg: 0 8px 40px rgba(244,114,182,0.25);
   }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -36,20 +33,17 @@
     position: relative;
   }
 
-  /* ふわふわ背景 */
   body::before {
     content: '';
     position: fixed;
     inset: 0;
     background:
       radial-gradient(ellipse at 10% 15%, rgba(244,114,182,0.12) 0%, transparent 50%),
-      radial-gradient(ellipse at 90% 85%, rgba(192,132,252,0.12) 0%, transparent 50%),
-      radial-gradient(ellipse at 50% 50%, rgba(251,191,36,0.05) 0%, transparent 60%);
+      radial-gradient(ellipse at 90% 85%, rgba(192,132,252,0.12) 0%, transparent 50%);
     pointer-events: none;
     z-index: 0;
   }
 
-  /* 浮かぶハート */
   .hearts-bg { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
   .heart-float {
     position: absolute;
@@ -71,7 +65,6 @@
     padding: 0 16px 60px;
   }
 
-  /* ヘッダー */
   header {
     text-align: center;
     padding: 44px 0 32px;
@@ -89,10 +82,7 @@
     box-shadow: 0 6px 24px rgba(244,114,182,0.4);
     animation: bounce 3s ease-in-out infinite;
   }
-  @keyframes bounce {
-    0%,100% { transform: translateY(0); }
-    50% { transform: translateY(-8px); }
-  }
+  @keyframes bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
 
   header h1 {
     font-size: 1.7rem;
@@ -105,13 +95,8 @@
     letter-spacing: 0.1em;
   }
 
-  header p {
-    font-size: 0.75rem;
-    color: var(--muted);
-    letter-spacing: 0.12em;
-  }
+  header p { font-size: 0.75rem; color: var(--muted); letter-spacing: 0.12em; }
 
-  /* タブ */
   .tab-bar {
     display: flex;
     background: white;
@@ -142,7 +127,6 @@
     box-shadow: 0 4px 16px rgba(244,114,182,0.4);
   }
 
-  /* カード */
   .card {
     background: var(--card);
     border-radius: 24px;
@@ -183,7 +167,6 @@
     border-radius: 1px;
   }
 
-  /* 人物カード */
   .person-card {
     background: var(--bg);
     border: 1.5px solid var(--border);
@@ -202,12 +185,7 @@
     gap: 6px;
   }
 
-  .field-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-  }
-
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .field-group { margin-bottom: 12px; }
   .field-group:last-child { margin-bottom: 0; }
 
@@ -243,12 +221,7 @@
     cursor: pointer;
   }
 
-  /* VS */
-  .vs-divider {
-    text-align: center;
-    padding: 10px 0;
-    position: relative;
-  }
+  .vs-divider { text-align: center; padding: 10px 0; position: relative; }
 
   .vs-badge {
     display: inline-flex;
@@ -263,7 +236,6 @@
     box-shadow: 0 4px 14px rgba(244,114,182,0.4);
     position: relative;
     z-index: 1;
-    letter-spacing: 0.05em;
   }
 
   .vs-divider::before {
@@ -274,7 +246,6 @@
     background: var(--border);
   }
 
-  /* ボタン */
   .btn-diagnose {
     width: 100%;
     padding: 15px;
@@ -290,73 +261,10 @@
     transition: all 0.3s;
     margin-top: 12px;
     box-shadow: 0 6px 20px rgba(244,114,182,0.4);
-    position: relative;
-    overflow: hidden;
   }
 
-  .btn-diagnose::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent);
-    opacity: 0;
-    transition: opacity 0.3s;
-  }
+  .btn-diagnose:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(244,114,182,0.5); }
 
-  .btn-diagnose:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 30px rgba(244,114,182,0.5);
-  }
-
-  .btn-diagnose:hover::after { opacity: 1; }
-  .btn-diagnose:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-
-  /* ローディング */
-  .loading { display: none; text-align: center; padding: 40px 20px; }
-  .loading.show { display: block; }
-
-  .loading-icon {
-    font-size: 3rem;
-    display: block;
-    margin-bottom: 16px;
-    animation: spinBounce 1.5s ease-in-out infinite;
-  }
-
-  @keyframes spinBounce {
-    0%,100% { transform: scale(1) rotate(-10deg); }
-    50% { transform: scale(1.15) rotate(10deg); }
-  }
-
-  .loading-dots {
-    display: flex;
-    justify-content: center;
-    gap: 6px;
-    margin-top: 14px;
-  }
-
-  .loading-dots span {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    background: var(--pink);
-    animation: dotBounce 1.2s ease-in-out infinite;
-  }
-
-  .loading-dots span:nth-child(2) { animation-delay: 0.2s; background: var(--lavender); }
-  .loading-dots span:nth-child(3) { animation-delay: 0.4s; background: var(--mint); }
-
-  @keyframes dotBounce {
-    0%,80%,100% { transform: scale(0.6); opacity: 0.4; }
-    40% { transform: scale(1); opacity: 1; }
-  }
-
-  .loading p {
-    font-size: 0.82rem;
-    color: var(--muted);
-    letter-spacing: 0.15em;
-    font-weight: 700;
-  }
-
-  /* 結果 */
   .result-card { display: none; animation: popIn 0.5s cubic-bezier(0.34,1.56,0.64,1); }
   .result-card.show { display: block; }
 
@@ -365,21 +273,10 @@
     to { opacity: 1; transform: scale(1) translateY(0); }
   }
 
-  /* スコアリング */
-  .score-area {
-    text-align: center;
-    padding: 24px 0 20px;
-    position: relative;
-  }
+  .score-area { text-align: center; padding: 24px 0 20px; }
 
-  .score-ring {
-    width: 150px; height: 150px;
-    margin: 0 auto 16px;
-    position: relative;
-  }
-
+  .score-ring { width: 150px; height: 150px; margin: 0 auto 16px; position: relative; }
   .score-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
-
   .score-ring .track { fill: none; stroke: #fce7f3; stroke-width: 10; }
   .score-ring .progress {
     fill: none;
@@ -420,51 +317,16 @@
     margin-bottom: 4px;
   }
 
-  .result-subtitle {
-    font-size: 0.72rem;
-    color: var(--muted);
-    letter-spacing: 0.15em;
-    font-weight: 700;
-    margin-bottom: 20px;
-  }
+  .result-subtitle { font-size: 0.72rem; color: var(--muted); letter-spacing: 0.15em; font-weight: 700; margin-bottom: 20px; }
 
-  /* 詳細スコア */
   .detail-scores { display: grid; gap: 12px; margin-top: 20px; }
 
   .d-item { display: flex; align-items: center; gap: 10px; }
+  .d-item .dlabel { font-size: 0.72rem; font-weight: 700; color: var(--text); width: 75px; flex-shrink: 0; }
+  .d-item .dbar { flex: 1; height: 8px; background: var(--pink-light); border-radius: 50px; overflow: hidden; }
+  .d-item .dfill { height: 100%; border-radius: 50px; width: 0%; transition: width 1.2s cubic-bezier(0.4,0,0.2,1) 0.3s; }
+  .d-item .dscore { font-size: 0.75rem; font-weight: 800; color: var(--pink2); width: 32px; text-align: right; }
 
-  .d-item .dlabel {
-    font-size: 0.72rem;
-    font-weight: 700;
-    color: var(--text);
-    width: 75px;
-    flex-shrink: 0;
-  }
-
-  .d-item .dbar {
-    flex: 1;
-    height: 8px;
-    background: var(--pink-light);
-    border-radius: 50px;
-    overflow: hidden;
-  }
-
-  .d-item .dfill {
-    height: 100%;
-    border-radius: 50px;
-    width: 0%;
-    transition: width 1.2s cubic-bezier(0.4,0,0.2,1) 0.3s;
-  }
-
-  .d-item .dscore {
-    font-size: 0.75rem;
-    font-weight: 800;
-    color: var(--pink2);
-    width: 32px;
-    text-align: right;
-  }
-
-  /* 鑑定文 */
   .reading-box {
     background: var(--bg);
     border-radius: 16px;
@@ -473,16 +335,7 @@
     border: 1.5px solid var(--border);
   }
 
-  .reading-label {
-    font-size: 0.65rem;
-    font-weight: 800;
-    color: var(--pink);
-    letter-spacing: 0.2em;
-    margin-bottom: 12px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
+  .reading-label { font-size: 0.65rem; font-weight: 800; color: var(--pink); letter-spacing: 0.2em; margin-bottom: 12px; }
 
   .reading-text {
     font-family: 'Zen Maru Gothic', serif;
@@ -492,7 +345,6 @@
     white-space: pre-wrap;
   }
 
-  /* エラー */
   .error-msg {
     display: none;
     background: #fef2f2;
@@ -505,10 +357,8 @@
     margin-top: 10px;
     text-align: center;
   }
-
   .error-msg.show { display: block; }
 
-  /* リセット */
   .btn-reset {
     width: 100%;
     margin-top: 12px;
@@ -524,17 +374,11 @@
     transition: all 0.3s;
     letter-spacing: 0.1em;
   }
-
-  .btn-reset:hover {
-    border-color: var(--pink);
-    color: var(--pink);
-    background: var(--pink-light);
-  }
+  .btn-reset:hover { border-color: var(--pink); color: var(--pink); background: var(--pink-light); }
 </style>
 </head>
 <body>
 
-<!-- 浮かぶハート -->
 <div class="hearts-bg" id="hearts"></div>
 
 <div class="container">
@@ -544,7 +388,6 @@
     <p>ふたりの縁を、姓名と生年月日から占います</p>
   </header>
 
-  <!-- タブ -->
   <div class="tab-bar">
     <button class="tab-btn active" onclick="switchTab('name')">📛 姓名判断</button>
     <button class="tab-btn" onclick="switchTab('birth')">🎂 生年月日</button>
@@ -558,54 +401,27 @@
       <div class="person-card">
         <h3>🌸 あなた</h3>
         <div class="field-row">
-          <div class="field-group">
-            <label>姓（漢字）</label>
-            <input type="text" id="name-a-sei" placeholder="例：山田">
-          </div>
-          <div class="field-group">
-            <label>名（漢字）</label>
-            <input type="text" id="name-a-mei" placeholder="例：花子">
-          </div>
+          <div class="field-group"><label>姓（漢字）</label><input type="text" id="name-a-sei" placeholder="例：山田"></div>
+          <div class="field-group"><label>名（漢字）</label><input type="text" id="name-a-mei" placeholder="例：花子"></div>
         </div>
         <div class="field-row">
-          <div class="field-group">
-            <label>姓（ふりがな）</label>
-            <input type="text" id="name-a-sei-kana" placeholder="例：やまだ">
-          </div>
-          <div class="field-group">
-            <label>名（ふりがな）</label>
-            <input type="text" id="name-a-mei-kana" placeholder="例：はなこ">
-          </div>
+          <div class="field-group"><label>姓（ふりがな）</label><input type="text" id="name-a-sei-kana" placeholder="例：やまだ"></div>
+          <div class="field-group"><label>名（ふりがな）</label><input type="text" id="name-a-mei-kana" placeholder="例：はなこ"></div>
         </div>
       </div>
-
       <div class="vs-divider"><span class="vs-badge">VS</span></div>
-
       <div class="section-label" style="margin-top:12px">お相手の名前</div>
       <div class="person-card">
         <h3>💫 お相手</h3>
         <div class="field-row">
-          <div class="field-group">
-            <label>姓（漢字）</label>
-            <input type="text" id="name-b-sei" placeholder="例：鈴木">
-          </div>
-          <div class="field-group">
-            <label>名（漢字）</label>
-            <input type="text" id="name-b-mei" placeholder="例：太郎">
-          </div>
+          <div class="field-group"><label>姓（漢字）</label><input type="text" id="name-b-sei" placeholder="例：鈴木"></div>
+          <div class="field-group"><label>名（漢字）</label><input type="text" id="name-b-mei" placeholder="例：太郎"></div>
         </div>
         <div class="field-row">
-          <div class="field-group">
-            <label>姓（ふりがな）</label>
-            <input type="text" id="name-b-sei-kana" placeholder="例：すずき">
-          </div>
-          <div class="field-group">
-            <label>名（ふりがな）</label>
-            <input type="text" id="name-b-mei-kana" placeholder="例：たろう">
-          </div>
+          <div class="field-group"><label>姓（ふりがな）</label><input type="text" id="name-b-sei-kana" placeholder="例：すずき"></div>
+          <div class="field-group"><label>名（ふりがな）</label><input type="text" id="name-b-mei-kana" placeholder="例：たろう"></div>
         </div>
       </div>
-
       <button class="btn-diagnose" onclick="diagnose('name')">💕 姓名で相性を診断する</button>
     </div>
   </div>
@@ -616,31 +432,16 @@
       <div class="section-label">あなたの情報</div>
       <div class="person-card">
         <h3>🌸 あなた</h3>
-        <div class="field-group">
-          <label>名前</label>
-          <input type="text" id="birth-a-name" placeholder="例：山田花子">
-        </div>
-        <div class="field-group">
-          <label>生年月日</label>
-          <input type="date" id="birth-a-date">
-        </div>
+        <div class="field-group"><label>名前</label><input type="text" id="birth-a-name" placeholder="例：山田花子"></div>
+        <div class="field-group"><label>生年月日</label><input type="date" id="birth-a-date"></div>
       </div>
-
       <div class="vs-divider"><span class="vs-badge">VS</span></div>
-
       <div class="section-label" style="margin-top:12px">お相手の情報</div>
       <div class="person-card">
         <h3>💫 お相手</h3>
-        <div class="field-group">
-          <label>名前</label>
-          <input type="text" id="birth-b-name" placeholder="例：鈴木太郎">
-        </div>
-        <div class="field-group">
-          <label>生年月日</label>
-          <input type="date" id="birth-b-date">
-        </div>
+        <div class="field-group"><label>名前</label><input type="text" id="birth-b-name" placeholder="例：鈴木太郎"></div>
+        <div class="field-group"><label>生年月日</label><input type="date" id="birth-b-date"></div>
       </div>
-
       <button class="btn-diagnose" onclick="diagnose('birth')">🎂 生年月日で相性を診断する</button>
     </div>
   </div>
@@ -652,62 +453,30 @@
       <div class="person-card">
         <h3>🌸 あなた</h3>
         <div class="field-row">
-          <div class="field-group">
-            <label>姓（漢字）</label>
-            <input type="text" id="both-a-sei" placeholder="山田">
-          </div>
-          <div class="field-group">
-            <label>名（漢字）</label>
-            <input type="text" id="both-a-mei" placeholder="花子">
-          </div>
+          <div class="field-group"><label>姓（漢字）</label><input type="text" id="both-a-sei" placeholder="山田"></div>
+          <div class="field-group"><label>名（漢字）</label><input type="text" id="both-a-mei" placeholder="花子"></div>
         </div>
-        <div class="field-group">
-          <label>生年月日</label>
-          <input type="date" id="both-a-date">
-        </div>
+        <div class="field-group"><label>生年月日</label><input type="date" id="both-a-date"></div>
       </div>
-
       <div class="vs-divider"><span class="vs-badge">VS</span></div>
-
       <div class="section-label" style="margin-top:12px">お相手の情報</div>
       <div class="person-card">
         <h3>💫 お相手</h3>
         <div class="field-row">
-          <div class="field-group">
-            <label>姓（漢字）</label>
-            <input type="text" id="both-b-sei" placeholder="鈴木">
-          </div>
-          <div class="field-group">
-            <label>名（漢字）</label>
-            <input type="text" id="both-b-mei" placeholder="太郎">
-          </div>
+          <div class="field-group"><label>姓（漢字）</label><input type="text" id="both-b-sei" placeholder="鈴木"></div>
+          <div class="field-group"><label>名（漢字）</label><input type="text" id="both-b-mei" placeholder="太郎"></div>
         </div>
-        <div class="field-group">
-          <label>生年月日</label>
-          <input type="date" id="both-b-date">
-        </div>
+        <div class="field-group"><label>生年月日</label><input type="date" id="both-b-date"></div>
       </div>
-
       <button class="btn-diagnose" onclick="diagnose('both')">✨ 総合相性を診断する</button>
     </div>
   </div>
 
-  <!-- エラー -->
   <div class="error-msg" id="error-msg"></div>
-
-  <!-- ローディング -->
-  <div class="loading card" id="loading">
-    <span class="loading-icon">💌</span>
-    <p>鑑定中… ふたりの相性を読み解いています</p>
-    <div class="loading-dots">
-      <span></span><span></span><span></span>
-    </div>
-  </div>
 
   <!-- 結果 -->
   <div class="result-card card" id="result-card">
     <div class="section-label">診断結果</div>
-
     <div class="score-area">
       <div class="score-ring">
         <svg viewBox="0 0 120 120">
@@ -728,188 +497,324 @@
       <div class="result-title" id="result-title"></div>
       <div class="result-subtitle" id="result-subtitle"></div>
     </div>
-
     <div class="detail-scores" id="detail-scores"></div>
-
     <div class="reading-box">
       <div class="reading-label">🔮 鑑定メッセージ</div>
       <div class="reading-text" id="result-body"></div>
     </div>
-
     <button class="btn-reset" onclick="resetAll()">← もう一度診断する</button>
   </div>
 </div>
 
-<!-- SVG グラデ定義 -->
 <svg style="position:absolute;width:0;height:0">
   <defs>
-    <linearGradient id="bG1" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#f472b6"/><stop offset="100%" stop-color="#fb7185"/>
-    </linearGradient>
-    <linearGradient id="bG2" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#c084fc"/><stop offset="100%" stop-color="#818cf8"/>
-    </linearGradient>
-    <linearGradient id="bG3" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#34d399"/><stop offset="100%" stop-color="#6ee7b7"/>
-    </linearGradient>
-    <linearGradient id="bG4" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#fde68a"/>
-    </linearGradient>
+    <linearGradient id="bG1" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#f472b6"/><stop offset="100%" stop-color="#fb7185"/></linearGradient>
+    <linearGradient id="bG2" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#c084fc"/><stop offset="100%" stop-color="#818cf8"/></linearGradient>
+    <linearGradient id="bG3" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#34d399"/><stop offset="100%" stop-color="#6ee7b7"/></linearGradient>
+    <linearGradient id="bG4" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#fde68a"/></linearGradient>
   </defs>
 </svg>
 
 <script>
-// ハート背景
+// ── ハート背景 ──
 const hc = document.getElementById('hearts');
-const hEmojis = ['💕','💗','💝','🌸','⭐','✨','💫'];
-for (let i = 0; i < 18; i++) {
-  const el = document.createElement('div');
-  el.className = 'heart-float';
-  el.textContent = hEmojis[Math.floor(Math.random()*hEmojis.length)];
-  el.style.cssText = `left:${Math.random()*100}%;bottom:-5%;--fs:${0.7+Math.random()*1}rem;--dur:${7+Math.random()*8}s;--delay:${Math.random()*10}s;`;
-  hc.appendChild(el);
+['💕','💗','💝','🌸','⭐','✨','💫'].forEach((e,i) => {
+  for(let j=0;j<3;j++){
+    const el=document.createElement('div');
+    el.className='heart-float';
+    el.textContent=e;
+    el.style.cssText=`left:${Math.random()*100}%;bottom:-5%;--fs:${0.7+Math.random()}rem;--dur:${7+Math.random()*8}s;--delay:${Math.random()*12}s;`;
+    hc.appendChild(el);
+  }
+});
+
+// ── 姓名判断エンジン ──
+// 五十音の画数テーブル（ひらがな→画数）
+const KANA_STROKES = {
+  'あ':3,'い':2,'う':2,'え':3,'お':3,
+  'か':3,'き':3,'く':2,'け':3,'こ':2,
+  'さ':3,'し':3,'す':2,'せ':3,'そ':3,
+  'た':3,'ち':3,'つ':3,'て':3,'と':2,
+  'な':4,'に':3,'ぬ':4,'ね':4,'の':2,
+  'は':3,'ひ':2,'ふ':4,'へ':1,'ほ':4,
+  'ま':3,'み':3,'む':3,'め':2,'も':3,
+  'や':3,'ゆ':2,'よ':3,
+  'ら':2,'り':2,'る':2,'れ':2,'ろ':3,
+  'わ':3,'を':4,'ん':2,
+  'が':3,'ぎ':3,'ぐ':2,'げ':3,'ご':2,
+  'ざ':3,'じ':3,'ず':2,'ぜ':3,'ぞ':3,
+  'だ':3,'ぢ':3,'づ':3,'で':3,'ど':2,
+  'ば':3,'び':2,'ぶ':4,'べ':1,'ぼ':4,
+  'ぱ':3,'ぴ':2,'ぷ':4,'ぺ':1,'ぽ':4,
+  'ぁ':3,'ぃ':2,'ぅ':2,'ぇ':3,'ぉ':3,
+  'っ':3,'ゃ':3,'ゅ':2,'ょ':3,
+};
+
+function kanaToStrokes(str) {
+  let total = 0;
+  for(const c of str) {
+    total += KANA_STROKES[c] || 3;
+  }
+  return total || 1;
 }
 
-// タブ
+// 漢字の画数（よみがなの合計から推定 + 文字コードで揺らぎ付加）
+function kanjiScore(str, kana) {
+  let base = kanaToStrokes(kana);
+  for(const c of str) {
+    base += c.codePointAt(0) % 7;
+  }
+  return base;
+}
+
+// 数秘術：生年月日の数字を1桁に還元
+function lifePathNumber(dateStr) {
+  if (!dateStr) return 5;
+  const digits = dateStr.replace(/-/g,'').split('').map(Number);
+  let sum = digits.reduce((a,b)=>a+b,0);
+  while(sum > 9 && sum !== 11 && sum !== 22) {
+    sum = String(sum).split('').map(Number).reduce((a,b)=>a+b,0);
+  }
+  return sum;
+}
+
+// 星座計算
+function getZodiac(dateStr) {
+  if (!dateStr) return 0;
+  const d = new Date(dateStr);
+  const m = d.getMonth()+1, day = d.getDate();
+  if((m===3&&day>=21)||(m===4&&day<=19)) return 0; // 牡羊
+  if((m===4&&day>=20)||(m===5&&day<=20)) return 1; // 牡牛
+  if((m===5&&day>=21)||(m===6&&day<=21)) return 2; // 双子
+  if((m===6&&day>=22)||(m===7&&day<=22)) return 3; // 蟹
+  if((m===7&&day>=23)||(m===8&&day<=22)) return 4; // 獅子
+  if((m===8&&day>=23)||(m===9&&day<=22)) return 5; // 乙女
+  if((m===9&&day>=23)||(m===10&&day<=23)) return 6; // 天秤
+  if((m===10&&day>=24)||(m===11&&day<=22)) return 7; // 蠍
+  if((m===11&&day>=23)||(m===12&&day<=21)) return 8; // 射手
+  if((m===12&&day>=22)||(m===1&&day<=19)) return 9; // 山羊
+  if((m===1&&day>=20)||(m===2&&day<=18)) return 10; // 水瓶
+  return 11; // 魚
+}
+
+// 星座の属性（火・土・風・水）
+const ZODIAC_ELEM = [0,1,2,3,0,1,2,3,0,1,2,3]; // 0=火,1=土,2=風,3=水
+const ZODIAC_NAMES = ['牡羊座','牡牛座','双子座','蟹座','獅子座','乙女座','天秤座','蠍座','射手座','山羊座','水瓶座','魚座'];
+
+// 相性スコア計算
+function calcCompatibility(mode, data) {
+  let heart=50, love=50, trust=50, future=50;
+
+  if (mode === 'name' || mode === 'both') {
+    const aScore = kanjiScore(data.aName, data.aKana);
+    const bScore = kanjiScore(data.bName, data.bKana);
+    const diff = Math.abs(aScore - bScore);
+    const sum = (aScore + bScore) % 81;
+
+    heart  = 45 + (sum % 40) - (diff % 15);
+    love   = 40 + ((aScore * 3 + bScore * 2) % 45) - (diff % 10);
+    trust  = 50 + ((aScore + bScore * 3) % 35) - (diff % 12);
+    future = 42 + ((aScore * 2 + bScore) % 42) - (diff % 8);
+  }
+
+  if (mode === 'birth' || mode === 'both') {
+    const aLP = lifePathNumber(data.aDate);
+    const bLP = lifePathNumber(data.bDate);
+    const aZ  = getZodiac(data.aDate);
+    const bZ  = getZodiac(data.bDate);
+
+    // 数秘相性：合計が11か差が0が最高
+    const lpSum = aLP + bLP;
+    const lpBonus = (lpSum === 11 || aLP === bLP) ? 20 : (lpSum % 3 === 0 ? 10 : 0);
+    const lpPenalty = Math.abs(aLP - bLP) > 5 ? 10 : 0;
+
+    // 星座相性：同元素は高相性、反対元素は中
+    const elemA = ZODIAC_ELEM[aZ], elemB = ZODIAC_ELEM[bZ];
+    const elemBonus = elemA === elemB ? 18 : Math.abs(elemA-elemB)===2 ? 8 : 2;
+
+    if (mode === 'birth') {
+      heart  = Math.min(98, 48 + lpBonus + elemBonus - lpPenalty + (aZ+bZ)%15);
+      love   = Math.min(98, 44 + lpBonus + elemBonus - lpPenalty + (aLP*bLP)%20);
+      trust  = Math.min(98, 50 + lpBonus - lpPenalty + elemBonus/2 + (aZ*3+bZ)%18);
+      future = Math.min(98, 46 + lpBonus + elemBonus - lpPenalty + (aLP+bZ)%16);
+    } else {
+      // 総合：名前と生年月日を混合
+      heart  = Math.min(98, Math.round((heart + 48 + lpBonus + elemBonus) / 2));
+      love   = Math.min(98, Math.round((love  + 44 + lpBonus + elemBonus) / 2));
+      trust  = Math.min(98, Math.round((trust + 50 + lpBonus - lpPenalty) / 2));
+      future = Math.min(98, Math.round((future+ 46 + lpBonus + elemBonus) / 2));
+    }
+  }
+
+  // 範囲クランプ
+  heart  = Math.max(30, Math.min(98, heart));
+  love   = Math.max(30, Math.min(98, love));
+  trust  = Math.max(30, Math.min(98, trust));
+  future = Math.max(30, Math.min(98, future));
+
+  const total = Math.round((heart + love + trust + future) / 4);
+
+  return { total, heart, love, trust, future };
+}
+
+// タイトル・メッセージ生成
+function genResult(mode, data, scores) {
+  const { total, heart, love, trust, future } = scores;
+
+  const titles = [
+    ['試練を超えたその先に','A Bond Worth Fighting For'],
+    ['ゆっくり育つ縁','Quietly Growing Love'],
+    ['心地よい距離感','Comfortable Harmony'],
+    ['惹かれ合うふたり','Natural Attraction'],
+    ['深まりゆく絆','Deepening Connection'],
+    ['心の鏡同士','Mirror Souls'],
+    ['運命の赤い糸','Red Thread of Fate'],
+    ['天が結んだ縁','Destined Together'],
+  ];
+  const idx = Math.min(7, Math.floor(total / 13));
+  const [title, subtitle] = titles[idx];
+
+  // 星座情報
+  let zodiacInfo = '';
+  if ((mode==='birth'||mode==='both') && data.aDate && data.bDate) {
+    const zA = ZODIAC_NAMES[getZodiac(data.aDate)];
+    const zB = ZODIAC_NAMES[getZodiac(data.bDate)];
+    const aLP = lifePathNumber(data.aDate);
+    const bLP = lifePathNumber(data.bDate);
+    zodiacInfo = `\n【星座】${data.aName||'Aさん'}は${zA}、${data.bName||'Bさん'}は${zB}。\n【数秘】ライフパスナンバーは${aLP}と${bLP}。`;
+  }
+
+  // 名前情報
+  let nameInfo = '';
+  if ((mode==='name'||mode==='both') && data.aName && data.bName) {
+    nameInfo = `\n【姓名】${data.aName}と${data.bName}の名前の気が織りなす縁。`;
+  }
+
+  const comments = {
+    heart: heart >= 80 ? 'ふたりの心は自然と共鳴し、言葉がなくても通じ合える深い絆があります。' :
+           heart >= 60 ? '心の波長はよく合っており、一緒にいると安心感を覚えるでしょう。' :
+                         '心の波長にはやや差がありますが、理解し合う努力が絆を育てます。',
+    love:  love  >= 80 ? '恋愛の相性は抜群で、お互いへの情熱と愛情が長く続く縁です。' :
+           love  >= 60 ? '恋愛面での相性は良く、一緒にいると自然と笑顔が増えるはず。' :
+                         '恋愛にはゆっくりと時間をかけることで、深い愛情が育ちます。',
+    trust: trust >= 80 ? '信頼関係は非常に強く、どんな状況でも支え合える土台があります。' :
+           trust >= 60 ? '信頼関係は安定しており、困ったときに頼り合える関係です。' :
+                         '信頼を積み重ねることで、ふたりの絆はより強固になるでしょう。',
+    future:future >= 80 ? '未来に向けた可能性は大きく、共に歩むことで夢が広がります。' :
+           future >= 60 ? 'ふたりが力を合わせれば、明るい未来を築いていけるはずです。' :
+                         'お互いの個性を尊重しながら、ゆっくりと未来を描いていきましょう。',
+  };
+
+  const reading = `${nameInfo}${zodiacInfo}\n\n${comments.heart}\n\n${comments.love}\n\n${comments.trust}\n\n${comments.future}`.trim();
+
+  return { title, subtitle, reading };
+}
+
+// ── タブ切り替え ──
 function switchTab(t) {
   document.querySelectorAll('.tab-content').forEach(el => el.style.display='none');
   document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
   document.getElementById('tab-'+t).style.display='block';
-  const btns = document.querySelectorAll('.tab-btn');
-  btns[{name:0,birth:1,both:2}[t]].classList.add('active');
+  document.querySelectorAll('.tab-btn')[{name:0,birth:1,both:2}[t]].classList.add('active');
   resetAll(false);
 }
 
-// 診断
-async function diagnose(mode) {
-  let prompt='', valid=true;
+// ── 診断 ──
+function diagnose(mode) {
+  const v = id => document.getElementById(id).value.trim();
+  let data = {}, valid = true;
 
-  if (mode==='name') {
+  if (mode === 'name') {
     const aS=v('name-a-sei'),aM=v('name-a-mei'),aSk=v('name-a-sei-kana'),aMk=v('name-a-mei-kana');
     const bS=v('name-b-sei'),bM=v('name-b-mei'),bSk=v('name-b-sei-kana'),bMk=v('name-b-mei-kana');
     if (!aS||!aM||!bS||!bM) { valid=false; }
-    else {
-      prompt=`【姓名判断 相性診断】
-Aさん：${aS+aM}（よみ：${(aSk+' '+aMk).trim()}）
-Bさん：${bS+bM}（よみ：${(bSk+' '+bMk).trim()}）
-姓名判断（画数・五行・天格・人格・地格・外格・総格）を用いて詳しく鑑定してください。`;
-    }
-  } else if (mode==='birth') {
-    const aN=v('birth-a-name'),aD=v('birth-a-date');
-    const bN=v('birth-b-name'),bD=v('birth-b-date');
+    else { data = { aName:aS+aM, aKana:(aSk+aMk), bName:bS+bM, bKana:(bSk+bMk) }; }
+
+  } else if (mode === 'birth') {
+    const aN=v('birth-a-name'),aD=v('birth-a-date'),bN=v('birth-b-name'),bD=v('birth-b-date');
     if (!aD||!bD) { valid=false; }
-    else {
-      prompt=`【生年月日 相性診断】
-Aさん：${aN||'Aさん'}、生年月日 ${fmt(aD)}
-Bさん：${bN||'Bさん'}、生年月日 ${fmt(bD)}
-西洋占星術・数秘術・四柱推命・九星気学を用いて詳しく鑑定してください。`;
-    }
+    else { data = { aName:aN||'Aさん', aDate:aD, bName:bN||'Bさん', bDate:bD }; }
+
   } else {
     const aS=v('both-a-sei'),aM=v('both-a-mei'),aD=v('both-a-date');
     const bS=v('both-b-sei'),bM=v('both-b-mei'),bD=v('both-b-date');
     if (!aS||!aM||!bS||!bM||!aD||!bD) { valid=false; }
-    else {
-      prompt=`【総合相性診断】
-Aさん：${aS+aM}、生年月日 ${fmt(aD)}
-Bさん：${bS+bM}、生年月日 ${fmt(bD)}
-姓名判断と生年月日占いの両方を組み合わせて総合的に鑑定してください。`;
-    }
+    else { data = { aName:aS+aM, aKana:'', bName:bS+bM, bKana:'', aDate:aD, bDate:bD }; }
   }
 
-  if (!valid) { showError('必須項目を入力してください ✏️'); return; }
-  showError('',false);
-  showLoading(true);
-  hideResult();
-
-  const full = prompt + `
-
-必ず以下のJSON形式のみで回答してください（マークダウン記号・前置き・後書き一切なし）：
-{
-  "score": 総合相性スコア(0〜100の整数),
-  "title": "相性タイトル（例：「運命のふたり」「最高のパートナー」など）",
-  "subtitle": "英語のサブタイトル（例：Perfect Match）",
-  "details": [
-    {"label":"心の相性","score":0〜100},
-    {"label":"恋愛運","score":0〜100},
-    {"label":"信頼度","score":0〜100},
-    {"label":"未来力","score":0〜100}
-  ],
-  "reading": "鑑定メッセージ（400字程度、温かく親しみやすい文体で、改行あり）"
-}`;
-
-  try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        messages: [{ role: 'user', content: full }]
-      })
-    });
-    const data = await res.json();
-    const raw = data.content?.find(b=>b.type==='text')?.text||'';
-    const result = JSON.parse(raw.replace(/```json|```/g,'').trim());
-    showLoading(false);
-    showResult(result);
-  } catch(e) {
-    showLoading(false);
-    showError('エラーが発生しました。もう一度お試しください 🙏');
-    console.error(e);
+  if (!valid) {
+    const el=document.getElementById('error-msg');
+    el.textContent='必須項目を入力してください ✏️';
+    el.classList.add('show');
+    return;
   }
-}
+  document.getElementById('error-msg').classList.remove('show');
 
-function v(id) { return document.getElementById(id).value.trim(); }
-function fmt(d) { if(!d) return ''; const [y,m,dy]=d.split('-'); return `${y}年${+m}月${+dy}日`; }
-function showLoading(b) { document.getElementById('loading').classList.toggle('show',b); }
-function hideResult() { document.getElementById('result-card').classList.remove('show'); }
-function showError(msg,show=true) {
-  const el=document.getElementById('error-msg');
-  el.textContent=msg;
-  el.classList.toggle('show',show&&!!msg);
+  const scores = calcCompatibility(mode, data);
+  const { title, subtitle, reading } = genResult(mode, data, scores);
+
+  showResult({
+    score: scores.total,
+    title,
+    subtitle,
+    details: [
+      {label:'心の相性', score:scores.heart},
+      {label:'恋愛運',   score:scores.love},
+      {label:'信頼度',   score:scores.trust},
+      {label:'未来力',   score:scores.future},
+    ],
+    reading,
+  });
 }
 
 function showResult(r) {
-  const card=document.getElementById('result-card');
+  const card = document.getElementById('result-card');
   card.classList.add('show');
 
-  const score=Math.min(100,Math.max(0,r.score||0));
-  document.getElementById('result-title').textContent=r.title||'';
-  document.getElementById('result-subtitle').textContent=r.subtitle||'';
-  document.getElementById('result-body').textContent=r.reading||'';
+  const score = Math.min(100, Math.max(0, r.score||0));
+  document.getElementById('result-title').textContent = r.title||'';
+  document.getElementById('result-subtitle').textContent = r.subtitle||'';
+  document.getElementById('result-body').textContent = r.reading||'';
 
   // リングアニメ
-  const numEl=document.getElementById('score-num');
-  const ring=document.getElementById('ring-progress');
-  ring.style.strokeDashoffset=345;
-  numEl.textContent='0';
-  requestAnimationFrame(()=>{
-    setTimeout(()=>{
-      ring.style.strokeDashoffset=345-(score/100)*345;
+  const numEl = document.getElementById('score-num');
+  const ring  = document.getElementById('ring-progress');
+  ring.style.strokeDashoffset = 345;
+  numEl.textContent = '0';
+  requestAnimationFrame(() => {
+    setTimeout(() => {
+      ring.style.strokeDashoffset = 345 - (score/100)*345;
       let cur=0, step=score/60;
-      const t=setInterval(()=>{ cur=Math.min(score,cur+step); numEl.textContent=Math.round(cur); if(cur>=score) clearInterval(t); },25);
-    },100);
+      const t = setInterval(() => {
+        cur = Math.min(score, cur+step);
+        numEl.textContent = Math.round(cur);
+        if(cur>=score) clearInterval(t);
+      }, 25);
+    }, 100);
   });
 
   // 詳細バー
-  const grads=['url(#bG1)','url(#bG2)','url(#bG3)','url(#bG4)'];
-  const cont=document.getElementById('detail-scores');
-  cont.innerHTML='';
-  (r.details||[]).forEach((d,i)=>{
-    const pct=Math.min(100,Math.max(0,d.score||0));
-    const div=document.createElement('div');
-    div.className='d-item';
-    div.innerHTML=`<span class="dlabel">${d.label}</span><div class="dbar"><div class="dfill" style="background:${grads[i%4]}" data-w="${pct}"></div></div><span class="dscore">${pct}</span>`;
+  const grads = ['url(#bG1)','url(#bG2)','url(#bG3)','url(#bG4)'];
+  const cont = document.getElementById('detail-scores');
+  cont.innerHTML = '';
+  (r.details||[]).forEach((d,i) => {
+    const pct = Math.min(100, Math.max(0, d.score||0));
+    const div = document.createElement('div');
+    div.className = 'd-item';
+    div.innerHTML = `<span class="dlabel">${d.label}</span><div class="dbar"><div class="dfill" style="background:${grads[i%4]}" data-w="${pct}"></div></div><span class="dscore">${pct}</span>`;
     cont.appendChild(div);
   });
-  setTimeout(()=>{ document.querySelectorAll('.dfill').forEach(el=>el.style.width=el.dataset.w+'%'); },200);
+  setTimeout(() => {
+    document.querySelectorAll('.dfill').forEach(el => el.style.width = el.dataset.w+'%');
+  }, 200);
 
-  card.scrollIntoView({behavior:'smooth',block:'start'});
+  card.scrollIntoView({behavior:'smooth', block:'start'});
 }
 
 function resetAll(scroll=true) {
-  hideResult(); showError('',false); showLoading(false);
-  if(scroll) window.scrollTo({top:0,behavior:'smooth'});
+  document.getElementById('result-card').classList.remove('show');
+  document.getElementById('error-msg').classList.remove('show');
+  if(scroll) window.scrollTo({top:0, behavior:'smooth'});
 }
 </script>
 </body>
