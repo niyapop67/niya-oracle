@@ -543,8 +543,8 @@ h1 {
   <div class="form-card">
     <div class="form-grid">
       <div class="form-group">
-        <div class="form-label">名前（ひらがな）</div>
-        <input class="form-input" type="text" id="nameInput" placeholder="やまだはなこ">
+        <div class="form-label">名前（ひらがな or ローマ字）</div>
+        <input class="form-input" type="text" id="nameInput" placeholder="やまだはなこ / YAMADA HANAKO">
       </div>
       <div class="form-group">
         <div class="form-label">生年月日</div>
@@ -742,6 +742,18 @@ const kanaMap = {
   'っ':4,'ゃ':1,'ゅ':6,'ょ':7,
 };
 
+// Pythagorean romaji map (A=1, B=2, ... standard numerology)
+const romajiMap = {
+  'a':1,'b':2,'c':3,'d':4,'e':5,'f':8,'g':3,'h':5,'i':1,'j':1,
+  'k':2,'l':3,'m':4,'n':5,'o':7,'p':8,'q':1,'r':9,'s':3,'t':4,
+  'u':6,'v':6,'w':6,'x':5,'y':1,'z':7
+};
+const romajiVowels = ['a','e','i','o','u'];
+
+function isRomaji(name) {
+  return /^[a-zA-Z\s]+$/.test(name.trim());
+}
+
 function reduceNum(n) {
   if (n === 11 || n === 22 || n === 33) return n;
   if (n < 10) return n;
@@ -758,19 +770,26 @@ function calcLifePath(dateStr) {
 function calcExpression(name) {
   const clean = name.replace(/\s/g, '').toLowerCase();
   let sum = 0;
-  for (const c of clean) {
-    sum += kanaMap[c] || 0;
+  if (isRomaji(name)) {
+    for (const c of clean) sum += romajiMap[c] || 0;
+  } else {
+    for (const c of clean) sum += kanaMap[c] || 0;
   }
   return sum > 0 ? reduceNum(sum) : null;
 }
 
 function calcSoulUrge(name) {
-  // Vowels in hiragana
-  const vowels = ['あ','い','う','え','お','ぁ','ぃ','ぅ','ぇ','ぉ'];
-  const clean = name.replace(/\s/g, '');
+  const clean = name.replace(/\s/g, '').toLowerCase();
   let sum = 0;
-  for (const c of clean) {
-    if (vowels.includes(c)) sum += kanaMap[c] || 1;
+  if (isRomaji(name)) {
+    for (const c of clean) {
+      if (romajiVowels.includes(c)) sum += romajiMap[c] || 1;
+    }
+  } else {
+    const vowels = ['あ','い','う','え','お','ぁ','ぃ','ぅ','ぇ','ぉ'];
+    for (const c of clean) {
+      if (vowels.includes(c)) sum += kanaMap[c] || 1;
+    }
   }
   return sum > 0 ? reduceNum(sum) : null;
 }
