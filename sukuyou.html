@@ -414,6 +414,7 @@ body::before {
     <button class="tab-btn active" onclick="switchTab('self')">自分の宿</button>
     <button class="tab-btn" onclick="switchTab('compat')">相性占い</button>
     <button class="tab-btn" onclick="switchTab('calendar')">カレンダー</button>
+    <button class="tab-btn" onclick="switchTab('shuku27')">27宿一覧</button>
     <button class="tab-btn" onclick="switchTab('guide')">解説</button>
   </div>
 
@@ -522,11 +523,33 @@ body::before {
 
     <div id="calendarWrap" style="display:none;">
       <div class="cal-legend">
-        <div class="legend-item"><div class="legend-dot" style="background:rgba(176,40,0,0.5)"></div>凌犯期間</div>
+        <div class="legend-item"><div class="legend-dot" style="background:rgba(232,67,147,0.5)"></div>活動期</div>
+        <div class="legend-item"><div class="legend-dot" style="background:rgba(41,128,185,0.5)"></div>魔のウィーク</div>
+        <div class="legend-item"><div class="legend-dot" style="background:rgba(243,156,18,0.5)"></div>転換期</div>
+        <div class="legend-item"><div class="legend-dot" style="background:rgba(80,80,80,0.4)"></div>凌犯期間</div>
         <div class="legend-item"><div class="legend-dot" style="background:rgba(106,42,138,0.5)"></div>六害宿</div>
-        <div class="legend-item"><div class="legend-dot" style="background:rgba(26,122,64,0.35)"></div>吉日</div>
       </div>
       <div id="calMonthsWrap"></div>
+    </div>
+  </div>
+
+  <!-- ===== TAB: 27宿一覧 ===== -->
+  <div id="tab-shuku27" class="tab-panel">
+
+    <div class="section" style="margin-bottom:20px;">
+      <div class="section-title">宿曜 二十七宿</div>
+      <div style="font-size:13px;color:var(--text-dim);line-height:1.8;margin-bottom:20px;">
+        各宿をタップすると、性格・恋愛・仕事・金運・健康など詳細が表示されます。
+      </div>
+      <div id="shuku27Grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;"></div>
+    </div>
+
+    <!-- 詳細パネル -->
+    <div id="shukuDetailPanel" style="display:none;">
+      <div class="section" style="position:relative;">
+        <button onclick="closeShukuDetail()" style="position:absolute;top:12px;right:12px;background:transparent;border:1px solid var(--border);color:var(--text-muted);padding:4px 12px;border-radius:4px;cursor:pointer;font-size:12px;">✕ 閉じる</button>
+        <div id="shukuDetailContent"></div>
+      </div>
     </div>
   </div>
 
@@ -946,6 +969,233 @@ const COMPAT_RELATIONS = [
     desc:'すぐに打ち解けられる関係。初対面でも長年の知人のように感じる不思議な縁。自然体でいられる大切な存在。' },
 ];
 
+
+// ===== 27宿 詳細データ =====
+const SHUKU_DETAIL = {
+  0:{ // 角宿
+    overview:'二十七宿の第1宿。「青龍」の角にあたる東方七宿の筆頭。木の気をもち、新しい始まりと決断を司る宿。知性と洞察力に優れ、人の上に立つ素質を持つ。惑星は「木星」の影響を受け、精神性と哲学を好む。',
+    love:'恋愛においては誠実で一途。理想が高く、なかなか好きな相手が見つからないが、いったん決めると長く深い愛情を注ぐ。感情表現が苦手なため、気持ちを言葉にする努力が大切。',
+    work:'計画を立てて着実に実行する能力に長ける。リーダーとして活躍しやすく、責任感の強さが信頼を生む。完璧主義な面があるが、それが高い成果につながる。知識を要する仕事や管理職に向いている。',
+    money:'堅実な金銭感覚を持つ。無駄遣いは少ないが、保守的すぎて大きなチャンスを逃すことも。長期的な計画で着実に財を築くタイプ。',
+    health:'几帳面な性格ゆえ、ストレスを溜め込みやすい。頭痛・肩こり・目の疲れに注意。定期的な休養と気分転換が健康維持の鍵。',
+  },
+  1:{ // 亢宿
+    overview:'東方七宿の第2宿。「青龍」の首にあたる。金の気をもち、変化と移動を司る。適応力が高く、どんな環境でも力を発揮できる柔軟性がある。',
+    love:'自由を愛し、束縛を嫌う。恋愛でも広い心で相手を受け入れるが、自分も自由でいたいという思いが強い。新しい出会いを常に求める傾向があり、浮気に注意。',
+    work:'変化に強く、新しい環境にすぐ馴染む。営業・旅行・貿易など動きのある仕事で活躍。飽きっぽい面があるので、変化のある職場が向いている。',
+    money:'お金に対してはあまり執着しない。入ってきた分は使ってしまうタイプ。旅や経験にお金をかける傾向がある。',
+    health:'移動が多い生活から疲れが溜まりやすい。腰・膝・関節に注意。旅先での食当たりにも気をつけて。',
+  },
+  2:{ // 氐宿
+    overview:'東方七宿の第3宿。「青龍」の胸にあたる。土の気をもち、安定と根付きを司る。家庭運・不動産運に恵まれ、地道な努力が実を結ぶ宿。',
+    love:'家庭的で安定した愛情を大切にする。結婚運が強く、良い家庭を築ける。焦らず、じっくりと関係を深めていくタイプ。',
+    work:'コツコツと積み上げる力が強み。不動産・建設・農業など地に足のついた仕事が向いている。長期プロジェクトで真価を発揮する。',
+    money:'堅実な財運。不動産投資などで資産を増やせる。派手な投機よりも着実な貯蓄・投資が合っている。',
+    health:'胃腸が弱い傾向。ストレスが消化器系に出やすい。規則正しい食生活を心がけると良い。',
+  },
+  3:{ // 房宿
+    overview:'東方七宿の第4宿。「青龍」の腹にあたる。日の気をもち、収穫と成就を司る。努力が報われやすく、人望を集める魅力を持つ宿。',
+    love:'温かく包み込むような愛情を持つ。相手のために尽くすことに喜びを感じる。ただし、自己犠牲的になりすぎると燃え尽きることも。',
+    work:'面倒見が良く、自然とリーダーになる。チームをまとめる力があり、組織で活躍する。教育・福祉・医療など人を助ける仕事に縁がある。',
+    money:'お金より人間関係を大切にするタイプ。人への投資（贈り物・食事など）が多く、財が散りやすい。人脈がビジネスチャンスをもたらす。',
+    health:'心臓・血圧に注意。過労になりやすいので、定期的な休息が必要。感情の波に体調が影響される。',
+  },
+  4:{ // 心宿
+    overview:'東方七宿の第5宿。「青龍」の心臓にあたる。月の気をもち、情熱と愛情を司る。感情が豊かで芸術的センスに恵まれる宿。',
+    love:'情熱的で深い愛情を注ぐ。恋愛に全力投球するが、感情の起伏が激しく、喜怒哀楽が表れやすい。嫉妬深い一面も。一途な愛は本物。',
+    work:'芸術・音楽・デザインなど感性を生かす仕事で才能を発揮。情熱を仕事に向けると大きな成果を生む。感情で判断する場面に注意。',
+    money:'感情的な消費が多い。気に入ったものには惜しみなく使う。感情が落ち着いているときに金銭管理を。',
+    health:'心臓・循環器系に注意。感情のアップダウンが体に影響しやすい。瞑想やヨガなど心を落ち着ける習慣が大切。',
+  },
+  5:{ // 尾宿
+    overview:'東方七宿の第6宿。「青龍」の尾にあたる。火の気をもち、繁栄と子孫を司る。生命力に溢れ、常に前進するエネルギーを持つ宿。',
+    love:'情熱的で積極的。好きになったら真っすぐにアプローチする。家族を大切にし、子育てに向いている。家庭を守る力が強い。',
+    work:'教育・保育・医療など人を育てる仕事が向いている。エネルギッシュで行動力があり、困難も突破する。後輩の指導に才能がある。',
+    money:'稼ぐ力はあるが、家族や仲間のために使うことが多い。教育費や家族への投資を惜しまない。',
+    health:'基本的に体力があり丈夫。ただし、無理をしすぎる傾向があり疲労が蓄積しやすい。休養を意識的にとることが必要。',
+  },
+  6:{ // 箕宿
+    overview:'東方七宿の第7宿。「青龍」の尾の先にあたる。水の気をもち、知恵と弁才を司る。言葉と知識に恵まれ、学問や交渉ごとに強い宿。「箕」の字が示すように、大らかで豪快な気質を持つ。木星の影響を受け、精神性と哲学を好む。',
+    love:'自由奔放で華やかな魅力を醸し出す。恋愛に対してもこだわりが少なく、何事にも囚われないスマートな恋愛を望む傾向がある。欲望に忠実で享楽にふける面があるので、一途な愛情を大切に。',
+    work:'マスコミ・出版・旅行・プロデュース業・マネージメント業に適性がある。知識を要する仕事や、人生の意味を探求するような精神性の深い仕事に向いている。独立運が強く、起業して活躍できる。',
+    money:'お金に関しても楽観的で、困難があっても意欲が燃える。稼ぎ方も使い方も豪快で、気風の良さがあるが大盤振る舞いに注意。緻密な金銭感覚に長けた人と交流すると良い。',
+    health:'人体では「右脇」に当たる。コンディションが低下すると右脇をはじめいろいろな箇所に痛みが生じる。お酒の飲みすぎに注意。肝機能障害・胃けいれん、筋肉痛・リュウマチ・筋肉や関節に注意。',
+  },
+  7:{ // 斗宿
+    overview:'北方七宿の第1宿。「玄武」の頭にあたる。蟹の気をもち、節制と管理を司る。計画的に物事を進める力があり、財政管理に優れる宿。',
+    love:'慎重で真面目。じっくりと時間をかけて関係を深める。一度決めたら長く続けるタイプ。感情表現が控えめなので、積極的に気持ちを伝えることが大切。',
+    work:'経理・会計・管理職など数字や管理の仕事が向いている。計画通りに物事を進める能力が高く、プロジェクト管理に優れる。',
+    money:'財運が強い。節約上手で着実に資産を増やせる。長期的な財務計画を立てると良い結果が出る。',
+    health:'過度なストレスが体に影響しやすい。消化器系・腎臓に注意。規則正しい生活が健康の基盤。',
+  },
+  8:{ // 女宿
+    overview:'北方七宿の第2宿。「玄武」の首にあたる。土の気をもち、縁結びと人間関係を司る。人との縁に恵まれ、良い出会いをもたらす宿。',
+    love:'愛嬌があり、自然と人が集まる。恋愛運が強く、良縁に恵まれる。相手の気持ちを敏感に察知し、寄り添うことができる。',
+    work:'人との調整・仲介役として活躍。接客・カウンセリング・営業など対人スキルを生かせる仕事が向いている。チームの潤滑油的存在。',
+    money:'人との縁がビジネスチャンスをもたらす。人脈を生かした仕事で財運が開ける。',
+    health:'婦人科系・泌尿器系に注意。感情が体に出やすいので、精神的な安定を心がけて。',
+  },
+  9:{ // 虚宿
+    overview:'北方七宿の第3宿。「玄武」の胸にあたる。日の気をもち、霊感と直観を司る。第六感が鋭く、目に見えないものを感じ取る力がある宿。',
+    love:'精神的なつながりを大切にする。感覚的に「この人だ」と感じた相手を大切に。ロマンチストで理想が高い面も。',
+    work:'占い・カウンセリング・芸術・音楽など感性を生かす仕事が向いている。直感力が武器になる。',
+    money:'物質的なことへの執着が薄い。精神的な豊かさを優先する傾向がある。',
+    health:'精神的なものが体に強く影響する。十分な睡眠と休養が最も大切。神経系に注意。',
+  },
+  10:{ // 危宿
+    overview:'北方七宿の第4宿。「玄武」の腹にあたる。月の気をもち、変革と更新を司る。危機を乗り越えることで大きく成長する宿。',
+    love:'関係に変化が起きやすい。困難を共に乗り越えることで絆が深まる。波乱万丈な恋愛が多いが、それが成長につながる。',
+    work:'変革期に力を発揮。新しいことへの挑戦を恐れない。ITや新産業など変化の激しい分野で活躍できる。',
+    money:'波があるが、ピンチをチャンスに変える力がある。危機的状況から逆転することも。',
+    health:'神経・精神面に注意。ストレスが体に影響しやすい。規則正しい生活が安定のカギ。',
+  },
+  11:{ // 室宿
+    overview:'北方七宿の第5宿。「玄武」の腰にあたる。火の気をもち、守護と庇護を司る。家庭や仲間を守る強い力がある宿。',
+    love:'家庭を守ることに喜びを感じる。献身的で安定した愛情を提供できる。結婚後に愛情が深まるタイプ。',
+    work:'組織を守る管理職・保安・建築など「守る」仕事が向いている。責任感が強く、信頼される存在になれる。',
+    money:'堅実な財運。家族のために蓄える力が強い。不動産など安定した資産を好む。',
+    health:'呼吸器系に注意。特に冬場の体調管理を大切に。',
+  },
+  12:{ // 壁宿
+    overview:'北方七宿の第6宿。「玄武」の足にあたる。水の気をもち、蓄積と保存を司る。コツコツと積み上げる力があり、長期的な成功を収める宿。',
+    love:'慎重でじっくりと関係を築く。長期的に安定した関係を好む。感情表現は控えめだが、深い愛情を持っている。',
+    work:'研究・学術・図書館・アーカイブなど知識や情報を蓄積する仕事が向いている。長期プロジェクトで力を発揮。',
+    money:'財運が強い。長期的な視野での資産形成が得意。コツコツと貯める力がある。',
+    health:'腎臓・膀胱に注意。水分摂取と冷え対策が健康の鍵。',
+  },
+  13:{ // 奎宿
+    overview:'西方七宿の第1宿。「白虎」の奎にあたる。木の気をもち、文章と芸術を司る。創造的表現に才能を発揮する宿。',
+    love:'ロマンチストで詩的な愛情表現をする。芸術的感性で相手を惹きつける。理想が高い面もある。',
+    work:'作家・詩人・画家・デザイナーなど創造的な仕事で才能を発揮。言語能力が高く、文章で人を感動させる力がある。',
+    money:'芸術的な才能を生かしてお金を稼ぐ。趣味と仕事を一致させると財運が開ける。',
+    health:'神経系・皮膚に注意。ストレスが肌に出やすい。創造的な活動が精神の健康に良い。',
+  },
+  14:{ // 婁宿
+    overview:'西方七宿の第2宿。「白虎」の婁にあたる。金の気をもち、集合と招集を司る。人を集める力があり、コミュニティ形成に長ける宿。',
+    love:'社交的で人気者。恋愛においても多くの出会いに恵まれる。リーダーシップがあり、相手を引っ張っていくタイプ。',
+    work:'経営者・コミュニティマネージャー・イベントプランナーなど人を集め動かす仕事が向いている。',
+    money:'人脈から財運が開ける。グループや組織を通じてお金を得る機会が多い。',
+    health:'肺・大腸に注意。免疫力を維持するために規則正しい生活を。',
+  },
+  15:{ // 胃宿
+    overview:'西方七宿の第3宿。「白虎」の胃にあたる。土の気をもち、蓄財と豊穣を司る。財運・食運に恵まれ、物質的な豊かさをもたらす宿。',
+    love:'安定した生活を好み、物質的な豊かさの中で愛情を育む。グルメや食事を通じた愛情表現が得意。',
+    work:'農業・食品・不動産・金融など物質的な豊かさに関わる仕事が向いている。蓄積する力が強み。',
+    money:'財運が非常に強い。着実に資産を増やせる。食に関わるビジネスで成功しやすい。',
+    health:'胃腸が弱い傾向。食べすぎに注意。消化器系の定期検診を。',
+  },
+  16:{ // 昴宿
+    overview:'西方七宿の第4宿。「白虎」の昴（プレアデス星団）にあたる。日の気をもち、美と輝きを司る。人目を引く華やかさと美的センスを持つ宿。',
+    love:'美しい恋愛を求める。外見にも気を使い、素敵な雰囲気の中で愛を育む。美しいものへのこだわりが強い。',
+    work:'ファッション・美容・芸能・アート関係で才能を発揮。美的センスを生かせる分野が向いている。',
+    money:'美に関わる仕事や投資で財運が開ける。センスを生かしたビジネスが成功しやすい。',
+    health:'皮膚・のどに注意。美しさを保つためのスキンケアが健康管理にもなる。',
+  },
+  17:{ // 畢宿
+    overview:'西方七宿の第5宿。「白虎」の畢にあたる。月の気をもち、農耕と実務を司る。地道な努力と実務能力に長ける宿。',
+    love:'誠実でぶれない愛情を持つ。地道に関係を積み上げる。浮気や不誠実さとは無縁のタイプ。',
+    work:'農業・製造・技術職など地道な努力が実る仕事が向いている。コツコツと積み上げる力が武器。',
+    money:'財運はコツコツ型。焦らず着実に積み上げると良い結果が出る。',
+    health:'呼吸器・肺に注意。定期的な運動で体力を維持することが大切。',
+  },
+  18:{ // 觜宿
+    overview:'西方七宿の第6宿。「白虎」の觜にあたる。火の気をもち、言語と通信を司る。コミュニケーション能力に優れ、メディアや情報に縁がある宿。',
+    love:'言葉で愛情を表現する。メッセージやSNSを通じた恋愛が得意。話題が豊富で一緒にいて楽しい。',
+    work:'メディア・教育・通信・IT関係が向いている。言語能力が高く、プレゼンや交渉が得意。',
+    money:'情報を生かした仕事で財運が開ける。メディアやコンテンツ関連で収益を得やすい。',
+    health:'喉・肺・神経系に注意。話しすぎによる疲労に気をつけて。',
+  },
+  19:{ // 参宿
+    overview:'西方七宿の第7宿。「白虎」の参にあたる。水の気をもち、闘争と勝負を司る。競争に強く、勝負事で力を発揮する宿。',
+    love:'情熱的で積極的なアプローチをする。恋愛も勝負と考え、諦めない。ライバルがいると燃えるタイプ。',
+    work:'スポーツ・法律・軍・警察など競争や勝負の世界で活躍。弁護士・検察官など争いごとに関わる職業も向いている。',
+    money:'勝負強い財運。投資やビジネスの勝負所で力を発揮する。',
+    health:'筋肉・骨格系に注意。スポーツ障害に気をつけて。適度な運動が健康維持に良い。',
+  },
+  20:{ // 井宿
+    overview:'南方七宿の第1宿。「朱雀」の井にあたる。木の気をもち、泉と源流を司る。創造の源となるエネルギーを持つ宿。アイデアが泉のように湧き出る。',
+    love:'豊かな感性で恋愛を楽しむ。創造的なデートや表現で相手を喜ばせる。アイデアが豊富で飽きさせない。',
+    work:'芸術・音楽・発明・研究など創造力を生かす仕事が向いている。斬新なアイデアで周囲を驚かせる。',
+    money:'創造的なビジネスで財運が開ける。アイデアをビジネスに変える力がある。',
+    health:'消化器系・肝臓に注意。クリエイティブな活動がストレス解消になる。',
+  },
+  21:{ // 鬼宿
+    overview:'南方七宿の第2宿。「朱雀」の鬼にあたる。金の気をもち、霊的保護を司る。最強の吉宿とも言われ、邪気を払い守護の力を持つ特別な宿。',
+    love:'神秘的な魅力で相手を惹きつける。精神的な絆を大切にする。霊的なつながりを感じる相手との縁が深い。',
+    work:'占い・スピリチュアル・医療・福祉など守護や癒しに関わる仕事で力を発揮。霊感を生かせる分野も。',
+    money:'守護力が強く、危機的状況から守られる。精神的な仕事で財運が開ける。',
+    health:'鬼宿は最強の吉宿。基本的に健康運が強い。ただし、守護力を過信せず適度な健康管理を。',
+  },
+  22:{ // 柳宿
+    overview:'南方七宿の第3宿。「朱雀」の柳にあたる。土の気をもち、忍耐と再生を司る。苦難を乗り越えて再生する力を持つ宿。',
+    love:'忍耐強く、関係が困難になっても諦めない。時間をかけて愛情を育む。再生・復縁の縁が強い。',
+    work:'困難な状況でこそ力を発揮。リストラクチャリング・再建など立て直しの仕事が向いている。',
+    money:'波があるが、必ず復活する。一時的な困難を乗り越えると財運が開ける。',
+    health:'消化器系・肝臓に注意。忍耐強さが健康管理にも。規則正しい生活が再生の力になる。',
+  },
+  23:{ // 星宿
+    overview:'南方七宿の第4宿。「朱雀」の星にあたる。日の気をもち、光明と名誉を司る。名声と栄光を引き寄せる力がある宿。',
+    love:'華やかな存在感で人を惹きつける。人気者で恋愛の機会が多い。名誉ある恋愛・結婚を望む。',
+    work:'芸能・政治・経営など表舞台で輝く仕事が向いている。カリスマ性があり、人々に影響を与えられる。',
+    money:'名声に伴い財運も高まる。有名になることでビジネスチャンスが広がる。',
+    health:'心臓・循環器系に注意。ストレスが心臓に影響しやすい。定期的な検診を。',
+  },
+  24:{ // 張宿
+    overview:'南方七宿の第5宿。「朱雀」の張にあたる。月の気をもち、豊饒と祝祭を司る。喜びと祝いをもたらす宿。飲食・宴会に縁がある。',
+    love:'陽気で楽しい雰囲気を作り、相手を笑顔にする。食事や祝い事を通じた愛情表現が得意。',
+    work:'飲食業・ホテル・イベント・エンターテインメントが向いている。場を盛り上げる才能で活躍。',
+    money:'飲食や祝い事に関わるビジネスで財運が開ける。楽しいことにお金が集まってくる。',
+    health:'胃腸・消化器系に注意。食べすぎ・飲みすぎに気をつけて。楽しい気持ちが健康の源。',
+  },
+  25:{ // 翼宿
+    overview:'南方七宿の第6宿。「朱雀」の翼にあたる。火の気をもち、飛翔と旅行を司る。遠方との縁があり、旅や移動に吉の宿。',
+    love:'自由を愛する恋愛スタイル。遠距離恋愛や国際恋愛に縁がある。一緒に旅をすることで絆が深まる。',
+    work:'航空・旅行・貿易・外交など遠方や異文化に関わる仕事が向いている。海外での活躍も。',
+    money:'旅や移動の中でビジネスチャンスが生まれる。海外との取引で財運が開ける。',
+    health:'旅のストレス・時差・食事の変化に注意。足腰のケアも大切。',
+  },
+  26:{ // 軫宿
+    overview:'南方七宿の第7宿。「朱雀」の軫にあたる。水の気をもち、終結と完成を司る。物事を完成させる力があり、終わりと新たな始まりを司る宿。',
+    love:'最後まで諦めない深い愛情を持つ。関係を完成形に持っていく力がある。別れと新しい出会いのサイクルがある。',
+    work:'プロジェクトを完成させる力が強み。最後の仕上げが得意。完成度へのこだわりが高い仕事に向いている。',
+    money:'物事を完成させることで財運が開ける。完成品に価値を生み出す力がある。',
+    health:'泌尿器系・生殖器系に注意。終わりと始まりを意識した健康管理を。',
+  },
+};
+
+// 11種日運の計算（自分の宿からの差分）
+const DAILY_LUCK = [
+  { name:'命', color:'#e84393', bg:'rgba(232,67,147,0.15)', desc:'凌犯期間。エネルギーの転換期。無理は禁物。', type:'danger' },
+  { name:'親', color:'#27ae60', bg:'rgba(39,174,96,0.15)',  desc:'親しみやすく縁が結びやすい吉日。', type:'good' },
+  { name:'栄', color:'#27ae60', bg:'rgba(39,174,96,0.15)',  desc:'栄える日。積極的な行動が吉。', type:'good' },
+  { name:'衰', color:'#e84393', bg:'rgba(232,67,147,0.15)', desc:'活動期。ペースを落として休養を。', type:'caution' },
+  { name:'安', color:'#27ae60', bg:'rgba(39,174,96,0.15)',  desc:'穏やかで安定した吉日。', type:'good' },
+  { name:'危', color:'#e84393', bg:'rgba(232,67,147,0.15)', desc:'魔のウィーク。トラブルに注意。', type:'danger' },
+  { name:'成', color:'#2980b9', bg:'rgba(41,128,185,0.15)', desc:'物事が成就しやすい吉日。', type:'good' },
+  { name:'壊', color:'#2980b9', bg:'rgba(41,128,185,0.15)', desc:'魔のウィーク。変化に注意。', type:'caution' },
+  { name:'友', color:'#27ae60', bg:'rgba(39,174,96,0.15)',  desc:'友情が結ばれやすい日。', type:'good' },
+  { name:'業', color:'#2980b9', bg:'rgba(41,128,185,0.15)', desc:'転換期。新しいことの準備に。', type:'neutral' },
+  { name:'胎', color:'#f39c12', bg:'rgba(243,156,18,0.15)', desc:'転換期。新しい始まりの前触れ。', type:'neutral' },
+];
+
+// 期間タイプ
+// 命(0)=凌犯、危(5)壊(7)=魔のウィーク、栄(2)親(1)安(4)成(6)友(8)=活動期、衰(3)業(9)胎(10)=転換期
+const PERIOD_TYPE = {
+  0:'凌犯期間', 1:'活動期', 2:'活動期', 3:'転換期',
+  4:'活動期', 5:'魔のウィーク', 6:'活動期', 7:'魔のウィーク',
+  8:'活動期', 9:'転換期', 10:'転換期'
+};
+const PERIOD_COLOR = {
+  '凌犯期間':'#555', '活動期':'#e84393', '魔のウィーク':'#2980b9', '転換期':'#f39c12'
+};
+
+function getDailyLuck(myShukuId, dateShukuId) {
+  const diff = (dateShukuId - myShukuId + 27) % 27;
+  // 27宿を11種に分類（参考サイトの分類に合わせる）
+  const luckMap = [0,1,2,3,4,5,6,7,8,9,10, 0,1,2,3,4,5,6,7,8,9,10, 0,1,2,3,4];
+  return DAILY_LUCK[luckMap[diff]];
+}
+
 // ===== 宿を計算（旧暦→二十七宿） =====
 function calcShuku(dateStr) {
   const d = new Date(dateStr);
@@ -1245,32 +1495,39 @@ function renderMonth(year, month) {
 function renderCell(day, date, shuku, otherMonth, today) {
   const dow = date.getDay();
   const isToday = date.toDateString() === today.toDateString();
-  const ryohan = calMyShuku ? isRyohan(calMyShuku.id, shuku.id) : false;
+  const dailyLuck = calMyShuku ? getDailyLuck(calMyShuku.id, shuku.id) : null;
   const rokugai = calMyShuku ? isRokugai(calMyShuku.id, shuku.id) : false;
-  const kichi = calMyShuku ? isKichi(calMyShuku.id, shuku.id) : false;
+
+  // 期間タイプ判定
+  let periodType = '';
+  let cellBg = '';
+  if (calMyShuku && dailyLuck) {
+    const luckIdx = DAILY_LUCK.indexOf(dailyLuck);
+    periodType = PERIOD_TYPE[luckIdx] || '';
+    if (periodType === '凌犯期間') cellBg = 'background:rgba(80,80,80,0.12);border-color:rgba(80,80,80,0.3);';
+    else if (periodType === '活動期') cellBg = 'background:rgba(232,67,147,0.08);border-color:rgba(232,67,147,0.25);';
+    else if (periodType === '魔のウィーク') cellBg = 'background:rgba(41,128,185,0.08);border-color:rgba(41,128,185,0.25);';
+    else if (periodType === '転換期') cellBg = 'background:rgba(243,156,18,0.08);border-color:rgba(243,156,18,0.25);';
+  }
+  if (rokugai) cellBg += 'outline:2px solid rgba(106,42,138,0.4);outline-offset:-2px;';
 
   const classes = [
     'cal-cell',
     otherMonth ? 'other-month' : '',
     isToday ? 'today' : '',
     dow === 0 ? 'sun' : dow === 6 ? 'sat' : '',
-    ryohan && !rokugai ? 'ryohan' : '',
-    rokugai && !ryohan ? 'rokugai' : '',
-    ryohan && rokugai ? 'ryohan rokugai' : '',
   ].filter(Boolean).join(' ');
 
-  const badges = [];
-  if (ryohan) badges.push('<span class="badge badge-ryohan">凌犯</span>');
-  if (rokugai) badges.push('<span class="badge badge-rokugai">六害</span>');
-  if (kichi && !ryohan && !rokugai) badges.push('<span class="badge badge-kichi">吉</span>');
+  const luckBadge = dailyLuck ? `<span class="badge" style="background:${dailyLuck.bg};color:${dailyLuck.color};font-weight:700;">${dailyLuck.name}</span>` : '';
+  const rokugaiBadge = rokugai ? '<span class="badge badge-rokugai">六害</span>' : '';
 
-  const tooltip = `${shuku.ja} · ${ryohan ? '凌犯期間' : rokugai ? '六害宿' : kichi ? '吉日' : ''}`;
+  const tooltip = dailyLuck ? `${shuku.ja}｜${dailyLuck.name}（${periodType}）${rokugai ? '・六害' : ''}` : shuku.ja;
 
   return `
-    <div class="${classes}">
+    <div class="${classes}" style="${cellBg}">
       <div class="cal-cell-date">${day}</div>
       <div class="cal-cell-shuku">${shuku.ja}</div>
-      <div class="cal-cell-badges">${badges.join('')}</div>
+      <div class="cal-cell-badges">${luckBadge}${rokugaiBadge}</div>
       <div class="cal-tooltip">${tooltip}</div>
     </div>
   `;
@@ -1286,10 +1543,125 @@ function navCal(dir) {
 // ===== Tab switch =====
 function switchTab(name) {
   document.querySelectorAll('.tab-btn').forEach((b,i) => {
-    b.classList.toggle('active', ['self','compat','calendar','guide'][i] === name);
+    b.classList.toggle('active', ['self','compat','calendar','shuku27','guide'][i] === name);
   });
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
+  if (name === 'shuku27') initShuku27Grid();
+}
+
+// ===== 27宿一覧 =====
+function initShuku27Grid() {
+  const grid = document.getElementById('shuku27Grid');
+  if (!grid || grid.children.length > 0) return;
+  grid.innerHTML = SHUKU.map(s => `
+    <button onclick="showShukuDetail(${s.id})" style="
+      background:var(--surface2);border:1px solid var(--border);
+      border-radius:6px;padding:12px 8px;cursor:pointer;
+      text-align:center;transition:all .2s;color:var(--text);
+      font-family:'Noto Serif JP',serif;width:100%;
+    " onmouseover="this.style.borderColor='var(--gold)';this.style.background='rgba(138,106,16,0.1)'"
+      onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--surface2)'">
+      <div style="font-size:20px;margin-bottom:4px;">${s.symbol}</div>
+      <div style="font-size:15px;font-weight:500;color:var(--gold);">${s.ja}</div>
+      <div style="font-size:10px;color:var(--text-muted);margin-top:2px;">${s.element}・${s.animal}</div>
+    </button>
+  `).join('');
+}
+
+function showShukuDetail(id) {
+  const s = SHUKU[id];
+  const d = SHUKU_DETAIL[id];
+  if (!s || !d) return;
+
+  const year = new Date().getFullYear();
+  const monthLabels = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+
+  function monthLuck(shukuId, m) {
+    const base = s.luck.fortune;
+    const adj = s.good_months.includes(m) ? 15 : s.caution_months.includes(m) ? -18 : 0;
+    const noise = ((shukuId * m * 13) % 14) - 7;
+    const val = Math.min(99, Math.max(30, base + adj + noise));
+    if (val >= 85) return {label:'大吉', color:'#c9a84c'};
+    if (val >= 72) return {label:'吉', color:'#27ae60'};
+    if (val >= 60) return {label:'小吉', color:'#2980b9'};
+    if (val >= 48) return {label:'平', color:'#7a6a48'};
+    if (val >= 38) return {label:'注意', color:'#e67e22'};
+    return {label:'凶', color:'#c0392b'};
+  }
+
+  const monthGrid = monthLabels.map((label, i) => {
+    const lk = monthLuck(id, i+1);
+    return `<div style="background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:8px 4px;text-align:center;">
+      <div style="font-size:10px;color:var(--text-muted);margin-bottom:3px;">${label}</div>
+      <div style="font-size:13px;font-weight:700;color:${lk.color};">${lk.label}</div>
+    </div>`;
+  }).join('');
+
+  const luckKeys = ['love','work','money','health','fortune'];
+  const luckLabels2 = ['恋愛運','仕事運','金運','健康運','総合運'];
+  const luckColors2 = ['#e84393','#2980b9','#27ae60','#e74c3c','#8e44ad'];
+  const luckBars = luckKeys.map((k,i) => {
+    const val = s.luck[k];
+    return `<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+      <div style="font-size:11px;color:var(--text-dim);width:60px;flex-shrink:0;">${luckLabels2[i]}</div>
+      <div style="flex:1;height:6px;background:rgba(0,0,0,0.08);border-radius:3px;overflow:hidden;">
+        <div style="width:${val}%;height:100%;background:${luckColors2[i]};border-radius:3px;"></div>
+      </div>
+      <div style="font-size:11px;color:var(--text-muted);width:30px;text-align:right;">${val}</div>
+    </div>`;
+  }).join('');
+
+  const rokugaiName = SHUKU[ROKUGAI[id]] ? SHUKU[ROKUGAI[id]].ja : '';
+
+  document.getElementById('shukuDetailContent').innerHTML = `
+    <div style="text-align:center;margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid var(--border);">
+      <div style="font-size:36px;margin-bottom:8px;">${s.symbol}</div>
+      <div style="font-family:'Noto Serif JP',serif;font-size:28px;color:var(--gold);margin-bottom:4px;">${s.ja}</div>
+      <div style="font-size:13px;color:var(--text-muted);">第${id+1}宿 · ${s.element}の気 · ${s.animal} · ${s.yomi}</div>
+      <div style="margin-top:10px;display:inline-block;background:var(--gold-dim);border:1px solid var(--gold-border);border-radius:20px;padding:4px 16px;font-size:11px;color:var(--gold);">六害宿：${rokugaiName}</div>
+    </div>
+
+    <div style="margin-bottom:20px;">
+      <div style="font-size:12px;color:var(--gold);font-weight:700;margin-bottom:8px;letter-spacing:.1em;">◈ 概要</div>
+      <div style="font-size:13px;line-height:1.9;color:var(--text-dim);">${d.overview}</div>
+    </div>
+
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:16px;margin-bottom:20px;">
+      <div style="font-size:12px;color:var(--gold);font-weight:700;margin-bottom:12px;letter-spacing:.1em;">◈ 基本運勢</div>
+      ${luckBars}
+    </div>
+
+    <div style="margin-bottom:20px;">
+      <div style="font-size:12px;color:var(--gold);font-weight:700;margin-bottom:8px;">◈ 恋愛運</div>
+      <div style="font-size:13px;line-height:1.9;color:var(--text-dim);">${d.love}</div>
+    </div>
+    <div style="margin-bottom:20px;">
+      <div style="font-size:12px;color:var(--gold);font-weight:700;margin-bottom:8px;">◈ 仕事運</div>
+      <div style="font-size:13px;line-height:1.9;color:var(--text-dim);">${d.work}</div>
+    </div>
+    <div style="margin-bottom:20px;">
+      <div style="font-size:12px;color:var(--gold);font-weight:700;margin-bottom:8px;">◈ 金運</div>
+      <div style="font-size:13px;line-height:1.9;color:var(--text-dim);">${d.money}</div>
+    </div>
+    <div style="margin-bottom:24px;">
+      <div style="font-size:12px;color:var(--gold);font-weight:700;margin-bottom:8px;">◈ 健康運</div>
+      <div style="font-size:13px;line-height:1.9;color:var(--text-dim);">${d.health}</div>
+    </div>
+
+    <div>
+      <div style="font-size:12px;color:var(--gold);font-weight:700;margin-bottom:12px;letter-spacing:.1em;">◈ ${year}年 月別運勢</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;">${monthGrid}</div>
+    </div>
+  `;
+
+  const panel = document.getElementById('shukuDetailPanel');
+  panel.style.display = 'block';
+  panel.scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+
+function closeShukuDetail() {
+  document.getElementById('shukuDetailPanel').style.display = 'none';
 }
 </script>
 </body>
