@@ -950,14 +950,14 @@ const COMPAT_RELATIONS = [
 function calcShuku(dateStr) {
   const d = new Date(dateStr);
   // 基準日: 1900年1月31日 = 角宿(0)
-  const base = new Date('1900-01-31');
+  const base = new Date('1900-02-14');
   const diff = Math.floor((d - base) / (1000*60*60*24));
   const idx = ((diff % 27) + 27) % 27;
   return SHUKU[idx];
 }
 
 function getShukuByDate(date) {
-  const base = new Date('1900-01-31');
+  const base = new Date('1900-02-14');
   const diff = Math.floor((date - base) / (1000*60*60*24));
   const idx = ((diff % 27) + 27) % 27;
   return SHUKU[idx];
