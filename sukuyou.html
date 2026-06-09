@@ -413,7 +413,6 @@ body::before {
   <div class="tabs">
     <button class="tab-btn active" onclick="switchTab('self')">自分の宿</button>
     <button class="tab-btn" onclick="switchTab('compat')">相性占い</button>
-    <button class="tab-btn" onclick="switchTab('calendar')">カレンダー</button>
     <button class="tab-btn" onclick="switchTab('shuku27')">27宿一覧</button>
     <button class="tab-btn" onclick="switchTab('guide')">解説</button>
   </div>
@@ -441,6 +440,18 @@ body::before {
       <div class="section">
         <div class="section-title">月別運勢（今年）</div>
         <div class="fortune-grid" id="selfFortune"></div>
+        <div id="selfMonthDetail" style="display:none;margin-top:16px;"></div>
+      </div>
+      <div class="section" id="selfCalSection">
+        <div class="section-title">運勢カレンダー</div>
+        <div class="cal-legend" style="margin-bottom:12px;">
+          <div class="legend-item"><div class="legend-dot" style="background:rgba(232,67,147,0.6)"></div>活動期</div>
+          <div class="legend-item"><div class="legend-dot" style="background:rgba(41,128,185,0.6)"></div>魔のウィーク</div>
+          <div class="legend-item"><div class="legend-dot" style="background:rgba(243,156,18,0.6)"></div>転換期</div>
+          <div class="legend-item"><div class="legend-dot" style="background:rgba(80,80,80,0.5)"></div>凌犯期間</div>
+          <div class="legend-item"><div class="legend-dot" style="background:rgba(106,42,138,0.5)"></div>六害宿</div>
+        </div>
+        <div id="selfCalWrap"></div>
       </div>
     </div>
   </div>
@@ -505,31 +516,6 @@ body::before {
     <div class="result-box" id="compatResult" style="margin-top:20px;">
       <div class="compat-result" id="compatMain"></div>
       <div class="section" id="compatDetail"></div>
-    </div>
-  </div>
-
-  <!-- ===== TAB: CALENDAR ===== -->
-  <div id="tab-calendar" class="tab-panel">
-    <div class="cal-input-wrap">
-      <div class="section-title">自分の宿を入力してカレンダーを表示</div>
-      <div class="cal-input-row">
-        <div class="form-group" style="flex:1;min-width:160px;">
-          <label class="form-label">生年月日</label>
-          <input class="form-input" type="date" id="calBirth">
-        </div>
-        <button class="btn-calc" style="width:auto;padding:11px 20px;margin-top:0;" onclick="initCalendar()">表示</button>
-      </div>
-    </div>
-
-    <div id="calendarWrap" style="display:none;">
-      <div class="cal-legend">
-        <div class="legend-item"><div class="legend-dot" style="background:rgba(232,67,147,0.5)"></div>活動期</div>
-        <div class="legend-item"><div class="legend-dot" style="background:rgba(41,128,185,0.5)"></div>魔のウィーク</div>
-        <div class="legend-item"><div class="legend-dot" style="background:rgba(243,156,18,0.5)"></div>転換期</div>
-        <div class="legend-item"><div class="legend-dot" style="background:rgba(80,80,80,0.4)"></div>凌犯期間</div>
-        <div class="legend-item"><div class="legend-dot" style="background:rgba(106,42,138,0.5)"></div>六害宿</div>
-      </div>
-      <div id="calMonthsWrap"></div>
     </div>
   </div>
 
@@ -1310,16 +1296,147 @@ function renderSelf(shuku) {
     const val = Math.min(98, Math.max(35, base + adj + noise));
     const f = getFortuneLabel(val);
     fortuneHtml += `
-      <div class="fortune-item">
+      <div class="fortune-item clickable" data-month="${m}" style="cursor:pointer;transition:all .2s;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='var(--border)'">
         <div class="fortune-month">${m}月</div>
         <div class="fortune-val ${f.cls}">${f.label}</div>
+        <div style="font-size:9px;color:var(--text-muted);margin-top:2px;">詳細 ›</div>
       </div>
     `;
   }
+  // 月クリックで詳細表示
   document.getElementById('selfFortune').innerHTML = fortuneHtml;
+  document.querySelectorAll('.fortune-item.clickable').forEach(el => {
+    el.style.cursor = 'pointer';
+    el.addEventListener('click', function() {
+      const m = parseInt(this.dataset.month);
+      showMonthDetail(shuku, m);
+    });
+  });
+
+  // 自分のカレンダー表示
+  calMyShuku = shuku;
+  calYear = new Date().getFullYear();
+  calMonth = new Date().getMonth();
+  renderSelfCal();
 
   document.getElementById('selfResult').classList.add('show');
   document.getElementById('selfResult').scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+
+// ===== 月詳細 =====
+const LUCKY_COLORS = {
+  0:['深緑','白','金色'],1:['空色','銀色','白'],2:['茶色','ベージュ','オレンジ'],
+  3:['オレンジ','赤','金色'],4:['紫','白','ラベンダー'],5:['赤','橙','黄'],
+  6:['緑','青','紫'],7:['紺青','銀色','深緑'],8:['ピンク','白','水色'],
+  9:['灰色','紫','白'],10:['青紫','銀','黒'],11:['深紺','白','銀'],
+  12:['橙','黄緑','金'],13:['金色','白','クリーム'],14:['深緑','金','茶'],
+  15:['黄土色','緑','茶'],16:['白','金','ピンク'],17:['緑','茶','白'],
+  18:['水色','緑','黄'],19:['赤','オレンジ','金'],20:['青緑','白','金'],
+  21:['白','金','紫'],22:['緑','茶','ベージュ'],23:['金','白','オレンジ'],
+  24:['黄色','オレンジ','赤'],25:['空色','緑','白'],26:['深緑','紺','銀'],
+};
+const LUCKY_ITEMS = ['水晶','ラベンダー','月桂樹','シトリン','ローズクォーツ','アメジスト','トルマリン','ムーンストーン','ガーネット'];
+const OPEN_ADVICE = {
+  love:['好きな気持ちを素直に表現する','連絡の頻度を少し増やしてみる','二人で新しい場所に出かける','相手の話をじっくり聞く時間を作る'],
+  work:['新しいアイデアを積極的に提案する','苦手な人と積極的にコミュニケーションを取る','スキルアップのための学習を始める','感謝の気持ちを言葉で伝える'],
+  money:['不要なものを整理して運気を整える','収支を見直し節約ポイントを探す','長期的な財務目標を立てる','臨時収入のチャンスに目を向ける'],
+  health:['早寝早起きを意識する','水分を意識的に多く取る','自然の中で過ごす時間を作る','深呼吸やストレッチを習慣にする'],
+};
+
+function showMonthDetail(shuku, month) {
+  const year = new Date().getFullYear();
+  const monthNames = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+  const base = shuku.luck.fortune;
+  const adj = shuku.good_months.includes(month) ? 15 : shuku.caution_months.includes(month) ? -18 : 0;
+  const noise = ((shuku.id * month * 13) % 14) - 7;
+  const val = Math.min(99, Math.max(30, base + adj + noise));
+
+  function luckLabel(v) {
+    if(v>=85) return {label:'大吉',color:'#c9a84c'};
+    if(v>=72) return {label:'吉',color:'#27ae60'};
+    if(v>=60) return {label:'小吉',color:'#2980b9'};
+    if(v>=48) return {label:'平',color:'#7a6a48'};
+    if(v>=38) return {label:'注意',color:'#e67e22'};
+    return {label:'凶',color:'#c0392b'};
+  }
+
+  const lk = luckLabel(val);
+  const colors = LUCKY_COLORS[shuku.id] || ['金色','白','緑'];
+  const item = LUCKY_ITEMS[(shuku.id + month) % LUCKY_ITEMS.length];
+
+  // 吉日・凶日を算出
+  const daysInMonth = new Date(year, month, 0).getDate();
+  const kichiDays = [], kyoDays = [], ryohanDays = [];
+  for(let d = 1; d <= daysInMonth; d++) {
+    const date = new Date(year, month-1, d);
+    const ds = getShukuByDate(date);
+    const luckIdx = DAILY_LUCK.indexOf(getDailyLuck(shuku.id, ds.id));
+    const pt = PERIOD_TYPE[luckIdx];
+    if(pt === '活動期') kichiDays.push(d);
+    else if(pt === '魔のウィーク' || pt === '凌犯期間') kyoDays.push(d);
+    if(isRokugai(shuku.id, ds.id)) kyoDays.indexOf(d) === -1 && kyoDays.push(d);
+  }
+
+  const adviceKeys = ['love','work','money','health'];
+  const adviceLabels = ['恋愛','仕事','金運','健康'];
+  const adviceHtml = adviceKeys.map((k,i) => {
+    const tips = OPEN_ADVICE[k];
+    const tip = tips[(shuku.id + month + i) % tips.length];
+    return `<div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:8px;">
+      <span style="background:var(--gold-dim);color:var(--gold);font-size:10px;padding:2px 7px;border-radius:10px;white-space:nowrap;flex-shrink:0;">${adviceLabels[i]}</span>
+      <span style="font-size:13px;color:var(--text-dim);line-height:1.7;">${tip}</span>
+    </div>`;
+  }).join('');
+
+  document.getElementById('selfMonthDetail').innerHTML = `
+    <div style="background:var(--bg2);border:1px solid var(--gold-border);border-radius:8px;padding:18px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <div style="font-family:'Noto Serif JP',serif;font-size:16px;color:var(--gold);">${year}年 ${monthNames[month-1]} の運勢</div>
+        <div style="font-size:22px;font-weight:700;color:${lk.color};">${lk.label}</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:10px;">
+          <div style="font-size:10px;color:var(--text-muted);margin-bottom:4px;">✦ 吉日</div>
+          <div style="font-size:13px;color:#27ae60;font-weight:500;">${kichiDays.slice(0,8).join('・')}日</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:10px;">
+          <div style="font-size:10px;color:var(--text-muted);margin-bottom:4px;">⚠ 注意日</div>
+          <div style="font-size:13px;color:#c0392b;font-weight:500;">${kyoDays.slice(0,6).join('・')}日</div>
+        </div>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:10px;margin-bottom:12px;">
+        <div style="font-size:10px;color:var(--text-muted);margin-bottom:6px;">🎨 ラッキーカラー</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          ${colors.map(c=>`<span style="background:var(--gold-dim);color:var(--gold);font-size:12px;padding:3px 10px;border-radius:12px;">${c}</span>`).join('')}
+          <span style="background:rgba(26,122,64,0.1);color:#1a7a40;font-size:12px;padding:3px 10px;border-radius:12px;">ラッキーアイテム：${item}</span>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:10px;color:var(--text-muted);margin-bottom:8px;">💡 開運アドバイス</div>
+        ${adviceHtml}
+      </div>
+    </div>
+  `;
+  document.getElementById('selfMonthDetail').style.display = 'block';
+  document.getElementById('selfMonthDetail').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+// ===== 自分のカレンダー =====
+let selfCalYear = new Date().getFullYear();
+let selfCalMonth = new Date().getMonth();
+
+function renderSelfCal() {
+  const wrap = document.getElementById('selfCalWrap');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  wrap.appendChild(renderMonthCal(selfCalYear, selfCalMonth, 'selfCalYear', 'selfCalMonth', 'renderSelfCal'));
+}
+
+function navSelfCal(dir) {
+  selfCalMonth += dir;
+  if (selfCalMonth < 0) { selfCalMonth = 11; selfCalYear--; }
+  if (selfCalMonth > 11) { selfCalMonth = 0; selfCalYear++; }
+  renderSelfCal();
 }
 
 // ===== 相性 =====
@@ -1414,81 +1531,48 @@ let calMyShuku = null;
 let calYear = new Date().getFullYear();
 let calMonth = new Date().getMonth(); // 0-based
 
-function initCalendar() {
-  const birth = document.getElementById('calBirth').value;
-  if (!birth) { alert('生年月日を入力してください'); return; }
-  calMyShuku = calcShuku(birth);
-  calYear = new Date().getFullYear();
-  calMonth = new Date().getMonth();
-  document.getElementById('calendarWrap').style.display = 'block';
-  renderCalendars();
-}
+function initCalendar() {}  // legacy stub
 
-function renderCalendars() {
-  const wrap = document.getElementById('calMonthsWrap');
-  wrap.innerHTML = '';
-
-  // Render 3 months at a time: prev, current, next
-  for (let i = -1; i <= 1; i++) {
-    let m = calMonth + i;
-    let y = calYear;
-    if (m < 0) { m += 12; y--; }
-    if (m > 11) { m -= 12; y++; }
-    wrap.appendChild(renderMonth(y, m));
-  }
-}
-
-function renderMonth(year, month) {
+// 共通カレンダー描画
+function renderMonthCal(year, month, yearVar, monthVar, renderFn) {
   const today = new Date();
   const monthNames = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
-
   const div = document.createElement('div');
-  div.style.cssText = 'background:#faf6ee;border:1px solid var(--border);border-radius:6px;padding:20px;margin-bottom:16px;';
+  div.style.cssText = 'background:#faf6ee;border:1px solid var(--border);border-radius:6px;padding:16px;';
 
-  // Header
-  const headerHtml = `
-    <div class="cal-header">
-      <button class="cal-nav" onclick="navCal(-1)">‹</button>
-      <div class="cal-month-title">${year}年 ${monthNames[month]}</div>
-      <button class="cal-nav" onclick="navCal(1)">›</button>
-    </div>
-    <div class="cal-grid-head">
-      ${['日','月','火','水','木','金','土'].map(d=>`<div class="cal-dow">${d}</div>`).join('')}
-    </div>
-  `;
-
-  // Days
   const firstDay = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const daysInPrev = new Date(year, month, 0).getDate();
 
   let cells = '';
   let dayCount = 0;
-
-  // Prev month padding
   for (let i = firstDay - 1; i >= 0; i--) {
     const d = daysInPrev - i;
-    const date = new Date(year, month - 1, d);
-    const shuku = getShukuByDate(date);
-    cells += renderCell(d, date, shuku, true, today);
+    cells += renderCell(d, new Date(year, month-1, d), getShukuByDate(new Date(year, month-1, d)), true, today);
     dayCount++;
   }
-  // Current month
   for (let d = 1; d <= daysInMonth; d++) {
-    const date = new Date(year, month, d);
-    const shuku = getShukuByDate(date);
-    cells += renderCell(d, date, shuku, false, today);
+    cells += renderCell(d, new Date(year, month, d), getShukuByDate(new Date(year, month, d)), false, today);
     dayCount++;
   }
-  // Next month padding
   const remaining = 42 - dayCount;
   for (let d = 1; d <= remaining; d++) {
-    const date = new Date(year, month + 1, d);
-    const shuku = getShukuByDate(date);
-    cells += renderCell(d, date, shuku, true, today);
+    cells += renderCell(d, new Date(year, month+1, d), getShukuByDate(new Date(year, month+1, d)), true, today);
   }
 
-  div.innerHTML = headerHtml + `<div class="cal-grid">${cells}</div>`;
+  const navPrev = renderFn === 'renderSelfCal' ? 'navSelfCal(-1)' : 'navShuku27Cal(-1)';
+  const navNext = renderFn === 'renderSelfCal' ? 'navSelfCal(1)' : 'navShuku27Cal(1)';
+  div.innerHTML = `
+    <div class="cal-header">
+      <button class="cal-nav" onclick="${navPrev}">‹</button>
+      <div class="cal-month-title">${year}年 ${monthNames[month]}</div>
+      <button class="cal-nav" onclick="${navNext}">›</button>
+    </div>
+    <div class="cal-grid-head">
+      ${['日','月','火','水','木','金','土'].map(d=>`<div class="cal-dow">${d}</div>`).join('')}
+    </div>
+    <div class="cal-grid">${cells}</div>
+  `;
   return div;
 }
 
@@ -1533,17 +1617,12 @@ function renderCell(day, date, shuku, otherMonth, today) {
   `;
 }
 
-function navCal(dir) {
-  calMonth += dir;
-  if (calMonth < 0) { calMonth = 11; calYear--; }
-  if (calMonth > 11) { calMonth = 0; calYear++; }
-  renderCalendars();
-}
+function navCal(dir) {}  // legacy stub
 
 // ===== Tab switch =====
 function switchTab(name) {
   document.querySelectorAll('.tab-btn').forEach((b,i) => {
-    b.classList.toggle('active', ['self','compat','calendar','shuku27','guide'][i] === name);
+    b.classList.toggle('active', ['self','compat','shuku27','guide'][i] === name);
   });
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
@@ -1554,19 +1633,21 @@ function switchTab(name) {
 function initShuku27Grid() {
   const grid = document.getElementById('shuku27Grid');
   if (!grid || grid.children.length > 0) return;
-  grid.innerHTML = SHUKU.map(s => `
+  grid.innerHTML = SHUKU.map(s => {
+    const kanji1 = s.ja.charAt(0);
+    return `
     <button onclick="showShukuDetail(${s.id})" style="
       background:var(--surface2);border:1px solid var(--border);
-      border-radius:6px;padding:12px 8px;cursor:pointer;
+      border-radius:6px;padding:14px 8px;cursor:pointer;
       text-align:center;transition:all .2s;color:var(--text);
       font-family:'Noto Serif JP',serif;width:100%;
     " onmouseover="this.style.borderColor='var(--gold)';this.style.background='rgba(138,106,16,0.1)'"
       onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--surface2)'">
-      <div style="font-size:20px;margin-bottom:4px;">${s.symbol}</div>
-      <div style="font-size:15px;font-weight:500;color:var(--gold);">${s.ja}</div>
-      <div style="font-size:10px;color:var(--text-muted);margin-top:2px;">${s.element}・${s.animal}</div>
-    </button>
-  `).join('');
+      <div style="font-size:32px;font-weight:700;color:var(--gold);line-height:1;">${kanji1}</div>
+      <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">${s.ja}</div>
+      <div style="font-size:9px;color:var(--text-muted);margin-top:2px;opacity:.7;">${s.element}・${s.animal}</div>
+    </button>`;
+  }).join('');
 }
 
 function showShukuDetail(id) {
@@ -1653,15 +1734,49 @@ function showShukuDetail(id) {
       <div style="font-size:12px;color:var(--gold);font-weight:700;margin-bottom:12px;letter-spacing:.1em;">◈ ${year}年 月別運勢</div>
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;">${monthGrid}</div>
     </div>
+
+    <!-- カレンダー -->
+    <div style="margin-top:20px;">
+      <div style="font-size:12px;color:var(--gold);font-weight:700;margin-bottom:12px;letter-spacing:.1em;">◈ 運勢カレンダー</div>
+      <div class="cal-legend" style="margin-bottom:10px;">
+        <div class="legend-item"><div class="legend-dot" style="background:rgba(232,67,147,0.6)"></div>活動期</div>
+        <div class="legend-item"><div class="legend-dot" style="background:rgba(41,128,185,0.6)"></div>魔のウィーク</div>
+        <div class="legend-item"><div class="legend-dot" style="background:rgba(243,156,18,0.6)"></div>転換期</div>
+        <div class="legend-item"><div class="legend-dot" style="background:rgba(80,80,80,0.5)"></div>凌犯期間</div>
+      </div>
+      <div id="shuku27CalWrap"></div>
+    </div>
   `;
 
+  // calMyShukuをこの宿に設定してカレンダー描画
+  calMyShuku = s;
+  shuku27CalYear = new Date().getFullYear();
+  shuku27CalMonth = new Date().getMonth();
   const panel = document.getElementById('shukuDetailPanel');
   panel.style.display = 'block';
   panel.scrollIntoView({ behavior:'smooth', block:'nearest' });
+  renderShuku27Cal();
 }
 
 function closeShukuDetail() {
   document.getElementById('shukuDetailPanel').style.display = 'none';
+}
+
+let shuku27CalYear = new Date().getFullYear();
+let shuku27CalMonth = new Date().getMonth();
+
+function renderShuku27Cal() {
+  const wrap = document.getElementById('shuku27CalWrap');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  wrap.appendChild(renderMonthCal(shuku27CalYear, shuku27CalMonth, 'shuku27CalYear', 'shuku27CalMonth', 'renderShuku27Cal'));
+}
+
+function navShuku27Cal(dir) {
+  shuku27CalMonth += dir;
+  if (shuku27CalMonth < 0) { shuku27CalMonth = 11; shuku27CalYear--; }
+  if (shuku27CalMonth > 11) { shuku27CalMonth = 0; shuku27CalYear++; }
+  renderShuku27Cal();
 }
 </script>
 </body>
