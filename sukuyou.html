@@ -446,7 +446,7 @@ body::before {
         <div class="section-title">運勢カレンダー</div>
         <div class="cal-legend" style="margin-bottom:12px;">
           <div class="legend-item"><div class="legend-dot" style="background:rgba(232,67,147,0.6)"></div>活動期</div>
-          <div class="legend-item"><div class="legend-dot" style="background:rgba(41,128,185,0.6)"></div>魔のウィーク</div>
+          <div class="legend-item"><div class="legend-dot" style="background:rgba(41,128,185,0.6)"></div>七曜凌逼</div>
           <div class="legend-item"><div class="legend-dot" style="background:rgba(243,156,18,0.6)"></div>転換期</div>
           <div class="legend-item"><div class="legend-dot" style="background:rgba(80,80,80,0.5)"></div>凌犯期間</div>
           <div class="legend-item"><div class="legend-dot" style="background:rgba(106,42,138,0.5)"></div>六害宿</div>
@@ -681,14 +681,54 @@ body::before {
     <div class="section">
       <div class="section-title">カレンダーの使い方</div>
       <div style="font-size:13px;line-height:2;color:var(--text-dim);">
-        「カレンダー」タブで生年月日を入力すると、その月の各日に宿と吉凶が表示されます。
-        <br><br>
-        <span style="background:rgba(176,40,0,0.10);border:1px solid rgba(176,40,0,0.3);color:#b02800;padding:2px 8px;border-radius:3px;font-size:12px;font-weight:700;">凌犯</span>
-        赤く表示される日は凌犯期間。無理な行動は控えめに。<br><br>
-        <span style="background:rgba(106,42,138,0.10);border:1px solid rgba(106,42,138,0.3);color:#6a2a8a;padding:2px 8px;border-radius:3px;font-size:12px;font-weight:700;">六害</span>
-        紫で表示される日は六害宿。トラブルに注意。<br><br>
-        <span style="background:rgba(26,122,64,0.12);border:1px solid rgba(26,122,64,0.3);color:#1a7a40;padding:2px 8px;border-radius:3px;font-size:12px;font-weight:700;">吉</span>
-        緑で表示される日は吉日。積極的に行動しましょう。
+        生年月日を入力すると、その月の各日に宿と吉凶が表示されます。カレンダーには11種類の日運が色分けで表示されます。
+      </div>
+
+      <div style="margin-top:16px;display:flex;flex-direction:column;gap:10px;">
+
+        <div style="background:rgba(232,67,147,0.08);border:1px solid rgba(232,67,147,0.3);border-radius:6px;padding:12px 14px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+            <span style="background:rgba(232,67,147,0.2);color:#e84393;font-size:12px;padding:2px 10px;border-radius:12px;font-weight:700;">活動期</span>
+            <span style="font-size:12px;color:var(--gold);">親・栄・安・成・友</span>
+          </div>
+          <div style="font-size:12px;color:var(--text-dim);line-height:1.8;">エネルギーが高まり、積極的な行動が実を結ぶ期間。新しいことへの挑戦・人との出会い・仕事での前進に向いています。</div>
+        </div>
+
+        <div style="background:rgba(243,156,18,0.08);border:1px solid rgba(243,156,18,0.3);border-radius:6px;padding:12px 14px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+            <span style="background:rgba(243,156,18,0.2);color:#c8860a;font-size:12px;padding:2px 10px;border-radius:12px;font-weight:700;">転換期</span>
+            <span style="font-size:12px;color:var(--gold);">衰・業・胎</span>
+          </div>
+          <div style="font-size:12px;color:var(--text-dim);line-height:1.8;">エネルギーが変化する時期。無理に動かず、休養・見直し・準備に充てるのが最善です。種を蒔く・計画を立てる行動が向いています。</div>
+        </div>
+
+        <div style="background:rgba(80,80,80,0.08);border:1px solid rgba(80,80,80,0.3);border-radius:6px;padding:12px 14px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+            <span style="background:rgba(80,80,80,0.2);color:#555;font-size:12px;padding:2px 10px;border-radius:12px;font-weight:700;">凌犯期間</span>
+            <span style="font-size:12px;color:var(--gold);">命</span>
+          </div>
+          <div style="font-size:12px;color:var(--text-dim);line-height:1.8;">月が自分の命宿を通過する最もエネルギーが乱れやすい時期（約3日間）。重要な契約・手術・大きな決断を避け、内省と浄化の時間にしましょう。約27日ごとに訪れます。</div>
+        </div>
+
+        <div style="background:rgba(232,67,147,0.06);border:1px solid rgba(232,67,147,0.25);border-radius:6px;padding:12px 14px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+            <span style="background:rgba(232,67,147,0.15);color:#e84393;font-size:12px;padding:2px 10px;border-radius:12px;font-weight:700;">七曜凌逼</span>
+            <span style="font-size:12px;color:var(--gold);">危・壊</span>
+          </div>
+          <div style="font-size:12px;color:var(--text-dim);line-height:1.8;">「七曜凌逼（しちようりょうひ）」とは、日・月・火・水・木・金・土の七曜星があなたの命宿に干渉する期間のこと。予期せぬトラブル・体調変化・対人関係の摩擦が起きやすい。慎重な行動と心の余裕が大切です。</div>
+        </div>
+
+        <div style="background:rgba(106,42,138,0.06);border:1px solid rgba(106,42,138,0.25);border-radius:6px;padding:12px 14px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+            <span style="background:rgba(106,42,138,0.15);color:#6a2a8a;font-size:12px;padding:2px 10px;border-radius:12px;font-weight:700;">六害宿</span>
+          </div>
+          <div style="font-size:12px;color:var(--text-dim);line-height:1.8;">あなたの命宿と正反対に位置する「六害宿」に月がある日。トラブルや障害が起きやすい要注意日です。特に人間関係・金銭・交通に注意しましょう。</div>
+        </div>
+
+      </div>
+
+      <div style="margin-top:16px;background:var(--gold-dim);border:1px solid var(--gold-border);border-radius:6px;padding:14px;font-size:13px;color:var(--text-dim);line-height:1.9;">
+        💡 <strong style="color:var(--gold);">活用のヒント：</strong>重要なイベント（面接・手術・結婚式・契約など）は「活動期」の吉日を選ぶことで流れが良くなります。凌犯期間や七曜凌逼の日は無理をせず、心身のリセットに使いましょう。
       </div>
     </div>
 
@@ -1156,23 +1196,23 @@ const DAILY_LUCK = [
   { name:'栄', color:'#27ae60', bg:'rgba(39,174,96,0.15)',  desc:'栄える日。積極的な行動が吉。', type:'good' },
   { name:'衰', color:'#e84393', bg:'rgba(232,67,147,0.15)', desc:'活動期。ペースを落として休養を。', type:'caution' },
   { name:'安', color:'#27ae60', bg:'rgba(39,174,96,0.15)',  desc:'穏やかで安定した吉日。', type:'good' },
-  { name:'危', color:'#e84393', bg:'rgba(232,67,147,0.15)', desc:'魔のウィーク。トラブルに注意。', type:'danger' },
+  { name:'危', color:'#e84393', bg:'rgba(232,67,147,0.15)', desc:'七曜凌逼。トラブルに注意。', type:'danger' },
   { name:'成', color:'#2980b9', bg:'rgba(41,128,185,0.15)', desc:'物事が成就しやすい吉日。', type:'good' },
-  { name:'壊', color:'#2980b9', bg:'rgba(41,128,185,0.15)', desc:'魔のウィーク。変化に注意。', type:'caution' },
+  { name:'壊', color:'#2980b9', bg:'rgba(41,128,185,0.15)', desc:'七曜凌逼。変化に注意。', type:'caution' },
   { name:'友', color:'#27ae60', bg:'rgba(39,174,96,0.15)',  desc:'友情が結ばれやすい日。', type:'good' },
   { name:'業', color:'#2980b9', bg:'rgba(41,128,185,0.15)', desc:'転換期。新しいことの準備に。', type:'neutral' },
   { name:'胎', color:'#f39c12', bg:'rgba(243,156,18,0.15)', desc:'転換期。新しい始まりの前触れ。', type:'neutral' },
 ];
 
 // 期間タイプ
-// 命(0)=凌犯、危(5)壊(7)=魔のウィーク、栄(2)親(1)安(4)成(6)友(8)=活動期、衰(3)業(9)胎(10)=転換期
+// 命(0)=凌犯、危(5)壊(7)=七曜凌逼、栄(2)親(1)安(4)成(6)友(8)=活動期、衰(3)業(9)胎(10)=転換期
 const PERIOD_TYPE = {
   0:'凌犯期間', 1:'活動期', 2:'活動期', 3:'転換期',
-  4:'活動期', 5:'魔のウィーク', 6:'活動期', 7:'魔のウィーク',
+  4:'活動期', 5:'七曜凌逼', 6:'活動期', 7:'七曜凌逼',
   8:'活動期', 9:'転換期', 10:'転換期'
 };
 const PERIOD_COLOR = {
-  '凌犯期間':'#555', '活動期':'#e84393', '魔のウィーク':'#2980b9', '転換期':'#f39c12'
+  '凌犯期間':'#555', '活動期':'#e84393', '七曜凌逼':'#2980b9', '転換期':'#f39c12'
 };
 
 function getDailyLuck(myShukuId, dateShukuId) {
@@ -1373,7 +1413,7 @@ function showMonthDetail(shuku, month) {
     const luckIdx = DAILY_LUCK.indexOf(getDailyLuck(shuku.id, ds.id));
     const pt = PERIOD_TYPE[luckIdx];
     if(pt === '活動期') kichiDays.push(d);
-    else if(pt === '魔のウィーク' || pt === '凌犯期間') kyoDays.push(d);
+    else if(pt === '七曜凌逼' || pt === '凌犯期間') kyoDays.push(d);
     if(isRokugai(shuku.id, ds.id)) kyoDays.indexOf(d) === -1 && kyoDays.push(d);
   }
 
@@ -1590,7 +1630,7 @@ function renderCell(day, date, shuku, otherMonth, today) {
     periodType = PERIOD_TYPE[luckIdx] || '';
     if (periodType === '凌犯期間') cellBg = 'background:rgba(80,80,80,0.12);border-color:rgba(80,80,80,0.3);';
     else if (periodType === '活動期') cellBg = 'background:rgba(232,67,147,0.08);border-color:rgba(232,67,147,0.25);';
-    else if (periodType === '魔のウィーク') cellBg = 'background:rgba(41,128,185,0.08);border-color:rgba(41,128,185,0.25);';
+    else if (periodType === '七曜凌逼') cellBg = 'background:rgba(41,128,185,0.08);border-color:rgba(41,128,185,0.25);';
     else if (periodType === '転換期') cellBg = 'background:rgba(243,156,18,0.08);border-color:rgba(243,156,18,0.25);';
   }
   if (rokugai) cellBg += 'outline:2px solid rgba(106,42,138,0.4);outline-offset:-2px;';
@@ -1605,7 +1645,7 @@ function renderCell(day, date, shuku, otherMonth, today) {
   const luckBadge = dailyLuck ? `<span class="badge" style="background:${dailyLuck.bg};color:${dailyLuck.color};font-weight:700;">${dailyLuck.name}</span>` : '';
   const rokugaiBadge = rokugai ? '<span class="badge badge-rokugai">六害</span>' : '';
 
-  const tooltip = dailyLuck ? `${shuku.ja}｜${dailyLuck.name}（${periodType}）${rokugai ? '・六害' : ''}` : shuku.ja;
+  const tooltip = dailyLuck ? `${shuku.ja}｜${dailyLuck.name}（${periodType}）${rokugai ? '・六害宿' : ''}` : shuku.ja;
 
   return `
     <div class="${classes}" style="${cellBg}">
@@ -1740,7 +1780,7 @@ function showShukuDetail(id) {
       <div style="font-size:12px;color:var(--gold);font-weight:700;margin-bottom:12px;letter-spacing:.1em;">◈ 運勢カレンダー</div>
       <div class="cal-legend" style="margin-bottom:10px;">
         <div class="legend-item"><div class="legend-dot" style="background:rgba(232,67,147,0.6)"></div>活動期</div>
-        <div class="legend-item"><div class="legend-dot" style="background:rgba(41,128,185,0.6)"></div>魔のウィーク</div>
+        <div class="legend-item"><div class="legend-dot" style="background:rgba(41,128,185,0.6)"></div>七曜凌逼</div>
         <div class="legend-item"><div class="legend-dot" style="background:rgba(243,156,18,0.6)"></div>転換期</div>
         <div class="legend-item"><div class="legend-dot" style="background:rgba(80,80,80,0.5)"></div>凌犯期間</div>
       </div>
