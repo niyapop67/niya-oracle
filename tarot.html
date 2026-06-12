@@ -4,31 +4,38 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>タロット占い｜Tarot Oracle</title>
-<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Noto+Serif+JP:wght@300;400;500&family=Uncial+Antiqua&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=M+PLUS+Rounded+1c:wght@400;500;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #1a1208;
-  --bg2: #221a0a;
-  --parchment: #f5e6c8;
-  --parchment2: #ede0b8;
-  --ink: #2a1f0a;
-  --ink-mid: #5c4a1e;
-  --ink-light: #8b7340;
-  --gold: #c9973a;
-  --gold-light: #e8c068;
-  --gold-dim: rgba(201,151,58,0.2);
+  --bg: #f5f0e8;
+  --bg2: #ede8dc;
+  --frost: #1a0f00;
+  --frost2: #2a1a00;
+  --ink: #0f0800;
+  --ink-mid: #3a2800;
+  --ink-light: #5a4010;
+  --silver: #4a3800;
+  --silver-light: #3a2800;
+  --silver-dim: rgba(80,60,20,0.15);
+  --rune-gold: #7a5800;
+  --ice: #e8f0dc;
+  --border: rgba(120,90,30,0.35);
+  --parchment: #1a0f00;
+  --parchment2: #2a1800;
+  --gold: #7a5800;
+  --gold-light: #9a7010;
+  --gold-dim: rgba(122,88,0,0.15);
   --red: #8b1a1a;
-  --red-light: #c0392b;
-  --cream: #fdf6e3;
-  --border: rgba(201,151,58,0.3);
+  --red-light: #c03020;
+  --cream: #f5f0e8;
 }
 
 * { margin:0; padding:0; box-sizing:border-box; }
 
 body {
   background: var(--bg);
-  color: var(--parchment);
-  font-family: 'Noto Serif JP', serif;
+  color: var(--frost);
+  font-family: 'Noto Sans JP', sans-serif;
   min-height: 100vh;
   overflow-x: hidden;
 }
@@ -90,13 +97,13 @@ body::before {
 .rule-line.r { background: linear-gradient(to left, transparent, var(--gold)); }
 .rule-center {
   padding: 0 14px;
-  font-family: 'IM Fell English', serif;
+  font-family: 'M PLUS Rounded 1c', sans-serif;
   font-size: 18px;
   color: var(--gold);
 }
 
 h1 {
-  font-family: 'Uncial Antiqua', cursive;
+  font-family: 'Space Grotesk', sans-serif;
   font-size: clamp(26px, 6vw, 44px);
   color: var(--gold-light);
   letter-spacing: 0.12em;
@@ -106,11 +113,11 @@ h1 {
 }
 
 .header-sub {
-  font-family: 'EB Garamond', serif;
+  font-family: 'Space Grotesk', sans-serif;
   font-style: italic;
   font-size: 14px;
   color: var(--ink-light);
-  letter-spacing: 0.2em;
+  letter-spacing: 0.04em;
 }
 
 /* Spread selector */
@@ -119,7 +126,7 @@ h1 {
 }
 
 .section-heading {
-  font-family: 'IM Fell English', serif;
+  font-family: 'M PLUS Rounded 1c', sans-serif;
   font-size: 11px;
   letter-spacing: 0.35em;
   color: var(--gold);
@@ -136,10 +143,10 @@ h1 {
 }
 
 .spread-btn {
-  background: rgba(26,18,8,0.8);
+  background: rgba(255,252,245,0.85);
   border: 1px solid var(--border);
-  color: var(--parchment);
-  font-family: 'IM Fell English', serif;
+  color: var(--frost);
+  font-family: 'M PLUS Rounded 1c', sans-serif;
   font-size: 14px;
   padding: 16px 20px;
   cursor: pointer;
@@ -161,7 +168,7 @@ h1 {
 
 .spread-btn-title { font-size: 14px; margin-bottom: 3px; position:relative;z-index:1; }
 .spread-btn-desc {
-  font-family: 'Noto Serif JP', serif;
+  font-family: 'Noto Sans JP', sans-serif;
   font-size: 11px;
   color: var(--ink-light);
   letter-spacing: 0.05em;
@@ -175,9 +182,9 @@ h1 {
 }
 
 .q-label {
-  font-family: 'IM Fell English', serif;
+  font-family: 'M PLUS Rounded 1c', sans-serif;
   font-size: 11px;
-  letter-spacing: 0.3em;
+  letter-spacing: 0.08em;
   color: var(--gold);
   text-transform: uppercase;
   margin-bottom: 10px;
@@ -188,8 +195,8 @@ textarea {
   width: 100%;
   background: rgba(26,18,8,0.7);
   border: 1px solid var(--border);
-  color: var(--parchment);
-  font-family: 'Noto Serif JP', serif;
+  color: var(--frost);
+  font-family: 'Noto Sans JP', sans-serif;
   font-size: 14px;
   padding: 14px 18px;
   resize: none;
@@ -210,9 +217,9 @@ textarea:focus { border-color: rgba(201,151,58,0.5); }
   background: transparent;
   border: 1px solid var(--gold);
   color: var(--gold-light);
-  font-family: 'Uncial Antiqua', cursive;
+  font-family: 'Space Grotesk', sans-serif;
   font-size: 16px;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.04em;
   padding: 18px 72px;
   cursor: pointer;
   position: relative;
@@ -264,11 +271,11 @@ textarea:focus { border-color: rgba(201,151,58,0.5); }
   75%{transform:translateY(-4px) rotate(3deg);}
 }
 .shuffle-text {
-  font-family: 'EB Garamond', serif;
+  font-family: 'Space Grotesk', sans-serif;
   font-style: italic;
   font-size: 13px;
   color: var(--ink-light);
-  letter-spacing: 0.15em;
+  letter-spacing: 0.02em;
 }
 
 /* Result */
@@ -283,10 +290,60 @@ textarea:focus { border-color: rgba(201,151,58,0.5); }
 /* Spread layout */
 .spread-layout {
   display: flex;
-  gap: 16px;
-  justify-content: center;
-  flex-wrap: wrap;
-  margin-bottom: 36px;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 28px;
+}
+
+/* カードリストアイテム */
+.card-list-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: rgba(255,252,245,0.8);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 14px 18px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.card-list-item:hover { background: rgba(201,151,58,0.08); border-color: var(--gold); }
+.card-list-item.selected { background: rgba(201,151,58,0.12); border-color: var(--gold); border-left: 3px solid var(--gold); }
+.card-list-position {
+  font-size: 11px;
+  color: var(--gold);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  min-width: 90px;
+  flex-shrink: 0;
+}
+.card-list-name {
+  font-family: 'Noto Serif JP', serif;
+  font-size: 17px;
+  color: var(--ink);
+  font-weight: 500;
+  flex: 1;
+}
+.card-list-sub {
+  font-size: 11px;
+  color: var(--ink-mid);
+  font-style: italic;
+}
+.card-list-rev {
+  font-size: 11px;
+  color: #7a5800;
+  background: rgba(201,151,58,0.15);
+  border: 1px solid rgba(201,151,58,0.4);
+  border-radius: 3px;
+  padding: 1px 8px;
+  flex-shrink: 0;
+  font-weight: 600;
+}
+.card-list-arrow {
+  font-size: 14px;
+  color: var(--gold);
+  flex-shrink: 0;
+  opacity: 0.6;
 }
 
 /* Card */
@@ -301,49 +358,19 @@ textarea:focus { border-color: rgba(201,151,58,0.5); }
 .tarot-card-wrap:hover { transform: translateY(-4px); }
 .tarot-card-wrap.selected .tarot-card { border-color: var(--gold); box-shadow: 0 0 24px rgba(201,151,58,0.4); }
 
-.tarot-card {
-  width: 100px;
-  height: 160px;
-  background: linear-gradient(160deg, #1e1406, #2d1f08);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  overflow: hidden;
-  transition: all 0.3s;
-  padding: 8px;
-}
-
-.tarot-card::before {
-  content: '';
-  position: absolute;
-  inset: 4px;
-  border: 1px solid rgba(201,151,58,0.15);
-  border-radius: 2px;
-  pointer-events: none;
-}
-
-.card-symbol {
-  font-size: 32px;
-  margin-bottom: 6px;
-  filter: drop-shadow(0 0 8px rgba(201,151,58,0.4));
-}
-.card-symbol.reversed { transform: rotate(180deg); }
+.tarot-card { display:none; }
 
 .card-num {
-  font-family: 'IM Fell English', serif;
+  font-family: 'M PLUS Rounded 1c', sans-serif;
   font-size: 10px;
   color: var(--gold);
-  letter-spacing: 0.2em;
+  letter-spacing: 0.04em;
   opacity: 0.7;
   margin-bottom: 4px;
 }
 
 .card-name-on {
-  font-family: 'IM Fell English', serif;
+  font-family: 'M PLUS Rounded 1c', sans-serif;
   font-size: 9px;
   color: var(--parchment2);
   text-align: center;
@@ -357,22 +384,23 @@ textarea:focus { border-color: rgba(201,151,58,0.5); }
   right: 4px;
   font-size: 8px;
   color: var(--red-light);
-  font-family: 'EB Garamond', serif;
+  font-family: 'Space Grotesk', sans-serif;
   font-style: italic;
   opacity: 0.8;
 }
 
 .card-position-label {
-  font-family: 'IM Fell English', serif;
-  font-size: 10px;
-  color: var(--ink-light);
-  letter-spacing: 0.1em;
+  font-family: 'M PLUS Rounded 1c', sans-serif;
+  font-size: 11px;
+  color: var(--gold);
+  letter-spacing: 0.01em;
   text-align: center;
+  font-weight: 700;
 }
 
 /* Detail */
 .card-detail {
-  background: rgba(26,18,8,0.9);
+  background: rgba(250,246,238,0.97);
   border: 1px solid var(--border);
   padding: 32px;
   margin-bottom: 16px;
@@ -399,49 +427,55 @@ textarea:focus { border-color: rgba(201,151,58,0.5); }
   align-items: flex-start;
   margin-bottom: 24px;
   padding-bottom: 20px;
-  border-bottom: 1px solid rgba(201,151,58,0.1);
+  border-bottom: 1px solid rgba(201,151,58,0.3);
 }
 
 .detail-symbol-big {
-  font-size: 52px;
+  width: 80px;
+  height: 128px;
   flex-shrink: 0;
-  filter: drop-shadow(0 0 12px rgba(201,151,58,0.3));
+  border-radius: 5px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
 }
-.detail-symbol-big.reversed { transform: rotate(180deg); }
+.detail-symbol-big img { width:100%;height:100%;object-fit:cover;display:block; }
 
 .detail-title-group { flex: 1; }
 .detail-position {
-  font-family: 'IM Fell English', serif;
+  font-family: 'M PLUS Rounded 1c', sans-serif;
   font-size: 10px;
-  letter-spacing: 0.3em;
+  letter-spacing: 0.08em;
   color: var(--gold);
-  opacity: 0.7;
+  opacity: 1;
   margin-bottom: 6px;
   text-transform: uppercase;
+  font-weight: 700;
 }
 .detail-card-title {
-  font-family: 'Uncial Antiqua', cursive;
+  font-family: 'Space Grotesk', sans-serif;
   font-size: 20px;
   color: var(--gold-light);
   margin-bottom: 4px;
   letter-spacing: 0.05em;
 }
 .detail-card-sub {
-  font-family: 'EB Garamond', serif;
+  font-family: 'Space Grotesk', sans-serif;
   font-style: italic;
   font-size: 13px;
-  color: var(--ink-light);
-  letter-spacing: 0.1em;
+  color: var(--ink-mid);
+  letter-spacing: 0.01em;
 }
 .reversed-label {
   display: inline-block;
   margin-top: 6px;
-  font-family: 'EB Garamond', serif;
+  font-family: 'Space Grotesk', sans-serif;
   font-style: italic;
   font-size: 12px;
-  color: var(--red-light);
-  border: 1px solid rgba(192,57,43,0.4);
+  color: #6b4c00;
+  background: rgba(201,151,58,0.15);
+  border: 1px solid rgba(201,151,58,0.5);
   padding: 2px 10px;
+  border-radius: 3px;
 }
 
 .detail-keywords {
@@ -451,19 +485,22 @@ textarea:focus { border-color: rgba(201,151,58,0.5); }
   margin-bottom: 20px;
 }
 .kw-tag {
-  font-family: 'EB Garamond', serif;
+  font-family: 'Space Grotesk', sans-serif;
   font-size: 12px;
-  color: var(--gold);
-  border: 1px solid var(--border);
+  color: #5a3c00;
+  background: rgba(201,151,58,0.1);
+  border: 1px solid rgba(201,151,58,0.4);
   padding: 4px 12px;
-  letter-spacing: 0.1em;
+  border-radius: 4px;
+  letter-spacing: 0.01em;
+  font-weight: 600;
 }
 .kw-tag.rev { color: var(--red-light); border-color: rgba(192,57,43,0.3); }
 
 .detail-sec-label {
-  font-family: 'IM Fell English', serif;
+  font-family: 'M PLUS Rounded 1c', sans-serif;
   font-size: 10px;
-  letter-spacing: 0.3em;
+  letter-spacing: 0.08em;
   color: var(--gold);
   text-transform: uppercase;
   opacity: 0.7;
@@ -493,11 +530,11 @@ textarea:focus { border-color: rgba(201,151,58,0.5); }
   margin-top: 4px;
 }
 .oracle-text {
-  font-family: 'EB Garamond', serif;
+  font-family: 'Space Grotesk', sans-serif;
   font-style: italic;
   font-size: 15px;
   line-height: 1.9;
-  color: var(--parchment);
+  color: var(--frost);
 }
 
 /* Summary */
@@ -508,10 +545,10 @@ textarea:focus { border-color: rgba(201,151,58,0.5); }
   margin-bottom: 24px;
 }
 .summary-title {
-  font-family: 'Uncial Antiqua', cursive;
+  font-family: 'Space Grotesk', sans-serif;
   font-size: 16px;
   color: var(--gold-light);
-  letter-spacing: 0.1em;
+  letter-spacing: 0.01em;
   margin-bottom: 16px;
   text-align: center;
 }
@@ -527,9 +564,9 @@ textarea:focus { border-color: rgba(201,151,58,0.5); }
   background: none;
   border: 1px solid var(--border);
   color: var(--ink-light);
-  font-family: 'IM Fell English', serif;
+  font-family: 'M PLUS Rounded 1c', sans-serif;
   font-size: 13px;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.04em;
   padding: 12px 40px;
   cursor: pointer;
   transition: all 0.3s;
@@ -537,14 +574,14 @@ textarea:focus { border-color: rgba(201,151,58,0.5); }
 .again-btn:hover { border-color: var(--gold); color: var(--gold); }
 
 .footer-note {
-  font-family: 'EB Garamond', serif;
+  font-family: 'Space Grotesk', sans-serif;
   font-style: italic;
   font-size: 11px;
   color: var(--ink-light);
   text-align: center;
   margin-top: 48px;
   opacity: 0.5;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.01em;
 }
 
 @media (max-width: 540px) {
@@ -596,11 +633,6 @@ textarea:focus { border-color: rgba(201,151,58,0.5); }
     </div>
   </div>
 
-  <div class="question-wrap">
-    <div class="q-label">— Question · 問いを立てる —</div>
-    <textarea id="questionInput" rows="2" placeholder="心に問いを思い浮かべてください。例：この恋は成就するのか。仕事の転換期はいつか。"></textarea>
-  </div>
-
   <div class="draw-wrap">
     <button class="draw-btn" id="drawBtn" onclick="drawCards()">
       <span>✦ カードを引く ✦</span>
@@ -627,7 +659,9 @@ textarea:focus { border-color: rgba(201,151,58,0.5); }
 </div>
 
 <script>
-// ===== TAROT DATA =====
+// ===== CARD IMAGES =====
+
+
 const majorArcana = [
   { id:0, name:'愚者', en:'The Fool', suit:'major', symbol:'🌟',
     keywords:['新しい始まり','自由','冒険','無邪気さ'],
@@ -934,6 +968,7 @@ function shuffleArray(arr) {
   return a;
 }
 
+
 function drawCards() {
   const btn = document.getElementById('drawBtn');
   const shuf = document.getElementById('shuffling');
@@ -966,22 +1001,21 @@ function drawCards() {
 
 function renderSpread() {
   const layout = document.getElementById('spreadLayout');
+  layout.classList.remove('celtic-layout');
   layout.innerHTML = drawnCards.map((dc, i) => `
-    <div class="tarot-card-wrap ${i === 0 ? 'selected' : ''}" onclick="selectCard(${i})">
-      <div class="tarot-card">
-        <div class="card-symbol ${dc.reversed ? 'reversed' : ''}">${dc.card.symbol}</div>
-        <div class="card-num">${dc.card.suit === 'major' ? `大アルカナ ${dc.card.id}` : dc.card.suit}</div>
-        <div class="card-name-on">${dc.card.name}</div>
-        ${dc.reversed ? '<div class="card-reversed-badge">逆位置</div>' : ''}
-      </div>
-      <div class="card-position-label">${dc.position}</div>
+    <div class="card-list-item ${i === 0 ? 'selected' : ''}" onclick="selectCard(${i})">
+      <div class="card-list-position">${dc.position}</div>
+      <div class="card-list-name">${dc.card.name}</div>
+      <div class="card-list-sub">${dc.card.en}</div>
+      ${dc.reversed ? '<div class="card-list-rev">逆位置</div>' : ''}
+      <div class="card-list-arrow">›</div>
     </div>
   `).join('');
 }
 
 function selectCard(i) {
   selectedCardIndex = i;
-  document.querySelectorAll('.tarot-card-wrap').forEach((el, idx) => {
+  document.querySelectorAll('.card-list-item').forEach((el, idx) => {
     el.classList.toggle('selected', idx === i);
   });
   renderDetail(i);
@@ -996,7 +1030,7 @@ function renderDetail(i) {
   detail.innerHTML = `
     <div class="card-detail">
       <div class="detail-head">
-        <div class="detail-symbol-big ${rev ? 'reversed' : ''}">${c.symbol}</div>
+
         <div class="detail-title-group">
           <div class="detail-position">${dc.position} · ${c.suit === 'major' ? '大アルカナ' : c.suit}</div>
           <div class="detail-card-title">${c.name}</div>
