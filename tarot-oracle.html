@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>タロット占い｜Tarot Oracle</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=M+PLUS+Rounded+1c:wght@400;500;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f5f0e8;
+  --bg2: #ede8dc;
+  --frost: #1a0f00;
+  --frost2: #2a1a00;
+  --ink: #0f0800;
+  --ink-mid: #3a2800;
+  --ink-light: #5a4010;
+  --silver: #4a3800;
+  --silver-light: #3a2800;
+  --silver-dim: rgba(80,60,20,0.15);
+  --rune-gold: #7a5800;
+  --ice: #e8f0dc;
+  --border: rgba(120,90,30,0.35);
+  --parchment: #1a0f00;
+  --parchment2: #2a1800;
+  --gold: #7a5800;
+  --gold-light: #9a7010;
+  --gold-dim: rgba(122,88,0,0.15);
+  --red: #8b1a1a;
+  --red-light: #c03020;
+  --cream: #f5f0e8;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--frost);
+  font-family: 'Noto Sans JP', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px),
+    repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0,0,0,0.02) 2px, rgba(0,0,0,0.02) 4px);
+  pointer-events: none;
+  z-index: 100;
+}
+
+.bg-wrap {
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 70% 50% at 50% 0%, rgba(201,151,58,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 60% at 10% 100%, rgba(139,26,26,0.1) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 40% at 90% 80%, rgba(201,151,58,0.06) 0%, transparent 60%),
+    var(--bg);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.container {
+  position: relative;
+  z-index: 1;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 52px 24px 80px;
+}
+
+.header { text-align: center; margin-bottom: 40px; }
+.header-emblem { font-size: 48px; margin-bottom: 16px; animation: floatEmb 5s ease-in-out infinite; display: block; }
+@keyframes floatEmb { 0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);} }
+.header-rule { display: flex; align-items: center; gap: 0; margin: 0 auto 16px; width: 320px; }
+.rule-line { flex:1; height:1px; background: linear-gradient(to right, transparent, var(--gold)); }
+.rule-line.r { background: linear-gradient(to left, transparent, var(--gold)); }
+.rule-center { padding: 0 14px; font-family: 'M PLUS Rounded 1c', sans-serif; font-size: 18px; color: var(--gold); }
+h1 { font-family: 'Space Grotesk', sans-serif; font-size: clamp(26px, 6vw, 44px); color: var(--gold-light); letter-spacing: 0.12em; line-height: 1.2; margin-bottom: 8px; text-shadow: 0 0 40px rgba(232,192,104,0.3); }
+.header-sub { font-family: 'Space Grotesk', sans-serif; font-style: italic; font-size: 14px; color: var(--ink-light); letter-spacing: 0.04em; }
+
+.section-heading { font-family: 'M PLUS Rounded 1c', sans-serif; font-size: 11px; letter-spacing: 0.35em; color: var(--gold); text-transform: uppercase; text-align: center; margin-bottom: 16px; opacity: 0.8; }
+
+/* Consultation form */
+.consult-section { margin-bottom: 32px; background: rgba(255,252,245,0.85); border: 1px solid var(--border); padding: 24px 22px; }
+.field-group { margin-bottom: 20px; }
+.field-group:last-child { margin-bottom: 0; }
+.q-label { font-family: 'M PLUS Rounded 1c', sans-serif; font-size: 11px; letter-spacing: 0.08em; color: var(--gold); text-transform: uppercase; margin-bottom: 10px; opacity: 0.9; display:block; }
+.theme-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px,1fr)); gap: 8px; }
+.theme-btn { background: rgba(255,255,255,0.7); border: 1px solid var(--border); color: var(--ink); font-family: 'Noto Sans JP', sans-serif; font-size: 12.5px; padding: 10px 8px; cursor: pointer; transition: all 0.2s; border-radius: 4px; text-align: center; }
+.theme-btn:hover { border-color: var(--gold); }
+.theme-btn.active { background: var(--gold-dim); border-color: var(--gold); color: var(--gold-light); font-weight: 700; }
+textarea, input[type=text] { width: 100%; background: rgba(255,255,255,0.7); border: 1px solid var(--border); color: var(--frost); font-family: 'Noto Sans JP', sans-serif; font-size: 14px; padding: 14px 16px; resize: vertical; outline: none; line-height: 1.8; transition: border-color 0.3s; border-radius: 4px; }
+textarea { min-height: 90px; }
+textarea::placeholder, input::placeholder { color: var(--ink-light); opacity:0.7; }
+textarea:focus, input:focus { border-color: rgba(122,88,0,0.6); }
+.optional-note { font-size: 11px; color: var(--ink-light); margin-top: 6px; opacity:0.75; }
+.form-error { font-size: 12px; color: var(--red-light); margin-top: 8px; display:none; }
+.form-error.show { display:block; }
+
+.draw-wrap { text-align: center; margin-bottom: 40px; }
+.draw-btn { background: transparent; border: 1px solid var(--gold); color: var(--gold-light); font-family: 'Space Grotesk', sans-serif; font-size: 16px; letter-spacing: 0.04em; padding: 18px 72px; cursor: pointer; position: relative; overflow: hidden; transition: all 0.4s; }
+.draw-btn::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(201,151,58,0.2), rgba(139,26,26,0.2)); transform: scaleX(0); transform-origin: left; transition: transform 0.4s; }
+.draw-btn:hover::before { transform: scaleX(1); }
+.draw-btn:hover { box-shadow: 0 0 30px rgba(201,151,58,0.2); }
+.draw-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.draw-btn span { position: relative; z-index: 1; }
+
+.shuffling { display: none; flex-direction: column; align-items: center; gap: 12px; margin: 16px 0; }
+.shuffling.show { display: flex; }
+.shuffle-cards { display: flex; gap: -8px; }
+.sh-card { width: 28px; height: 44px; background: linear-gradient(135deg, var(--bg2), rgba(201,151,58,0.1)); border: 1px solid var(--border); border-radius: 2px; animation: shuffle 0.8s ease-in-out infinite; margin: 0 2px; }
+.sh-card:nth-child(2) { animation-delay: 0.15s; }
+.sh-card:nth-child(3) { animation-delay: 0.3s; }
+@keyframes shuffle { 0%,100%{transform:translateY(0) rotate(0deg);} 25%{transform:translateY(-8px) rotate(-5deg);} 75%{transform:translateY(-4px) rotate(3deg);} }
+.shuffle-text { font-family: 'Space Grotesk', sans-serif; font-style: italic; font-size: 13px; color: var(--ink-light); letter-spacing: 0.02em; }
+
+.result-wrap { opacity: 0; transform: translateY(20px); transition: all 0.8s ease; pointer-events: none; }
+.result-wrap.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+
+.question-echo { background: rgba(26,18,8,0.06); border-left: 3px solid var(--gold); padding: 12px 16px; margin-bottom: 24px; font-size: 13px; color: var(--ink-mid); line-height:1.7; }
+.question-echo b { color: var(--gold-light); background: rgba(26,18,8,0.85); padding:1px 6px; border-radius:3px; font-weight:600; }
+
+.spread-layout { display: flex; flex-direction: column; gap: 8px; margin-bottom: 28px; }
+.card-list-item { display: flex; align-items: center; gap: 14px; background: rgba(255,252,245,0.8); border: 1px solid var(--border); border-radius: 6px; padding: 14px 18px; cursor: pointer; transition: all 0.2s; }
+.card-list-item:hover { background: rgba(201,151,58,0.08); border-color: var(--gold); }
+.card-list-item.selected { background: rgba(201,151,58,0.12); border-color: var(--gold); border-left: 3px solid var(--gold); }
+.card-list-position { font-size: 11px; color: var(--gold); font-weight: 700; letter-spacing: 0.05em; min-width: 60px; flex-shrink: 0; }
+.card-list-name { font-family: 'Noto Serif JP', serif; font-size: 17px; color: var(--ink); font-weight: 500; flex: 1; }
+.card-list-sub { font-size: 11px; color: var(--ink-mid); font-style: italic; }
+.card-list-rev { font-size: 11px; color: #7a5800; background: rgba(201,151,58,0.15); border: 1px solid rgba(201,151,58,0.4); border-radius: 3px; padding: 1px 8px; flex-shrink: 0; font-weight: 600; }
+.card-list-arrow { font-size: 14px; color: var(--gold); flex-shrink: 0; opacity: 0.6; }
+
+.card-detail { background: rgba(250,246,238,0.97); border: 1px solid var(--border); padding: 32px; margin-bottom: 16px; position: relative; }
+.card-detail::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(to right, transparent, var(--gold), transparent); }
+.card-detail::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: linear-gradient(to right, transparent, var(--gold), transparent); }
+.detail-head { margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid rgba(201,151,58,0.3); }
+.detail-position { font-family: 'M PLUS Rounded 1c', sans-serif; font-size: 10px; letter-spacing: 0.08em; color: var(--gold); margin-bottom: 6px; text-transform: uppercase; font-weight: 700; }
+.detail-card-title { font-family: 'Space Grotesk', sans-serif; font-size: 20px; color: var(--gold-light); margin-bottom: 4px; letter-spacing: 0.05em; }
+.detail-card-sub { font-family: 'Space Grotesk', sans-serif; font-style: italic; font-size: 13px; color: var(--ink-mid); letter-spacing: 0.01em; }
+.reversed-label { display: inline-block; margin-top: 6px; font-family: 'Space Grotesk', sans-serif; font-style: italic; font-size: 12px; color: #6b4c00; background: rgba(201,151,58,0.15); border: 1px solid rgba(201,151,58,0.5); padding: 2px 10px; border-radius: 3px; }
+.detail-keywords { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+.kw-tag { font-family: 'Space Grotesk', sans-serif; font-size: 12px; color: #5a3c00; background: rgba(201,151,58,0.1); border: 1px solid rgba(201,151,58,0.4); padding: 4px 12px; border-radius: 4px; letter-spacing: 0.01em; font-weight: 600; }
+.kw-tag.rev { color: var(--red-light); border-color: rgba(192,57,43,0.3); }
+.detail-sec-label { font-family: 'M PLUS Rounded 1c', sans-serif; font-size: 10px; letter-spacing: 0.08em; color: var(--gold); text-transform: uppercase; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+.detail-sec-label::after { content: ''; flex: 1; height: 1px; background: linear-gradient(to right, rgba(201,151,58,0.2), transparent); }
+.detail-text { font-size: 14px; line-height: 2; color: var(--ink); margin-bottom: 20px; }
+.oracle-box { background: linear-gradient(135deg, rgba(201,151,58,0.08), rgba(139,26,26,0.08)); border: 1px solid rgba(201,151,58,0.2); border-left: 3px solid var(--gold); padding: 18px 20px; margin-top: 4px; }
+.oracle-text { font-family: 'Space Grotesk', sans-serif; font-style: italic; font-size: 15px; line-height: 1.9; color: var(--frost); }
+
+.summary-card { background: rgba(26,18,8,0.92); border: 1px solid var(--border); padding: 28px 32px; margin-bottom: 20px; }
+.summary-title { font-family: 'Space Grotesk', sans-serif; font-size: 16px; color: var(--gold-light); letter-spacing: 0.01em; margin-bottom: 16px; text-align: center; }
+.summary-text { font-size: 14px; line-height: 2.1; color: rgba(245,230,200,0.9); }
+.summary-block { margin-bottom: 16px; }
+.summary-block:last-child { margin-bottom: 0; }
+.summary-block-label { font-family: 'M PLUS Rounded 1c', sans-serif; font-size: 10.5px; letter-spacing: 0.1em; color: var(--gold-light); text-transform: uppercase; margin-bottom: 6px; opacity: 0.9; }
+.advice-list { list-style: none; padding: 0; }
+.advice-list li { padding: 4px 0 4px 18px; position: relative; color: rgba(245,230,200,0.9); font-size: 14px; line-height: 1.9; }
+.advice-list li::before { content: '✦'; position: absolute; left: 0; color: var(--gold-light); font-size: 11px; }
+
+.again-wrap { text-align: center; margin-top: 28px; }
+.again-btn { background: none; border: 1px solid var(--border); color: var(--ink-light); font-family: 'M PLUS Rounded 1c', sans-serif; font-size: 13px; letter-spacing: 0.04em; padding: 12px 40px; cursor: pointer; transition: all 0.3s; }
+.again-btn:hover { border-color: var(--gold); color: var(--gold); }
+.meta-note { font-family: 'Space Grotesk', sans-serif; font-size: 10px; color: var(--ink-light); text-align: center; margin-top: 14px; opacity: 0.5; }
+
+.footer-note { font-family: 'Space Grotesk', sans-serif; font-style: italic; font-size: 11px; color: var(--ink-light); text-align: center; margin-top: 48px; opacity: 0.5; letter-spacing: 0.01em; }
+
+@media (max-width: 540px) {
+  .card-detail { padding: 20px 16px; }
+  .summary-card { padding: 20px; }
+}
+</style>
+</head>
+<body>
+
+<div class="bg-wrap"></div>
+
+<div class="container">
+
+  <div class="header">
+    <span class="header-emblem">🔮</span>
+    <div class="header-rule">
+      <div class="rule-line"></div>
+      <div class="rule-center">✦</div>
+      <div class="rule-line r"></div>
+    </div>
+    <h1>Tarot Oracle</h1>
+    <div class="header-sub">タロット神託 · 過去・現在・未来の3枚が語る、あなたの相談への答え</div>
+  </div>
+
+  <div class="consult-section" id="consultSection">
+    <div class="section-heading">— Consultation · 相談内容 —</div>
+
+    <div class="field-group">
+      <label class="q-label">テーマを選ぶ（必須）</label>
+      <div class="theme-grid" id="themeGrid"></div>
+    </div>
+
+    <div class="field-group">
+      <label class="q-label">質問内容（必須）</label>
+      <textarea id="questionInput" placeholder="例：最近LINEの返信が遅くなりました。相手は私をどう思っていますか？"></textarea>
+    </div>
+
+    <div class="field-group">
+      <label class="q-label">補足（任意）</label>
+      <input type="text" id="contextInput" placeholder="関係性や背景など、あれば">
+      <div class="optional-note">相談の判断に必要な範囲で構いません。無理に入力する必要はありません。</div>
+    </div>
+
+    <div class="form-error" id="formError">テーマの選択と質問内容の入力が必要です。</div>
+  </div>
+
+  <div class="draw-wrap">
+    <button class="draw-btn" id="drawBtn" onclick="handleDraw()">
+      <span>✦ カードを引く ✦</span>
+    </button>
+    <div class="shuffling" id="shuffling">
+      <div class="shuffle-cards">
+        <div class="sh-card"></div><div class="sh-card"></div><div class="sh-card"></div>
+        <div class="sh-card"></div><div class="sh-card"></div>
+      </div>
+      <div class="shuffle-text">カードをシャッフルしています…</div>
+    </div>
+  </div>
+
+  <div class="result-wrap" id="resultWrap">
+    <div class="question-echo" id="questionEcho"></div>
+    <div class="spread-layout" id="spreadLayout"></div>
+    <div id="detailArea"></div>
+    <div class="summary-card" id="summaryCard"></div>
+    <div class="again-wrap">
+      <button class="again-btn" onclick="resetReading()">✦ Reset · 新しい相談で引き直す ✦</button>
+    </div>
+    <div class="meta-note" id="metaNote"></div>
+  </div>
+
+  <div class="footer-note">タロットは内なる知恵を引き出す鏡です。断定ではなく、気づきのための道具として受け取ってください。</div>
+</div>
+
+<script>
+/* =========================================================
+   NIYA ORACLE — TAROT ENGINE (rule-based contextual layer)
+   Spec version: 01_TAROT_ENGINE_IMPLEMENTATION_SPEC v1.1
+   Scope of this pass:
+     - consultation intake (theme + question, required)
+     - deterministic seeded draw (reading is immutable once drawn)
+     - position/theme-aware contextual interpretation
+       (template composition over existing keyword/base-text data,
+        NOT hand-authored 78-card TarotMeaning objects — see spec §36)
+     - three-card relationship synthesis
+     - direct-answer structure (結論 → 理由 → どうするか)
+   Out of scope for this pass (unchanged from spec §32):
+     - Celtic Cross / Love spread / other multi-card spreads
+     - true AI-generated interpretation (spec §04) — this is the
+       deterministic template layer that would sit *underneath* it
+     - PDF generation, human review workflow, Coconala delivery
+   ========================================================= */
+
+// ---------- MVP THEMES (spec §10) ----------
+const THEMES = [
+  { id: 'love', label: '恋愛' },
+  { id: 'unrequited_love', label: '片思い' },
+  { id: 'reconciliation', label: '復縁' },
+  { id: 'feelings', label: '相手の気持ち' },
+  { id: 'relationship', label: '人間関係' },
+  { id: 'work', label: '仕事' },
+  { id: 'career_change', label: '転職' },
+  { id: 'future_direction', label: '今後の方向性' },
+  { id: 'self_understanding', label: '自己理解' },
+  { id: 'other', label: 'その他' },
+];
+
+let selectedTheme = null;
+
+function renderThemeGrid() {
+  const grid = document.getElementById('themeGrid');
+  grid.innerHTML = THEMES.map(t =>
+    `<button type="button" class="theme-btn" data-theme="${t.id}" onclick="selectTheme('${t.id}', this)">${t.label}</button>`
+  ).join('');
+}
+
+function selectTheme(id, btn) {
+  selectedTheme = id;
+  document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('formError').classList.remove('show');
+}
+
+// ---------- CARD MASTER DATA ----------
+// id scheme: stable slug (spec §3 / §5). Position/orientation are
+// NOT stored on the card — they belong to the drawn result (spec §22).
+
+const majorArcana = [
+  { id:'the_fool', name:'愚者', en:'The Fool', suit:'major', symbol:'🌟',
+    keywords:['新しい始まり','自由','冒険','無邪気さ'],
+    revKeywords:['無謀','無責任','方向性の欠如'],
+    upright:'新たな出発を告げるカード。純粋な心で一歩を踏み出す時が来ています。恐れを手放し、直感を信じて進みましょう。過去の経験や常識にとらわれず、白紙の状態で物事を見ることが重要です。',
+    reversed:'方向性を見失っている状態。無謀な行動や無責任さへの警告。今は立ち止まり、本当に進むべき道を見直す時です。',
+    oracle:'宇宙はあなたの新しい冒険を支援しています。軽やかな心で歩み出しなさい。'
+  },
+  { id:'the_magician', name:'魔術師', en:'The Magician', suit:'major', symbol:'⚡',
+    keywords:['意志力','スキル','創造力','行動'],
+    revKeywords:['未熟さ','操作','スキル不足'],
+    upright:'あなたはすべての道具を持っています。意志と行動力で夢を現実に変える時です。あなたの能力と才能は今まさに開花しようとしています。目標を明確にして動きましょう。',
+    reversed:'才能が活かしきれていない、または操作的な行動への警告。誠実に自分の力を使うことが大切です。',
+    oracle:'あなたの中に全ての力があります。今こそその力を解き放つ時です。'
+  },
+  { id:'the_high_priestess', name:'女教皇', en:'The High Priestess', suit:'major', symbol:'🌙',
+    keywords:['直感','神秘','内なる知恵','秘密'],
+    revKeywords:['隠された真実','直感無視','表面的判断'],
+    upright:'深い直感と内なる知恵が答えを持っています。今は外よりも内側に目を向ける時。静寂の中に真実があります。他者の意見より自分の内なる声を信頼してください。',
+    reversed:'表面的な情報に惑わされている。直感を無視することへの警告。真実が隠されている可能性があります。',
+    oracle:'月の光のように、真実は闇の中にこそ輝いています。静かに耳を澄ませなさい。'
+  },
+  { id:'the_empress', name:'女帝', en:'The Empress', suit:'major', symbol:'🌺',
+    keywords:['豊かさ','創造性','母性','自然'],
+    revKeywords:['停滞','依存','創造力の枯渇'],
+    upright:'豊かさと創造の最高の時。あなたの愛と創造力が花開いています。新しいプロジェクト、妊娠、芸術活動など実りある展開が訪れます。自然の流れに従い、愛を注いでください。',
+    reversed:'創造的なエネルギーが枯渇している状態。過保護や依存関係にも注意が必要です。',
+    oracle:'大地のように豊かに、花のように咲き誇りなさい。あなたは愛そのものです。'
+  },
+  { id:'the_emperor', name:'皇帝', en:'The Emperor', suit:'major', symbol:'👑',
+    keywords:['権威','秩序','安定','リーダーシップ'],
+    revKeywords:['専制','硬直','権力乱用'],
+    upright:'安定と秩序を象徴するカード。計画を立て、規律を持って行動する時です。リーダーシップを発揮し、しっかりとした基盤を築いてください。論理的で戦略的なアプローチが成功をもたらします。',
+    reversed:'権威の乱用や頑固さへの警告。柔軟性を持ち、他者の意見も聞き入れましょう。',
+    oracle:'強固な意志と穏やかな心。真のリーダーシップとはこの二つを兼ね備えることです。'
+  },
+  { id:'the_hierophant', name:'教皇', en:'The Hierophant', suit:'major', symbol:'⛪',
+    keywords:['伝統','教育','信念','精神的指導'],
+    revKeywords:['因習打破','反抗','自由な思想'],
+    upright:'伝統と精神的な教えに従う時。師や先人の知恵を借りることが重要です。信念体系を確認し、精神的な基盤を固めてください。信頼できるアドバイザーに相談することも吉です。',
+    reversed:'既存のルールや因習への疑問。自分だけの道を切り開く必要がある時かもしれません。',
+    oracle:'先人の知恵に耳を傾けなさい。そこに今あなたが必要としている答えがあります。'
+  },
+  { id:'the_lovers', name:'恋人', en:'The Lovers', suit:'major', symbol:'💕',
+    keywords:['選択','愛','調和','価値観の一致'],
+    revKeywords:['不調和','迷い','誘惑'],
+    upright:'重要な選択の時。心と価値観に従って決断してください。恋愛においては深い繋がりと相互理解を示します。二択に迫られている場合、本当の自分の価値観に照らし合わせて選びましょう。',
+    reversed:'選択に迷いがある、価値観の不一致。誘惑に負けないよう自分の軸を保つことが大切です。',
+    oracle:'真の愛は選択から生まれます。心の声に従いなさい。'
+  },
+  { id:'the_chariot', name:'戦車', en:'The Chariot', suit:'major', symbol:'🏆',
+    keywords:['勝利','意志','克服','前進'],
+    revKeywords:['暴走','方向性喪失','コントロール不能'],
+    upright:'勝利と前進を告げるカード。強い意志と集中力で困難を乗り越えてください。相反する力をコントロールして前へ進む時。目標を定めたら迷わず突き進みましょう。',
+    reversed:'エネルギーが暴走している状態。方向性を見失っていないか確認が必要です。',
+    oracle:'手綱を握りしめ、嵐の中でも正面を向きなさい。勝利はすでにあなたのものです。'
+  },
+  { id:'strength', name:'力', en:'Strength', suit:'major', symbol:'🦁',
+    keywords:['勇気','忍耐','内なる力','慈悲'],
+    revKeywords:['弱さ','自信喪失','内なる恐怖'],
+    upright:'内なる力と慈悲心で困難を乗り越える時。力技より愛と忍耐で解決できます。獣のような衝動も、愛の力でコントロールできます。自分を信じてください。',
+    reversed:'自信を失っている、または力を持て余している状態。自己信頼を取り戻すことが先決です。',
+    oracle:'本当の強さは優しさの中にあります。あなたの内なる光は消えていません。'
+  },
+  { id:'the_hermit', name:'隠者', en:'The Hermit', suit:'major', symbol:'🏮',
+    keywords:['内省','孤独','知恵','探求'],
+    revKeywords:['孤立','引きこもり','方向性の欠如'],
+    upright:'一人の時間と内省が必要な時。外界の騒音から離れ、自分の内側に問いを立ててください。孤独は成長の糧となります。深い知恵が静寂の中から生まれます。',
+    reversed:'孤立や社会からの切り離しへの警告。内省が自己閉塞になっていないか確認を。',
+    oracle:'灯台の光が嵐の海を照らすように、あなたの内なる光が道を示します。'
+  },
+  { id:'wheel_of_fortune', name:'運命の輪', en:'Wheel of Fortune', suit:'major', symbol:'⚙️',
+    keywords:['転機','運命','循環','チャンス'],
+    revKeywords:['不運','停滞','抵抗'],
+    upright:'人生の大きな転換点。運命の輪が回り、新しいサイクルが始まります。変化を恐れず受け入れることで、幸運を掴めます。流れに乗ってください。',
+    reversed:'変化への抵抗や悪運のサイクル。流れに逆らっていないか振り返りましょう。',
+    oracle:'運命の歯車は回り続けています。今この瞬間を逃さずに。'
+  },
+  { id:'justice', name:'正義', en:'Justice', suit:'major', symbol:'⚖️',
+    keywords:['公正','真実','因果','バランス'],
+    revKeywords:['不公正','偏見','責任回避'],
+    upright:'公正さと真実を求めるカード。法的問題や重要な決断において、客観的に物事を見てください。自分の行動の結果が返ってくる時。誠実であることが最善の道です。',
+    reversed:'不公正な状況や責任逃れへの警告。自分の行動を正直に見つめ直しましょう。',
+    oracle:'真実の前に全ては平等です。誠実であれば宇宙はあなたを支えます。'
+  },
+  { id:'the_hanged_man', name:'吊られた男', en:'The Hanged Man', suit:'major', symbol:'🙃',
+    keywords:['停止','視点の転換','犠牲','待機'],
+    revKeywords:['停滞への抵抗','無駄な犠牲','優柔不断'],
+    upright:'今は自発的に立ち止まる時。視点を変えることで新しい洞察が生まれます。一見不利に見える状況も、違う角度から見ると宝物が隠れています。',
+    reversed:'必要な変化に抵抗している。無駄な犠牲を払っていないか確認が必要です。',
+    oracle:'逆さまになって初めて見える景色があります。今の停滞は祝福です。'
+  },
+  { id:'death', name:'死神', en:'Death', suit:'major', symbol:'🌿',
+    keywords:['変容','終わりと始まり','解放','再生'],
+    revKeywords:['変化への抵抗','停滞','過去への固執'],
+    upright:'終わりは新しい始まりの予告。何かが終わることで、新しいものが生まれます。古いものを手放す勇気を持ってください。変容を恐れないでください。',
+    reversed:'変化への強い抵抗。古いものにしがみついていないか確認しましょう。',
+    oracle:'冬が去り春が来るように、全ての終わりは豊かな始まりです。'
+  },
+  { id:'temperance', name:'節制', en:'Temperance', suit:'major', symbol:'🌊',
+    keywords:['調和','バランス','忍耐','統合'],
+    revKeywords:['不均衡','過剰','不和'],
+    upright:'調和とバランスの時。極端を避け、中庸の道を歩んでください。異なるものを統合する力があなたにはあります。焦らず着実に進むことが成功への道です。',
+    reversed:'過剰や不均衡への警告。何かが極端になっていないか見直しが必要です。',
+    oracle:'二つの流れが合わさって大きな川になる。今はそのような時です。'
+  },
+  { id:'the_devil', name:'悪魔', en:'The Devil', suit:'major', symbol:'⛓️',
+    keywords:['執着','欲望','束縛','物質主義'],
+    revKeywords:['解放','束縛からの脱出','執着の解消'],
+    upright:'何かに縛られている状態への気づき。自分を束縛しているものを直視してください。依存や執着、物質的欲望への過度な傾倒に注意。鎖は外せることに気づいてください。',
+    reversed:'束縛からの解放の時。依存や執着から抜け出す力が生まれています。',
+    oracle:'あなたは自由です。鎖はあなた自身が外せます。今その時です。'
+  },
+  { id:'the_tower', name:'塔', en:'The Tower', suit:'major', symbol:'⚡',
+    keywords:['突然の変化','崩壊','啓示','解放'],
+    revKeywords:['変化の回避','内的な崩壊','先送り'],
+    upright:'突然の変化や崩壊が訪れるかもしれません。しかしそれは必要なものを壊すため。古い不健全な構造が崩れることで、真の自由と再建が始まります。',
+    reversed:'変化を先送りにしている。内側からじわじわと崩壊が進んでいる可能性があります。',
+    oracle:'嵐が過ぎた後の空は、これまでで最も美しい。恐れないでください。'
+  },
+  { id:'the_star', name:'星', en:'The Star', suit:'major', symbol:'⭐',
+    keywords:['希望','癒し','インスピレーション','信頼'],
+    revKeywords:['絶望','希望の喪失','不信'],
+    upright:'希望と癒しのカード。嵐の後の静けさ。あなたは正しい方向に進んでいます。宇宙はあなたを支援しています。夢を信じ、自分の可能性を開いてください。',
+    reversed:'希望を失いかけている状態。でも星はまだそこにあります。諦めないでください。',
+    oracle:'暗闇の中でも星は輝き続けています。あなたの夢を諦めないでください。'
+  },
+  { id:'the_moon', name:'月', en:'The Moon', suit:'major', symbol:'🌕',
+    keywords:['幻想','潜在意識','不安','夢'],
+    revKeywords:['混乱の解消','真実の発見','恐怖の克服'],
+    upright:'現実と幻想の境界が曖昧な時。潜在意識からのメッセージに注意を払ってください。物事の表面だけを見ず、隠された真実を探ってください。夢や直感が重要なヒントを運んでいます。',
+    reversed:'混乱や幻想から抜け出す時。隠れていた真実が明らかになりつつあります。',
+    oracle:'月の光は真実を照らし、同時に影も作ります。どちらも自分の一部です。'
+  },
+  { id:'the_sun', name:'太陽', en:'The Sun', suit:'major', symbol:'☀️',
+    keywords:['喜び','成功','活力','明晰'],
+    revKeywords:['過信','エネルギーの低下','楽観すぎ'],
+    upright:'喜びと成功の最高のカード。あなたの前途は明るく輝いています。自信を持ち、自分の光を世界に見せてください。子供のような純粋な喜びを大切にしてください。',
+    reversed:'楽観的すぎる、または一時的なエネルギーの低下。でも太陽は雲の後ろにあります。',
+    oracle:'太陽のように輝きなさい。あなたの喜びが世界を照らしています。'
+  },
+  { id:'judgement', name:'審判', en:'Judgement', suit:'major', symbol:'🎺',
+    keywords:['再生','目覚め','許し','使命'],
+    revKeywords:['自己批判','後悔','目覚めへの抵抗'],
+    upright:'目覚めと再生の時。過去を手放し、より高い使命に応える時が来ています。自己批判を手放し、許しの心で新たなスタートを切ってください。',
+    reversed:'過去への後悔や自己批判が前進を妨げています。許すことが解放の鍵です。',
+    oracle:'ラッパの音が響いています。目覚めなさい、あなたの使命が呼んでいます。'
+  },
+  { id:'the_world', name:'世界', en:'The World', suit:'major', symbol:'🌍',
+    keywords:['完成','達成','統合','新サイクルの始まり'],
+    revKeywords:['未完成','遅延','不完全な成功'],
+    upright:'完成と達成の最高のカード。一つのサイクルが完全に終わり、新しいより高いステージが始まります。自分を祝福し、この達成を喜んでください。',
+    reversed:'もう少しで完成しそうなのに遅延している状態。最後の一歩を丁寧に踏み出してください。',
+    oracle:'宇宙があなたの完成を祝福しています。あなたはすでにゴールに立っています。'
+  }
+];
+
+const suits = [
+  { key:'wands', name:'ワンド', en:'Wands', symbol:'🔥', element:'火', domain:'情熱・行動・創造' },
+  { key:'cups', name:'カップ', en:'Cups', symbol:'💧', element:'水', domain:'感情・愛・直感' },
+  { key:'swords', name:'ソード', en:'Swords', symbol:'⚔️', element:'風', domain:'知性・真実・葛藤' },
+  { key:'pentacles', name:'ペンタクル', en:'Pentacles', symbol:'⭐', element:'地', domain:'物質・仕事・安定' }
+];
+
+const rankNames = ['エース','2','3','4','5','6','7','8','9','10','ペイジ','ナイト','クイーン','キング'];
+const rankSlugs = ['ace','two','three','four','five','six','seven','eight','nine','ten','page','knight','queen','king'];
+
+const minorThemes = {
+  wands: [
+    {k:['始まり','情熱','可能性'],rk:['遅延','抵抗'],u:'新しい情熱と行動へのインスピレーション。今すぐ動き出してください。',r:'情熱が内に閉じこもっている状態。まず一歩を踏み出しましょう。',o:'炎は動くものを照らします。行動しなさい。'},
+    {k:['計画','決意','力'],rk:['優柔不断','曖昧さ'],u:'目標を見定め、力強く進む時。明確なビジョンを持ってください。',r:'決断を先延ばしにしています。今すぐ選択を。',o:'地平線を見渡しなさい。あなたの目的地は見えています。'},
+    {k:['チームワーク','協力','達成'],rk:['孤立','依存'],u:'協力と連携で成功を掴む時。人との絆を大切にしてください。',r:'協力関係が上手くいっていない状態。コミュニケーションを。',o:'共に歩む者と共に喜びなさい。'},
+    {k:['休息','準備','防衛'],rk:['過保護','停滞'],u:'しっかりとした基盤を守り、次への準備をする時です。',r:'変化への過度な恐れ。防衛しすぎていませんか？',o:'嵐の前に砦を築きなさい。準備は力です。'},
+    {k:['競争','挑戦','成長'],rk:['葛藤','消耗'],u:'競争や挑戦があなたを成長させます。立ち向かってください。',r:'無駄な争いに消耗しています。本当の戦いを見極めて。',o:'磨かれた剣は鋭く光ります。挑戦があなたを強くします。'},
+    {k:['勝利','認知','成功'],rk:['傲慢','見栄'],u:'努力が報われ、認められる時が来ました。自信を持って。',r:'プライドが邪魔をしている状態。謙虚さを忘れずに。',o:'月桂冠はあなたのためにあります。誇りを持ちなさい。'},
+    {k:['勇気','決断','前進'],rk:['リスク回避','臆病'],u:'勇気を持って前に進む時。不安に勝つのは行動だけです。',r:'恐れが足を止めています。勇気は行動の中に生まれます。',o:'壁を乗り越えなさい。その先に自由があります。'},
+    {k:['意志','押し通す','強さ'],rk:['抵抗','頑固'],u:'強い意志で困難を押し通す時。諦めないでください。',r:'頑固さが障害になっています。柔軟さも時に必要です。',o:'川は岩をも動かします。意志の力を信じなさい。'},
+    {k:['完成間近','最後の力','忍耐'],rk:['疲弊','諦め'],u:'もうすぐゴール。最後の力を振り絞って進んでください。',r:'疲れ果てて先が見えない状態。少し休んで英気を養って。',o:'頂上はすぐそこです。あと少しだけ登り続けなさい。'},
+    {k:['栄光','祝福','旅'],rk:['延期','出発の不安'],u:'旅立ちと栄光の時。新しい世界への扉が開いています。',r:'旅立ちを躊躇しています。準備ができていないのではなく、行く時が来ています。',o:'地平線の向こうに輝く未来があります。出発しなさい。'},
+    {k:['自由','探求','メッセージ'],rk:['方向性不定','未熟'],u:'自由な精神で新しい世界を探求する時。メッセージが届くかも。',r:'無責任な行動や未熟さへの警告。地に足をつけて。',o:'世界は広大です。好奇心をもって飛び込みなさい。'},
+    {k:['エネルギー','変化','速度'],rk:['衝動','無謀'],u:'素早い行動と変化をもたらすカード。エネルギーを正しく使って。',r:'衝動的な行動への警告。少し立ち止まって考えましょう。',o:'疾風のように動きなさい。しかし行き先を忘れずに。'},
+    {k:['情熱','豊かさ','創造力'],rk:['気まぐれ','過度な情熱'],u:'情熱と豊かな創造力の時。あなたの才能が輝いています。',r:'感情的になりすぎている、または気まぐれな状態。',o:'炎は暖めもするし燃やしもします。情熱を賢く使いなさい。'},
+    {k:['ビジョン','達成','権威'],rk:['傲慢','独裁'],u:'高いビジョンを持ち、多くを達成する力があります。リーダーとして輝く時。',r:'権威的すぎる、または傲慢な態度への警告。謙虚に。',o:'王者の使命は人々を照らすことにあります。'}
+  ],
+  cups: [
+    {k:['愛の始まり','感情的豊かさ','直感'],rk:['感情的抑圧','拒絶'],u:'新しい愛と感情の波が訪れます。心を開いて受け取ってください。',r:'感情を閉ざしている状態。心のドアを少し開けてみましょう。',o:'愛は与えられるものではなく、共に創るものです。'},
+    {k:['深い繋がり','パートナーシップ','友情'],rk:['不均衡な関係','距離'],u:'深い感情的な繋がりと相互理解の時。誰かとの絆が深まります。',r:'関係の不均衡。一方的になっていないか確認を。',o:'二つの杯が触れ合う時、そこに愛が生まれます。'},
+    {k:['喜び','お祝い','感謝'],rk:['過度な享楽','現実逃避'],u:'喜びと豊かさを分かち合う時。感謝の気持ちを表現してください。',r:'快楽に溺れていないか注意。現実を見つめることも大切です。',o:'祝福の杯を高く掲げなさい。あなたの喜びは世界の喜びです。'},
+    {k:['瞑想','新しい視点','内省'],rk:['空想','退屈'],u:'新しい感情的な視点が開かれつつあります。内省の時間を持って。',r:'空想や現実逃避への傾向。地に足をつけた視点が必要です。',o:'静寂の中に新しい声が聞こえます。耳を傾けなさい。'},
+    {k:['失望','期待外れ','再評価'],rk:['受け入れ','前進'],u:'期待していたものと現実のギャップに気づく時。しかし諦めは早い。',r:'失望から立ち直り始める兆し。新しい視点で見直してみて。',o:'こぼれた涙は大地を潤します。失望も成長の種です。'},
+    {k:['懐かしさ','記憶','子供時代'],rk:['過去への固執','現在逃避'],u:'過去の温かい記憶が心を癒します。懐かしさから学べることがあります。',r:'過去に生きすぎている状態。今ここに戻ってきてください。',o:'過去は変えられませんが、意味は変えられます。'},
+    {k:['幻想','選択','機会'],rk:['混乱','誘惑'],u:'多くの可能性が目の前に広がっています。慎重に選んでください。',r:'選択肢が多すぎて混乱している状態。本当に大切なものに絞って。',o:'夢は現実への扉です。しかし夢だけでは扉は開きません。'},
+    {k:['放棄','手放し','転換点'],rk:['停滞','変化への恐れ'],u:'何かを手放す時が来ました。それは失うことではなく、次への進化です。',r:'変化を恐れて手放せない状態。今こそ進む時です。',o:'満ちた杯を持ち歩くのは重い。時に手放すことで軽くなれます。'},
+    {k:['願望成就','夢の実現','充実'],rk:['願望未達','過去への執着'],u:'長年の夢が実現に近づいています。あなたの努力は報われます。',r:'夢はあるのに踏み出せていない状態。まず一歩を踏み出して。',o:'水が高いところから低いところへ流れるように、夢は実現する道を見つけます。'},
+    {k:['満足','達成感','感謝'],rk:['飽き足らなさ','不満足'],u:'深い満足と達成感を感じる時。今この豊かさを味わってください。',r:'何を手に入れても満足できない状態。感謝の視点を持ちましょう。',o:'最大の豊かさとは、今あるものに感謝できることです。'},
+    {k:['想像力','夢想','若さ'],rk:['非現実的','逃避'],u:'豊かな想像力と感受性があなたの強み。夢を大切にしてください。',r:'現実と夢の境界が曖昧になっています。バランスを取りましょう。',o:'子供のような心が最大の知恵を持っています。'},
+    {k:['ロマンス','理想主義','魅力'],rk:['幻想的な恋愛','失望'],u:'美しいロマンスと理想的な出会いの予感。感情に従ってください。',r:'現実より理想を見すぎている状態。相手をありのままに見て。',o:'騎士は理想を持ちながら地に足をつけます。'},
+    {k:['感受性','愛情深さ','直感'],rk:['感情的不安定','依存'],u:'深い感受性と愛で周囲を包む時。あなたの直感を信頼してください。',r:'感情的に不安定な状態。境界線を設けることが大切です。',o:'深い海のような感情は宝物です。溺れることなく泳ぎなさい。'},
+    {k:['感情の成熟','知恵','愛'],rk:['感情操作','不誠実'],u:'感情的な成熟と深い愛情。あなたの思いやりが人々を癒します。',r:'感情を操作したり、不誠実な行動への警告。誠実に向き合って。',o:'愛の王は愛することで統治します。'}
+  ],
+  swords: [
+    {k:['明晰','真実','突破口'],rk:['混乱','コミュニケーション問題'],u:'明晰な思考で真実を見抜く時。曖昧さを排除して前に進んでください。',r:'思考の混乱やコミュニケーションの問題。明確さを取り戻して。',o:'剣は真実を切り裂きます。今こそ明晰であれ。'},
+    {k:['均衡','休戦','難しい選択'],rk:['決断回避','先送り'],u:'困難な選択や均衡の中での判断を迫られています。公正に判断を。',r:'決断を避け続けている状態。いつかは選ばなければなりません。',o:'二つの剣が交差するところに平和があります。'},
+    {k:['悲しみ','失望','孤独'],rk:['回復','希望'],u:'悲しみや失望を経験している時。しかし夜明けは必ず来ます。',r:'悲しみから少しずつ回復しています。希望の光が見え始めています。',o:'悲しみは深く感じた愛の証です。泣いていいのです。'},
+    {k:['休息','回復','戦略的撤退'],rk:['停滞','回避'],u:'戦略的に休息を取り、力を蓄える時。急がば回れ。',r:'必要な休息を取れていない、または回避が長引いています。',o:'剣士も眠らなければ戦えません。休息は戦略です。'},
+    {k:['葛藤','不誠実','敗北'],rk:['回復','教訓'],u:'不公正な状況や葛藤の中にいます。誠実さを保ちましょう。',r:'困難から立ち直りつつあります。この経験から多くを学べます。',o:'不正な勝利は真の敗北です。誠実であれ。'},
+    {k:['移行','変化','旅立ち'],rk:['先送り','移行の困難'],u:'困難な状況から抜け出し、新しい場所へ移行する時です。',r:'移行が難しく感じられている状態。でも前に進まなければ。',o:'嵐の海を渡り切った者だけが、新しい岸に立てます。'},
+    {k:['行き詰まり','束縛','制限'],rk:['解放','突破'],u:'自分で自分を縛っている状態かもしれません。思い込みを外して。',r:'束縛から解放される時が近づいています。自由が戻ります。',o:'目隠しを外しなさい。あなたはすでに自由です。'},
+    {k:['恐怖','ストレス','悪夢'],rk:['恐怖の克服','夜明け'],u:'恐怖やストレスが最高潮に達しています。しかし夜明けは近い。',r:'最悪の恐怖は過ぎ去りつつあります。光が戻ってきます。',o:'悪夢は本物ではありません。目覚めなさい。'},
+    {k:['苦悩','孤独','危機'],rk:['希望','助けを求める'],u:'深い苦悩の中にいます。一人で抱え込まず、助けを求めてください。',r:'苦悩の中に一筋の光が見えています。助けは近くにあります。',o:'夜が最も暗い時、夜明けは最も近い。'},
+    {k:['終わり','裏切り','痛み'],rk:['回復','前進'],u:'何かが終わる痛みを経験しています。しかしこの終わりは解放です。',r:'最悪の状況は過ぎ去りました。今こそ立ち上がる時です。',o:'背中の剣を抜いて前を向きなさい。終わりは始まりの扉です。'},
+    {k:['観察','慎重','学習'],rk:['スパイ行為','不信'],u:'状況を慎重に観察し、情報を集める時。先走らないようにしましょう。',r:'不信感や疑心暗鬼になっている状態。信頼を育てることも大切です。',o:'知識は力ですが、智慧はその使い方を知っています。'},
+    {k:['素早さ','変化','知的エネルギー'],rk:['衝動','混乱'],u:'素早い思考と行動が求められます。変化に柔軟に対応してください。',r:'衝動的な発言や行動への警告。よく考えてから動きましょう。',o:'風のように素早く、しかし嵐のように暴れるな。'},
+    {k:['機知','独立','コミュニケーション'],rk:['皮肉','攻撃的な言葉'],u:'鋭い機知と独立心が強みです。言葉の力を賢く使ってください。',r:'言葉が攻撃的になっていないか注意。思いやりある表現を。',o:'最も鋭い剣は言葉です。使い方に責任を持ちなさい。'},
+    {k:['明晰な判断','権威','決断'],rk:['冷酷','専制'],u:'明晰な判断力と公正さで状況を切り開く力があります。',r:'冷酷すぎる判断や専制的な態度への警告。',o:'正義の剣は保護のためにあります。'}
+  ],
+  pentacles: [
+    {k:['物質的な始まり','チャンス','豊かさの種'],rk:['機会の喪失','計画不足'],u:'物質的・経済的な新しいチャンスが訪れます。しっかり掴んでください。',r:'機会を見逃している、または計画が不足している状態です。',o:'種は必ず芽吹きます。今日植えなさい。'},
+    {k:['バランス','管理','柔軟性'],rk:['無駄遣い','不均衡'],u:'複数の物事を上手くバランスさせる時。柔軟に対応してください。',r:'財政や時間の管理がうまくいっていない状態。見直しが必要です。',o:'二つの金貨を同時に回せる者は、どんな挑戦も乗り越えられます。'},
+    {k:['スキル','仕事','コミュニティ'],rk:['孤立','技術不足'],u:'才能と努力が認められ、コミュニティの中で輝く時です。',r:'スキル不足や孤立した働き方への警告。仲間と共に歩みましょう。',o:'職人の誇りは作品に宿ります。'},
+    {k:['安定','節約','所有'],rk:['執着','ケチ'],u:'安定を求め、しっかりと守る時。財産や関係を大切にしてください。',r:'執着やケチな態度が豊かさを遠ざけています。分かち合いましょう。',o:'握りしめた手では新しいものを受け取れません。'},
+    {k:['困窮','試練','支援'],rk:['回復','助けを受け入れる'],u:'経済的・精神的な困難の中にいます。助けを求めることは強さです。',r:'困難から立ち直りつつあります。差し伸べられた手を掴んでください。',o:'嵐の中でも互いに寄り添えば暖かい。'},
+    {k:['分かち合い','思いやり','豊かさ'],rk:['独占','不公平'],u:'持っているものを分かち合う時。与えることで豊かさが増します。',r:'独占的な態度が豊かさを止めています。分かち合いの精神を。',o:'与える者の杯は常に満たされています。'},
+    {k:['評価','自己価値','才能'],rk:['自信喪失','過小評価'],u:'自分の才能と価値を正当に認識する時。自己評価を高めてください。',r:'自分を過小評価している状態。あなたの価値は思っている以上です。',o:'あなたは宝石です。輝いていないのは磨いていないだけです。'},
+    {k:['遅い成長','着実な進歩','忍耐'],rk:['停滞','焦り'],u:'ゆっくりと確実に成長している時。急がず着実に進んでください。',r:'焦りや停滞感を感じている状態。でも着実に積み上げられています。',o:'大木は一夜にして育ちません。しかし必ず育ちます。'},
+    {k:['独立','熟練','達成'],rk:['完璧主義','孤立'],u:'長年の努力が実り、独立と達成の時が来ています。',r:'完璧主義が前進を妨げている、または孤立して働きすぎています。',o:'職人が一人で静かに傑作を生み出すように。'},
+    {k:['豊かさ','成功','家族'],rk:['損失','財政問題'],u:'物質的な豊かさと成功の時。家族や大切な人との絆も深まります。',r:'財政的な問題や損失への注意。慎重な管理が必要です。',o:'真の豊かさとは愛する者と共に享受するものです。'},
+    {k:['実践的','机上の空論からの脱出','奉仕'],rk:['非現実的','頑固'],u:'実践的に動く時。机上の空論より行動が大切です。',r:'現実的でない考え方や頑固さへの警告。柔軟に対応して。',o:'大地に根を張ることが天に届く第一歩です。'},
+    {k:['勤勉','信頼性','現実的'],rk:['怠惰','贅沢'],u:'勤勉さと信頼性があなたの武器。着実に前進してください。',r:'怠惰や過度な贅沢への警告。足元を見つめ直しましょう。',o:'大地を耕す者の手は土で汚れていても黄金を生みます。'},
+    {k:['豊かさ','慈悲','実務能力'],rk:['物質主義','冷淡'],u:'豊かさと慈悲の心で周囲を支える時。実務能力も最高潮です。',r:'物質主義や感情的冷淡さへの警告。内面の豊かさも育てて。',o:'豊かさとは持つことではなく、与えられることにあります。'},
+    {k:['物質的成功','安定','現実的な知恵'],rk:['物欲','現実主義すぎ'],u:'物質的な成功と安定を達成する力があります。現実的な知恵を活かして。',r:'物質にとらわれすぎている状態。精神的な豊かさも忘れずに。',o:'大地の王は自分の土を愛します。そしてその土が王を養います。'}
+  ]
+};
+
+const minorArcana = [];
+suits.forEach(suit => {
+  rankNames.forEach((rank, ri) => {
+    const d = minorThemes[suit.key][ri];
+    minorArcana.push({
+      id: `${rankSlugs[ri]}_of_${suit.key}`,
+      name: `${suit.name}の${rank}`,
+      en: `${rank.match(/^[0-9]+$/) ? rank : rankSlugs[ri].charAt(0).toUpperCase()+rankSlugs[ri].slice(1)} of ${suit.en}`,
+      suit: suit.key,
+      suitName: suit.name,
+      element: suit.element,
+      domain: suit.domain,
+      symbol: suit.symbol,
+      keywords: d.k, revKeywords: d.rk,
+      upright: d.u, reversed: d.r, oracle: d.o
+    });
+  });
+});
+
+const allCards = [...majorArcana, ...minorArcana];
+if (allCards.length !== 78) console.error('デッキ枚数エラー:', allCards.length);
+
+// ---------- SPREAD (spec §8 — MVP is fixed Past/Present/Future) ----------
+const SPREAD_POSITIONS = [
+  { key:'past', label:'過去' },
+  { key:'present', label:'現在' },
+  { key:'future', label:'未来' }
+];
+
+// ---------- POSITION-TRANSFORM PHRASES (spec §13) ----------
+const POSITION_PHRASES = {
+  past: {
+    upright: 'これまでの流れの中で、',
+    reversed: 'これまで内側に抱えてきたものとして、'
+  },
+  present: {
+    upright: '今まさに向き合っている状態として、',
+    reversed: '今、内側でくすぶっている感覚として、'
+  },
+  future: {
+    upright: 'このまま流れが続いた場合に向かう方向として、',
+    reversed: '今の流れに変化が必要だというサインとして、'
+  }
+};
+
+// ---------- THEME-TRANSFORM DOMAIN LABELS (spec §14) ----------
+const THEME_DOMAIN_LABEL = {
+  love: '恋愛面',
+  unrequited_love: '片思いの状況',
+  reconciliation: '復縁への流れ',
+  feelings: '相手の気持ち',
+  relationship: '人間関係',
+  work: '仕事面',
+  career_change: '転職の判断',
+  future_direction: '今後の方向性',
+  self_understanding: '自分自身の理解',
+  other: '今回の相談'
+};
+
+// ---------- SEEDED RNG (spec §27 — seed + deck = same three cards) ----------
+function mulberry32(seed) {
+  return function() {
+    seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function seededShuffle(arr, rng) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// ---------- READING STATE (immutable once drawn — spec §28/29) ----------
+let currentReading = null; // { readingId, seed, consultation, cards: [{position, card, reversed}] }
+let selectedCardIndex = 0;
+
+function makeReadingId() {
+  return 'rd_' + Date.now().toString(36) + '_' + Math.floor(Math.random()*1e6).toString(36);
+}
+
+function handleDraw() {
+  const question = document.getElementById('questionInput').value.trim();
+  const context = document.getElementById('contextInput').value.trim();
+  const errEl = document.getElementById('formError');
+
+  if (!selectedTheme || !question) {
+    errEl.classList.add('show');
+    errEl.scrollIntoView({ behavior:'smooth', block:'center' });
+    return;
+  }
+  errEl.classList.remove('show');
+
+  const btn = document.getElementById('drawBtn');
+  const shuf = document.getElementById('shuffling');
+  const wrap = document.getElementById('resultWrap');
+  btn.disabled = true;
+  shuf.classList.add('show');
+  wrap.classList.remove('show');
+
+  setTimeout(() => {
+    // CREATED -> DRAWN (spec §29): the draw is the source of truth and
+    // is never regenerated by the interpretation layer (spec §28/31).
+    const seed = Math.floor(Math.random() * 2147483647);
+    const rng = mulberry32(seed);
+    const shuffled = seededShuffle(allCards, rng);
+
+    const cards = SPREAD_POSITIONS.map((pos, i) => ({
+      position: pos.key,
+      positionLabel: pos.label,
+      cardId: shuffled[i].id,
+      card: shuffled[i],
+      orientation: rng() < 0.3 ? 'reversed' : 'upright'
+    }));
+
+    currentReading = {
+      readingId: makeReadingId(),
+      seed,
+      consultation: { theme: selectedTheme, question, context },
+      cards,
+      createdAt: new Date().toISOString()
+    };
+    selectedCardIndex = 0;
+
+    renderQuestionEcho();
+    renderSpread();
+    renderDetail(0);
+    renderSynthesis();
+
+    shuf.classList.remove('show');
+    wrap.classList.add('show');
+    btn.disabled = false;
+    document.getElementById('metaNote').textContent =
+      `reading ${currentReading.readingId} · seed ${seed} · この結果は固定されており、引き直すまで変わりません`;
+    wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 2200);
+}
+
+function renderQuestionEcho() {
+  const { theme, question, context } = currentReading.consultation;
+  const themeLabel = THEMES.find(t => t.id === theme)?.label || theme;
+  document.getElementById('questionEcho').innerHTML =
+    `テーマ：<b>${themeLabel}</b><br>ご相談：${escapeHtml(question)}` +
+    (context ? `<br>補足：${escapeHtml(context)}` : '');
+}
+
+function renderSpread() {
+  const layout = document.getElementById('spreadLayout');
+  layout.innerHTML = currentReading.cards.map((dc, i) => `
+    <div class="card-list-item ${i === 0 ? 'selected' : ''}" onclick="selectCard(${i})">
+      <div class="card-list-position">${dc.positionLabel}</div>
+      <div class="card-list-name">${dc.card.name}</div>
+      <div class="card-list-sub">${dc.card.en}</div>
+      ${dc.orientation === 'reversed' ? '<div class="card-list-rev">逆位置</div>' : ''}
+      <div class="card-list-arrow">›</div>
+    </div>
+  `).join('');
+}
+
+function selectCard(i) {
+  selectedCardIndex = i;
+  document.querySelectorAll('.card-list-item').forEach((el, idx) => {
+    el.classList.toggle('selected', idx === i);
+  });
+  renderDetail(i);
+}
+
+// ---------- CONTEXTUAL INTERPRETATION (spec §12 — "here", not "generally") ----------
+function buildContextualInterpretation(dc, theme) {
+  const c = dc.card;
+  const rev = dc.orientation === 'reversed';
+  const base = rev ? c.reversed : c.upright;
+  const posPhrase = POSITION_PHRASES[dc.position][rev ? 'reversed' : 'upright'];
+  const domainLabel = THEME_DOMAIN_LABEL[theme] || '今回の相談';
+
+  return `${posPhrase}${domainLabel}について、このカードは${rev ? 'その根底にある' : ''}次のような状態を映し出しています。${base}`;
+}
+
+function renderDetail(i) {
+  const dc = currentReading.cards[i];
+  const c = dc.card;
+  const rev = dc.orientation === 'reversed';
+  const detail = document.getElementById('detailArea');
+  const contextual = buildContextualInterpretation(dc, currentReading.consultation.theme);
+
+  detail.innerHTML = `
+    <div class="card-detail">
+      <div class="detail-head">
+        <div class="detail-position">${dc.positionLabel} · ${c.suit === 'major' ? '大アルカナ' : c.suitName}</div>
+        <div class="detail-card-title">${c.name}</div>
+        <div class="detail-card-sub">${c.en}</div>
+        ${rev ? '<div class="reversed-label">逆位置</div>' : ''}
+      </div>
+
+      <div class="detail-keywords">
+        ${(rev ? c.revKeywords : c.keywords).map(k => `<div class="kw-tag ${rev ? 'rev' : ''}">${k}</div>`).join('')}
+      </div>
+
+      <div class="detail-sec-label">Reading · この相談における解釈</div>
+      <div class="detail-text">${contextual}</div>
+
+      <div class="oracle-box">
+        <div class="detail-sec-label" style="margin-bottom:8px;">Oracle · 神託の言葉</div>
+        <div class="oracle-text">${c.oracle}</div>
+      </div>
+    </div>
+  `;
+}
+
+// ---------- THREE-CARD SYNTHESIS (spec §16/18) ----------
+function detectFlowType(cards) {
+  const revFlags = cards.map(c => c.orientation === 'reversed');
+  const revCount = revFlags.filter(Boolean).length;
+
+  if (revCount === 0) return 'escalation';       // 全て正位置 → 素直な発展
+  if (revCount === 3) return 'warning';          // 全て逆位置 → 強い警告
+  if (revFlags[0] && !revFlags[2]) return 'resolution'; // 過去が重く未来が正 → 解決に向かう
+  if (!revFlags[0] && revFlags[2]) return 'contrast';   // 過去が正で未来が逆 → 現状への警告
+  return 'shift'; // その他は転換
+}
+
+const FLOW_TEXT = {
+  escalation: '3枚の流れは滞りなく、過去から現在、未来へと素直に発展していく形を示しています。',
+  warning: '3枚とも内側に抱え込む要素が強く、表面化していない不安や葛藤が今回の核心にある可能性が高い流れです。',
+  resolution: '過去に重かったものが、未来に向けて少しずつ解消されていく流れとして読むことができます。',
+  contrast: '順調に見えていた過去に対し、未来のカードが立ち止まって見直すことを促しています。今の流れを過信しないための示唆です。',
+  shift: '3枚の間に明確な転換点があります。同じ状態が続くというより、どこかで質的な変化が起きる流れです。'
+};
+
+function suitCounts(cards) {
+  const counts = {};
+  cards.forEach(dc => {
+    const s = dc.card.suit;
+    if (s === 'major') return;
+    counts[s] = (counts[s] || 0) + 1;
+  });
+  return counts;
+}
+
+const SUIT_PATTERN_TEXT = {
+  wands: '複数枚にワンド（行動・情熱）の気配があり、感情や状況分析より先に「動くこと」自体が鍵になっている可能性があります。',
+  cups: '複数枚にカップ（感情・関係性）の気配があり、今回の相談の核心はロジックより感情の部分にあることを示しています。',
+  swords: '複数枚にソード（思考・葛藤）の気配があり、頭の中で考えすぎている、あるいは対話や情報整理が必要な状況を示しています。',
+  pentacles: '複数枚にペンタクル（現実・安定）の気配があり、感情面よりも現実的な条件や環境が今回の焦点になっている可能性があります。'
+};
+
+function buildAdvice(theme, flowType) {
+  const base = {
+    love: ['相手の言動そのものより、自分がその関係に何を求めているかを一度言語化してみてください。', '今すぐ答えを出そうとせず、次に会う・話す機会を一つ具体的に決めておくと流れが動きやすくなります。'],
+    unrequited_love: ['気持ちを伝えるかどうかより先に、今の関係性の中でどれくらい自然に接点があるかを確認してみてください。', '結果を急がず、まず相手との会話量・接点を少しずつ増やす具体的な行動を一つ決めてみましょう。'],
+    reconciliation: ['連絡を取る前に、以前の関係で繰り返していたパターンを一つ書き出してみてください。', '感情的な連絡より、状況が落ち着いたタイミングでの短い連絡から様子を見るのが現実的です。'],
+    feelings: ['相手の気持ちを断定するより、次に自然に確認できる場面を一つ想定しておいてください。', '相手の態度の変化を、あなた自身の状態と切り離して観察してみましょう。'],
+    relationship: ['相手を変えようとするより、自分がどこまで関わるかの境界線を先に決めておくと楽になります。', '一度、相手に直接伝えるべきことと、伝えなくてもいいことを分けてみてください。'],
+    work: ['感情的な判断を急がず、まず現状の事実関係（役割・評価・条件）を書き出してみてください。', '相談できる相手が社内・社外にいるか、選択肢を狭める前に確認しておきましょう。'],
+    career_change: ['今の職場に足りないものと、転職先に本当に求めるものを分けて書き出してみてください。', '結論を急がず、まず情報収集（求人・面談など）を1つだけ具体的に動かしてみましょう。'],
+    future_direction: ['遠い将来より、直近1〜3ヶ月で試せる小さな一歩を一つ決めてみてください。', '「正解」を探すより、今の選択肢の中で一番後悔が少なそうなものから動いてみましょう。'],
+    self_understanding: ['答えを急がず、今回のカードで気になった言葉を一つ選び、数日反芻してみてください。', '誰かに相談する前に、まず自分の言葉でこの状況を書き出してみることをお勧めします。'],
+    other: ['今回のカードの中で一番引っかかった言葉を一つ選び、それについて数日考えてみてください。', '結論を急がず、状況が動くまで小さな観察を続けることも一つの選択です。']
+  };
+  const list = (base[theme] || base.other).slice(0, 2);
+  if (flowType === 'warning') list.push('急いで結論を出すより、今回は一呼吸置くこと自体がアドバイスです。');
+  return list;
+}
+
+function buildDirectAnswer(theme, flowType, cards) {
+  const domainLabel = THEME_DOMAIN_LABEL[theme] || '今回の相談';
+  const conclusion = {
+    escalation: `${domainLabel}は、今の流れのまま進んでいく可能性が高い状況です。`,
+    warning: `${domainLabel}には、まだ表に出ていない不安や葛藤が影響している可能性があります。`,
+    resolution: `${domainLabel}は、過去の重さから少しずつ抜け出していく方向にあります。`,
+    contrast: `${domainLabel}は一見順調に見えても、どこかで立ち止まって見直す必要がありそうです。`,
+    shift: `${domainLabel}には、これまでと同じではいられない転換点が近づいています。`
+  }[flowType];
+
+  const reason = `過去（${cards[0].card.name}${cards[0].orientation==='reversed'?'・逆位置':''}）→現在（${cards[1].card.name}${cards[1].orientation==='reversed'?'・逆位置':''}）→未来（${cards[2].card.name}${cards[2].orientation==='reversed'?'・逆位置':''}）という並びが、${FLOW_TEXT[flowType]}`;
+
+  const action = {
+    escalation: '今の方向性を大きく変える必要はなく、今のペースを保つことが結果につながります。',
+    warning: 'まずは状況を急いで動かそうとせず、何が引っかかっているのかを言語化することから始めてください。',
+    resolution: '過去の出来事にこれ以上時間を使うより、今できる小さな一歩に意識を向けてください。',
+    contrast: '順調に見える今こそ、一度立ち止まって前提を確認しておくことをお勧めします。',
+    shift: 'どちらに転ぶかは今後の行動次第なので、まず自分がどうしたいかを明確にすることが最初の一歩です。'
+  }[flowType];
+
+  return { conclusion, reason, action };
+}
+
+function renderSynthesis() {
+  const cards = currentReading.cards;
+  const theme = currentReading.consultation.theme;
+  const flowType = detectFlowType(cards);
+  const counts = suitCounts(cards);
+  const dominantSuit = Object.entries(counts).find(([,n]) => n >= 2)?.[0];
+
+  const { conclusion, reason, action } = buildDirectAnswer(theme, flowType, cards);
+  const advice = buildAdvice(theme, flowType);
+
+  let flowBlock = `<div class="summary-block"><div class="summary-block-label">3枚の流れ</div>` +
+    `<div class="summary-text">${FLOW_TEXT[flowType]}` +
+    (dominantSuit ? `<br>${SUIT_PATTERN_TEXT[dominantSuit]}` : '') +
+    `</div></div>`;
+
+  let answerBlock = `<div class="summary-block"><div class="summary-block-label">今回の答え</div>` +
+    `<div class="summary-text">${conclusion}<br><br>${reason}<br><br>${action}</div></div>`;
+
+  let adviceBlock = `<div class="summary-block"><div class="summary-block-label">アドバイス</div>` +
+    `<ul class="advice-list">${advice.map(a => `<li>${a}</li>`).join('')}</ul></div>`;
+
+  document.getElementById('summaryCard').innerHTML =
+    `<div class="summary-title">✦ 統合リーディング ✦</div>` + flowBlock + answerBlock + adviceBlock;
+}
+
+function escapeHtml(s) {
+  return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function resetReading() {
+  currentReading = null;
+  document.getElementById('resultWrap').classList.remove('show');
+  document.getElementById('questionInput').value = '';
+  document.getElementById('contextInput').value = '';
+  selectedTheme = null;
+  document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ---------- INIT ----------
+renderThemeGrid();
+</script>
+</body>
+</html>
