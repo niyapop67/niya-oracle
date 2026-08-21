@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ルーン占い｜Rune Oracle</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=M+PLUS+Rounded+1c:wght@400;500;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f5f0e8;
+  --bg2: #ede8dc;
+  --frost: #1a0f00;
+  --frost2: #2a1a00;
+  --ink: #0f0800;
+  --ink-mid: #3a2800;
+  --ink-light: #5a4010;
+  --silver: #4a3800;
+  --silver-light: #3a2800;
+  --silver-dim: rgba(80,60,20,0.15);
+  --rune-gold: #7a5800;
+  --ice: #e8f0dc;
+  --border: rgba(80,60,20,0.25);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--frost);
+  font-family: 'Noto Sans JP', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(120,100,60,0.03) 3px, rgba(120,100,60,0.03) 6px),
+    repeating-linear-gradient(90deg, transparent, transparent 3px, rgba(120,100,60,0.02) 3px, rgba(120,100,60,0.02) 6px);
+  pointer-events: none;
+  z-index: 100;
+}
+
+.bg-wrap {
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 40% at 50% 0%, rgba(140,160,100,0.15) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 60% at 0% 80%, rgba(160,140,80,0.10) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 50% at 100% 20%, rgba(120,140,80,0.08) 0%, transparent 60%),
+    var(--bg);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.stars { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.star { position: absolute; width: 2px; height: 2px; background: var(--rune-gold); border-radius: 50%; animation: twinkle var(--dur, 3s) ease-in-out infinite; animation-delay: var(--delay, 0s); opacity: 0; }
+@keyframes twinkle { 0%,100% { opacity: 0; transform: scale(1); } 50% { opacity: 0.7; transform: scale(1.5); } }
+
+.container { position: relative; z-index: 1; max-width: 720px; margin: 0 auto; padding: 52px 24px 80px; }
+
+.header { text-align: center; margin-bottom: 40px; }
+.header-rune { font-size: 64px; margin-bottom: 12px; display: block; animation: floatRune 6s ease-in-out infinite; color: var(--rune-gold); font-family: 'Space Grotesk', sans-serif; text-shadow: 0 0 30px rgba(201,179,126,0.4); }
+@keyframes floatRune { 0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);} }
+.header-title { font-family: 'Space Grotesk', sans-serif; font-size: clamp(22px, 5vw, 34px); font-weight: 600; letter-spacing: 0.02em; color: var(--silver-light); margin-bottom: 6px; }
+.header-sub { font-family: 'M PLUS Rounded 1c', sans-serif; font-size: 14px; color: var(--silver); letter-spacing: 0.04em; font-style: italic; margin-bottom: 20px; }
+.header-divider { display: flex; align-items: center; gap: 12px; justify-content: center; margin-bottom: 16px; }
+.header-divider span { font-size: 10px; color: var(--silver); letter-spacing: 0.08em; text-transform: uppercase; }
+.header-divider::before, .header-divider::after { content: ''; flex: 1; max-width: 80px; height: 1px; background: linear-gradient(90deg, transparent, var(--border), transparent); }
+.header-desc { font-size: 13px; line-height: 1.8; max-width: 480px; margin: 0 auto; color: #5a4010; }
+
+/* Consultation */
+.consult-section { background: linear-gradient(135deg, rgba(120,100,60,0.06), rgba(140,120,60,0.04)); border: 1px solid var(--border); border-radius: 16px; padding: 28px 26px; margin-bottom: 28px; backdrop-filter: blur(4px); }
+.field-group { margin-bottom: 20px; }
+.field-group:last-child { margin-bottom: 0; }
+.question-label { font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--silver); margin-bottom: 12px; font-family: 'Space Grotesk', sans-serif; display:block; }
+.theme-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(112px,1fr)); gap: 8px; }
+.theme-btn { background: rgba(255,252,245,0.7); border: 1px solid var(--border); color: var(--frost2); font-family: 'Noto Sans JP', sans-serif; font-size: 12.5px; padding: 10px 8px; cursor: pointer; transition: all 0.2s; border-radius: 8px; text-align: center; }
+.theme-btn:hover { border-color: rgba(156,124,48,0.5); }
+.theme-btn.active { background: rgba(156,124,48,0.15); border-color: rgba(156,124,48,0.6); color: var(--rune-gold); font-weight: 700; }
+.question-input, .context-input { width: 100%; background: rgba(255,252,245,0.8); border: 1px solid rgba(120,100,60,0.25); border-radius: 10px; padding: 14px 18px; color: var(--frost); font-family: 'Noto Sans JP', sans-serif; font-size: 15px; resize: none; outline: none; transition: border-color 0.3s; }
+.question-input { min-height: 80px; }
+.question-input:focus, .context-input:focus { border-color: rgba(120,100,60,0.5); }
+.question-input::placeholder, .context-input::placeholder { color: #8a7040; }
+.optional-note { font-size: 11px; color: var(--silver); margin-top: 6px; opacity: 0.85; }
+.form-error { font-size: 12px; color: #c03020; margin-top: 10px; display:none; }
+.form-error.show { display:block; }
+
+/* Cast methods */
+.cast-methods { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 28px; }
+.cast-btn { background: rgba(255,252,245,0.7); border: 1px solid var(--border); border-radius: 12px; padding: 16px 10px; cursor: pointer; text-align: center; transition: all 0.3s; color: var(--frost2); }
+.cast-btn:hover { background: rgba(120,100,60,0.1); border-color: rgba(120,100,60,0.35); }
+.cast-btn.active { background: rgba(156,124,48,0.12); border-color: rgba(156,124,48,0.5); color: var(--rune-gold); }
+.cast-btn-icon { font-size: 22px; margin-bottom: 6px; }
+.cast-btn-name { font-size: 13px; font-weight: 500; margin-bottom: 3px; }
+.cast-btn-desc { font-size: 11px; color: var(--silver); line-height: 1.4; }
+
+.cast-action { text-align: center; margin-bottom: 40px; }
+.btn-cast { background: linear-gradient(135deg, rgba(156,124,48,0.18), rgba(120,100,60,0.10)); border: 1px solid rgba(156,124,48,0.45); color: var(--rune-gold); font-family: 'Space Grotesk', sans-serif; font-size: 15px; letter-spacing: 0.04em; padding: 16px 48px; border-radius: 50px; cursor: pointer; transition: all 0.4s; position: relative; overflow: hidden; }
+.btn-cast:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(156,124,48,0.2); }
+.btn-cast:active { transform: translateY(0); }
+.btn-cast:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.casting-area { display: none; text-align: center; padding: 60px 0; }
+.casting-area.active { display: block; }
+.casting-stones { display: flex; justify-content: center; gap: 20px; margin-bottom: 24px; }
+.casting-stone { width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #d4c8a8, #c0b090); border: 2px solid rgba(156,124,48,0.5); display: flex; align-items: center; justify-content: center; font-size: 24px; color: var(--rune-gold); animation: stoneFloat 0.8s ease-in-out infinite alternate; }
+.casting-stone:nth-child(2) { animation-delay: 0.2s; }
+.casting-stone:nth-child(3) { animation-delay: 0.4s; }
+@keyframes stoneFloat { from{transform:translateY(0) rotate(-5deg);} to{transform:translateY(-16px) rotate(5deg);} }
+.casting-text { color: var(--silver); font-size: 14px; letter-spacing: 0.04em; animation: pulse 1.5s ease-in-out infinite; }
+@keyframes pulse { 0%,100%{opacity:0.5;} 50%{opacity:1;} }
+
+.result-area { display: none; }
+.result-area.active { display: block; }
+
+.question-echo { background: rgba(26,18,8,0.05); border-left: 3px solid var(--rune-gold); padding: 12px 16px; margin-bottom: 24px; font-size: 13px; color: var(--ink-mid); line-height:1.7; border-radius: 4px; }
+.question-echo b { color: var(--rune-gold); }
+
+.runes-display { display: flex; justify-content: center; gap: 20px; margin-bottom: 48px; flex-wrap: wrap; }
+.rune-stone { display: flex; flex-direction: column; align-items: center; gap: 10px; animation: stoneReveal 0.8s ease-out forwards; opacity: 0; cursor: pointer; }
+.rune-stone:nth-child(2) { animation-delay: 0.3s; }
+.rune-stone:nth-child(3) { animation-delay: 0.6s; }
+@keyframes stoneReveal { from { opacity: 0; transform: translateY(30px) scale(0.8); } to { opacity: 1; transform: translateY(0) scale(1); } }
+.stone-circle { width: 100px; height: 100px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #d8cc9a, #b8a870); border: 2px solid rgba(156,124,48,0.4); display: flex; align-items: center; justify-content: center; position: relative; box-shadow: 0 4px 24px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.4); transition: transform 0.3s, box-shadow 0.3s; }
+.stone-circle:hover { transform: scale(1.05); box-shadow: 0 8px 32px rgba(156,124,48,0.25), inset 0 1px 0 rgba(255,255,255,0.5); }
+.stone-circle.reversed { transform: rotate(180deg); }
+.stone-circle.reversed:hover { transform: rotate(180deg) scale(1.05); }
+.stone-svg { width: 52px; height: 52px; }
+.stone-position { font-size: 11px; color: var(--silver); letter-spacing: 0.02em; text-transform: uppercase; font-family: 'Space Grotesk', sans-serif; }
+.stone-name-ja { font-size: 14px; color: var(--frost); font-weight: 500; }
+.stone-reversed-badge { font-size: 10px; color: #c03020; letter-spacing: 0.01em; display: none; }
+.stone-reversed-badge.show { display: block; }
+
+.section-divider { display: flex; align-items: center; gap: 16px; margin: 36px 0 28px; }
+.section-divider::before, .section-divider::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, transparent, var(--border), transparent); }
+.section-divider-label { font-family: 'Space Grotesk', sans-serif; font-size: 11px; letter-spacing: 0.08em; color: var(--silver); text-transform: uppercase; white-space: nowrap; }
+
+.reading-cards { display: flex; flex-direction: column; gap: 24px; margin-bottom: 40px; }
+.reading-card { background: linear-gradient(135deg, rgba(255,252,245,0.9), rgba(240,235,220,0.7)); border: 1px solid var(--border); border-radius: 16px; padding: 28px; animation: cardReveal 0.6s ease-out forwards; opacity: 0; }
+.reading-card:nth-child(1) { animation-delay: 0.8s; }
+.reading-card:nth-child(2) { animation-delay: 1.1s; }
+.reading-card:nth-child(3) { animation-delay: 1.4s; }
+@keyframes cardReveal { from{opacity:0;transform:translateX(-16px);} to{opacity:1;transform:translateX(0);} }
+.card-header { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+.card-rune-symbol { width: 48px; height: 48px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #d8cc9a, #b8a870); border: 1px solid rgba(156,124,48,0.35); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.card-rune-svg { width: 28px; height: 28px; }
+.card-position { font-size: 11px; color: var(--silver); letter-spacing: 0.04em; text-transform: uppercase; font-family: 'Space Grotesk', sans-serif; margin-bottom: 3px; }
+.card-name { font-size: 20px; color: var(--frost); font-weight: 500; }
+.card-name-en { font-size: 13px; color: var(--silver); font-family: 'Space Grotesk', sans-serif; font-style: italic; }
+.card-reversed { font-size: 11px; color: #c03020; margin-left: 8px; }
+.card-keywords { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.keyword-tag { font-size: 11px; padding: 4px 12px; border-radius: 20px; border: 1px solid rgba(156,124,48,0.3); color: var(--rune-gold); background: rgba(156,124,48,0.08); letter-spacing: 0.05em; }
+.card-reading { font-size: 14px; line-height: 2; color: var(--frost2); }
+
+.overall-section { background: linear-gradient(135deg, rgba(156,124,48,0.08), rgba(140,160,100,0.05)); border: 1px solid rgba(156,124,48,0.25); border-radius: 16px; padding: 32px; margin-bottom: 24px; animation: cardReveal 0.6s ease-out 1.8s forwards; opacity: 0; }
+.overall-title { font-family: 'Space Grotesk', sans-serif; font-size: 13px; letter-spacing: 0.06em; color: var(--rune-gold); text-transform: uppercase; margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
+.overall-title::before { content: '᛭'; font-size: 18px; }
+.overall-block { margin-bottom: 18px; }
+.overall-block:last-child { margin-bottom: 0; }
+.overall-block-label { font-family: 'Space Grotesk', sans-serif; font-size: 10.5px; letter-spacing: 0.08em; color: var(--rune-gold); text-transform: uppercase; margin-bottom: 6px; opacity: 0.9; }
+.overall-text { font-size: 14.5px; line-height: 2.1; color: var(--frost); }
+.advice-list { list-style: none; padding: 0; }
+.advice-list li { padding: 4px 0 4px 18px; position: relative; color: var(--frost); font-size: 14.5px; line-height: 1.9; }
+.advice-list li::before { content: '᛭'; position: absolute; left: 0; color: var(--rune-gold); font-size: 12px; }
+
+.reset-area { text-align: center; }
+.btn-reset { background: transparent; border: 1px solid var(--border); color: var(--silver); font-family: 'Space Grotesk', sans-serif; font-size: 13px; letter-spacing: 0.04em; padding: 12px 36px; border-radius: 50px; cursor: pointer; transition: all 0.3s; }
+.btn-reset:hover { border-color: rgba(120,100,60,0.5); color: var(--frost); }
+.meta-note { font-family: 'Space Grotesk', sans-serif; font-size: 10px; color: var(--silver); text-align: center; margin-top: 14px; opacity: 0.6; }
+
+.rune-svg-container { display: block; }
+
+@media (max-width: 480px) {
+  .cast-methods { grid-template-columns: 1fr; }
+  .runes-display { gap: 14px; }
+  .stone-circle { width: 80px; height: 80px; }
+  .stone-svg { width: 40px; height: 40px; }
+}
+</style>
+</head>
+<body>
+
+<div class="bg-wrap"></div>
+<div class="stars" id="stars"></div>
+
+<div class="container">
+
+  <header class="header">
+    <span class="header-rune">ᚠ</span>
+    <div class="header-title">Rune Oracle</div>
+    <div class="header-sub">Ancient Wisdom of the Elder Futhark</div>
+    <div class="header-divider"><span>ルーン占い</span></div>
+    <p class="header-desc">古代ノルドの知恵が刻まれたルーン文字。<br>あなたの相談に対し、状況・障害・助言の3つの石が語ります。</p>
+  </header>
+
+  <div id="inputSection">
+    <div class="consult-section">
+      <div class="field-group">
+        <label class="question-label">テーマを選ぶ（必須）</label>
+        <div class="theme-grid" id="themeGrid"></div>
+      </div>
+      <div class="field-group">
+        <label class="question-label">あなたの問い（必須）</label>
+        <textarea class="question-input" id="questionInput" placeholder="例：最近、相手からの連絡が減りました。どうしたらいいですか？"></textarea>
+      </div>
+      <div class="field-group">
+        <label class="question-label">補足（任意）</label>
+        <input type="text" class="context-input" id="contextInput" placeholder="関係性や背景など、あれば">
+        <div class="optional-note">相談の判断に必要な範囲で構いません。</div>
+      </div>
+      <div class="form-error" id="formError">テーマの選択と質問内容の入力が必要です。</div>
+    </div>
+
+    <div class="cast-methods">
+      <div class="cast-btn active" data-method="norns" onclick="selectMethod(this, 'norns')">
+        <div class="cast-btn-icon">ᚾ</div>
+        <div class="cast-btn-name">ノルンの紡ぎ</div>
+        <div class="cast-btn-desc">状況・障害・助言（3ルーン・相談向け）</div>
+      </div>
+      <div class="cast-btn" data-method="1" onclick="selectMethod(this, 1)">
+        <div class="cast-btn-icon">ᚠ</div>
+        <div class="cast-btn-name">1ルーン引き</div>
+        <div class="cast-btn-desc">今この瞬間の簡易メッセージ</div>
+      </div>
+    </div>
+
+    <div class="cast-action">
+      <button class="btn-cast" id="castBtn" onclick="startCasting()">ᚱᚢᚾᛖ — ルーンを投げる</button>
+    </div>
+  </div>
+
+  <div class="casting-area" id="castingArea">
+    <div class="casting-stones">
+      <div class="casting-stone">ᚠ</div>
+      <div class="casting-stone">ᚢ</div>
+      <div class="casting-stone">ᚦ</div>
+    </div>
+    <div class="casting-text">ルーンが語りかけています…</div>
+  </div>
+
+  <div class="result-area" id="resultArea">
+    <div class="question-echo" id="questionEcho"></div>
+    <div class="runes-display" id="runesDisplay"></div>
+    <div class="reading-cards" id="readingCards"></div>
+    <div class="section-divider"><span class="section-divider-label">総合リーディング</span></div>
+    <div class="overall-section" id="overallSection"></div>
+    <div class="reset-area">
+      <button class="btn-reset" onclick="resetReading()">ᚱ — 新しい相談で引き直す</button>
+    </div>
+    <div class="meta-note" id="metaNote"></div>
+  </div>
+
+</div>
+
+<script>
+/* =========================================================
+   NIYA ORACLE — RUNE ENGINE (rule-based contextual layer)
+   Spec version: 02_RUNE_ENGINE_IMPLEMENTATION_SPEC v1.0
+
+   Audit findings acted on in this pass (spec §35 steps 1-5):
+     - 24-rune Elder Futhark confirmed, no Blank Rune (matches §4/§10)
+     - Reversal policy was undocumented/inconsistent: some runes'
+       "reversed" text literally contained the note "(正逆なし)" while
+       the UI still rotated every stone 30% of the time regardless.
+       Fixed: runes are now explicitly tagged canReverse:false and
+       are never drawn as reversed (§9).
+     - No consultation intake, no stable rune IDs, no synthesis
+       beyond concatenating three keywords (the "addition" anti-
+       pattern §16 explicitly warns against), no direct-answer
+       structure, no deterministic seed / immutable reading.
+       All addressed below, mirroring the Tarot engine's approach.
+     - Spread consolidated onto the "ノルンの紡ぎ" (situation /
+       challenge / advice) structure per §5's recommendation for
+       the initial paid product; 1-rune quick draw kept as a
+       non-consultation lightweight mode.
+   ========================================================= */
+
+// ===== 星生成 =====
+(function(){
+  const stars = document.getElementById('stars');
+  for(let i=0;i<60;i++){
+    const s=document.createElement('div');
+    s.className='star';
+    s.style.cssText=`left:${Math.random()*100}%;top:${Math.random()*100}%;--dur:${2+Math.random()*4}s;--delay:${Math.random()*4}s;`;
+    stars.appendChild(s);
+  }
+})();
+
+// ---------- MVP THEMES (spec §7) ----------
+const THEMES = [
+  { id:'love', label:'恋愛' },
+  { id:'unrequited_love', label:'片思い' },
+  { id:'reconciliation', label:'復縁' },
+  { id:'feelings', label:'相手の気持ち' },
+  { id:'relationship', label:'人間関係' },
+  { id:'work', label:'仕事' },
+  { id:'career_change', label:'転職' },
+  { id:'future_direction', label:'今後の方向性' },
+  { id:'self_understanding', label:'自己理解' },
+  { id:'decision', label:'決断' },
+  { id:'other', label:'その他' },
+];
+const THEME_DOMAIN_LABEL = {
+  love:'恋愛面', unrequited_love:'片思いの状況', reconciliation:'復縁への流れ',
+  feelings:'相手の気持ち', relationship:'人間関係', work:'仕事面',
+  career_change:'転職の判断', future_direction:'今後の方向性',
+  self_understanding:'自分自身の理解', decision:'今回の決断', other:'今回の相談'
+};
+let selectedTheme = null;
+
+function renderThemeGrid() {
+  document.getElementById('themeGrid').innerHTML = THEMES.map(t =>
+    `<button type="button" class="theme-btn" onclick="selectTheme('${t.id}', this)">${t.label}</button>`
+  ).join('');
+}
+function selectTheme(id, btn) {
+  selectedTheme = id;
+  document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('formError').classList.remove('show');
+}
+
+// ---------- RUNE MASTER DATA ----------
+// canReverse:false runes previously carried a "(正逆なし)" note baked
+// into the reversed text itself (which the old UI still displayed
+// after a random 30% "reversed" roll). Fixed: these runes are simply
+// never drawn as reversed (see seededDraw below), and the note is
+// kept only as an internal comment, not shown to the user.
+// domains[] are used by the synthesis engine (§15) — not shown in UI.
+
+const RUNES = [
+  { id:'fehu', sym:'ᚠ', name:'フェフ', en:'Fehu', canReverse:true, domains:['material','growth'],
+    keys:['豊かさ','富','繁栄','流れ'],
+    norm:'豊かさとエネルギーの流れを示します。受け取ることへの開放性を持ちましょう。物質的・精神的な富が流れ込む兆しです。',
+    rev:'エネルギーの滞りや損失に注意。執着を手放すことで流れが戻ります。' },
+  { id:'uruz', sym:'ᚢ', name:'ウルズ', en:'Uruz', canReverse:true, domains:['action','growth'],
+    keys:['力','野生','健康','変化'],
+    norm:'内なる野生の力と健康を示します。変化を恐れず、本能に従って進む時です。',
+    rev:'エネルギー不足や体調に気をつけて。無理をせず休息を。' },
+  { id:'thurisaz', sym:'ᚦ', name:'サリサズ', en:'Thurisaz', canReverse:true, domains:['challenge','protection'],
+    keys:['試練','変容','突破','防衛'],
+    norm:'困難な状況への直面を示しますが、それは変容への扉。今こそ正面から向き合う時です。',
+    rev:'衝動的な行動は避けて。内省と慎重さが必要な時期です。' },
+  { id:'ansuz', sym:'ᚨ', name:'アンスズ', en:'Ansuz', canReverse:true, domains:['communication'],
+    keys:['言葉','知恵','メッセージ','神の声'],
+    norm:'重要なメッセージや啓示が届きます。コミュニケーションと知恵の時。耳を澄ませて。',
+    rev:'誤解や言葉のすれ違いに注意。よく確認してから発言を。' },
+  { id:'raidho', sym:'ᚱ', name:'ライド', en:'Raidho', canReverse:true, domains:['action','change'],
+    keys:['旅','動き','リズム','正しい道'],
+    norm:'旅や移動、物事の進展を示します。正しいリズムで流れに乗って進みましょう。',
+    rev:'計画の遅延や方向のズレ。立ち止まって方向を確認して。' },
+  { id:'kenaz', sym:'ᚲ', name:'ケン', en:'Kenaz', canReverse:true, domains:['growth','communication'],
+    keys:['炎','創造','明晰','知識'],
+    norm:'内なる炎が灯ります。創造力と洞察力が高まる時。技術や知識が実を結びます。',
+    rev:'情熱の衰えや創造力の低下。何が本当に大切かを見つめ直して。' },
+  { id:'gebo', sym:'ᚷ', name:'ゲボ', en:'Gebo', canReverse:false, domains:['relationship'],
+    keys:['贈り物','交換','愛','調和'],
+    norm:'与えることと受け取ることの調和を示します。パートナーシップや贈り物に吉。' },
+  { id:'wunjo', sym:'ᚹ', name:'ウィニョ', en:'Wunjo', canReverse:true, domains:['growth','relationship'],
+    keys:['喜び','達成','調和','幸福'],
+    norm:'幸福と達成の時が来ました。努力が報われ、喜びと調和がもたらされます。',
+    rev:'喜びの遅延や内面的な緊張。完璧主義を手放すことで道が開けます。' },
+  { id:'hagalaz', sym:'ᚺ', name:'ハガラズ', en:'Hagalaz', canReverse:false, domains:['challenge','change'],
+    keys:['試練','嵐','浄化','変化'],
+    norm:'予期せぬ変化や試練を示します。しかし嵐の後には清らかな空が広がります。浄化の時。' },
+  { id:'nauthiz', sym:'ᚾ', name:'ナウシズ', en:'Nauthiz', canReverse:true, domains:['challenge','growth'],
+    keys:['必然','制約','耐久','学び'],
+    norm:'制約や困難の中に深い学びがあります。今は踏ん張り時。必然の力に従いましょう。',
+    rev:'義務や制限が重くのしかかっています。助けを求めることも勇気です。' },
+  { id:'isa', sym:'ᛁ', name:'イサズ', en:'Isa', canReverse:false, domains:['uncertainty'],
+    keys:['停止','内省','待機','氷'],
+    norm:'動きが止まる時。焦らず内側を見つめ、エネルギーを蓄える時期です。' },
+  { id:'jera', sym:'ᛃ', name:'イェラ', en:'Jera', canReverse:false, domains:['growth','change'],
+    keys:['収穫','循環','報酬','時間'],
+    norm:'種まきの報酬を受け取る時が来ました。努力は必ず実を結びます。自然のサイクルに従って。' },
+  { id:'eihwaz', sym:'ᛇ', name:'エイワズ', en:'Eihwaz', canReverse:true, domains:['change','challenge'],
+    keys:['変容','忍耐','深み','生と死'],
+    norm:'深い変容のプロセスの中にいます。根を張りながら天へ伸びるイチイの木のように。',
+    rev:'停滞や行き詰まり感。より深いところから力を引き出して。' },
+  { id:'perthro', sym:'ᛈ', name:'ペルソ', en:'Perthro', canReverse:true, domains:['uncertainty','change'],
+    keys:['神秘','運命','隠れた力','可能性'],
+    norm:'隠れた力と神秘的な可能性を示します。運命のゲームが動き出す時。直感を信じて。',
+    rev:'隠し事や秘密に注意。明るみに出ることへの恐れを手放して。' },
+  { id:'algiz', sym:'ᛉ', name:'アルギス', en:'Algiz', canReverse:true, domains:['protection'],
+    keys:['守護','本能','聖域','保護'],
+    norm:'見えない力があなたを守っています。直感的な保護の力が働いています。',
+    rev:'脆弱性や注意散漫。防衛が必要な時。境界線を大切に。' },
+  { id:'sowilo', sym:'ᛊ', name:'ソウィロ', en:'Sowilo', canReverse:false, domains:['growth','action'],
+    keys:['太陽','成功','活力','勝利'],
+    norm:'太陽の力があなたを照らします。成功と活力の時。自信を持って前へ進みましょう。' },
+  { id:'tiwaz', sym:'ᛏ', name:'ティワズ', en:'Tiwaz', canReverse:true, domains:['challenge','action'],
+    keys:['勝利','正義','犠牲','信念'],
+    norm:'正しい道を貫く勇気が勝利をもたらします。信念と犠牲の精神で前へ。',
+    rev:'不正義や意欲の低下。何のために戦っているかを見つめ直して。' },
+  { id:'berkana', sym:'ᛒ', name:'ベルカナ', en:'Berkana', canReverse:true, domains:['growth','relationship'],
+    keys:['成長','再生','母性','始まり'],
+    norm:'新しい命と始まりを示します。成長と再生の時。優しさと包容力で育てましょう。',
+    rev:'成長の妨げや家族関係のトラブル。丁寧に関係を育んで。' },
+  { id:'ehwaz', sym:'ᛖ', name:'エワズ', en:'Ehwaz', canReverse:true, domains:['relationship','action'],
+    keys:['動き','旅','信頼','パートナー'],
+    norm:'信頼できるパートナーシップと共に進む時。馬と騎手のような調和した動きを。',
+    rev:'関係の不調和や信頼の欠如。コミュニケーションを丁寧に。' },
+  { id:'mannaz', sym:'ᛗ', name:'マンナズ', en:'Mannaz', canReverse:true, domains:['relationship','communication'],
+    keys:['人間','協力','自己認識','知性'],
+    norm:'自己認識と人とのつながりが鍵。協力と知性で道を切り開きましょう。',
+    rev:'孤立や自己過信。謙虚さと他者への開放性を取り戻して。' },
+  { id:'laguz', sym:'ᛚ', name:'ラグズ', en:'Laguz', canReverse:true, domains:['uncertainty','relationship'],
+    keys:['流れ','直感','潜在','感情'],
+    norm:'感情と直感の力が強まっています。流れに逆らわず、潜在意識の声を聴いて。',
+    rev:'感情の混乱や直感の曇り。立ち止まり、水が澄むのを待って。' },
+  { id:'ingwaz', sym:'ᛜ', name:'イングワズ', en:'Ingwaz', canReverse:false, domains:['growth'],
+    keys:['完成','内なる力','休息','種'],
+    norm:'内なる成熟と完成の時。静かに充電し、次のサイクルへの準備を整えましょう。' },
+  { id:'dagaz', sym:'ᛞ', name:'ダガズ', en:'Dagaz', canReverse:false, domains:['change','growth'],
+    keys:['夜明け','転換','突破','希望'],
+    norm:'夜明けのような大きな転換点を示します。新しい始まりと希望の光が差し込みます。' },
+  { id:'othala', sym:'ᛟ', name:'オシラ', en:'Othala', canReverse:true, domains:['material','relationship'],
+    keys:['遺産','故郷','先祖','根'],
+    norm:'先祖の知恵と故郷のエネルギーが力をくれます。根を大切にしながら前へ進みましょう。',
+    rev:'家族や文化的なしがらみ。受け継ぐものと手放すものを見極めて。' },
+];
+if (RUNES.length !== 24) console.error('ルーン数エラー:', RUNES.length);
+if (new Set(RUNES.map(r=>r.id)).size !== 24) console.error('ルーンID重複あり');
+
+// ---------- SVG drawing (unchanged from existing implementation) ----------
+function drawRuneSVG(sym, size=52, color='#7a5c20') {
+  const s = size / 2, cx = s, cy = s, sw = Math.max(2, size / 14);
+  const L = (x1,y1,x2,y2) => `<line x1="${cx+x1}" y1="${cy+y1}" x2="${cx+x2}" y2="${cy+y2}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`;
+  let paths = ''; const h = s * 0.85;
+  switch(sym) {
+    case 'ᚠ': paths = L(-h*.2,-h,-h*.2,h) + L(-h*.2,-h*.3,h*.6,-h) + L(-h*.2,h*.2,h*.6,-h*.25); break;
+    case 'ᚢ': paths = L(-h*.4,-h,-h*.4,h*.2) + L(h*.4,-h,h*.4,h*.2) + L(-h*.4,h*.2,h*.4,h*.2); break;
+    case 'ᚦ': paths = L(0,-h,0,h) + L(0,-h*.3,h*.55,0) + L(0,h*.3,h*.55,0); break;
+    case 'ᚨ': paths = L(h*.2,-h,h*.2,h) + L(h*.2,-h,-h*.5,-h*.5) + L(h*.2,-h*.15,-h*.5,h*.3); break;
+    case 'ᚱ': paths = L(-h*.3,-h,-h*.3,h) + L(-h*.3,-h,h*.5,-h*.3) + L(-h*.3,-h*.15,h*.5,-h*.3) + L(-h*.3,-h*.15,h*.5,h); break;
+    case 'ᚲ': paths = L(h*.3,-h,-h*.3,0) + L(-h*.3,0,h*.3,h); break;
+    case 'ᚷ': paths = L(-h,-h,h,h) + L(h,-h,-h,h); break;
+    case 'ᚹ': paths = L(-h*.3,-h,-h*.3,h) + L(-h*.3,-h,h*.5,-h*.25) + L(-h*.3,h*.25,h*.5,-h*.25); break;
+    case 'ᚺ': paths = L(-h*.45,-h,-h*.45,h) + L(h*.45,-h,h*.45,h) + L(-h*.45,-h*.2,h*.45,h*.25); break;
+    case 'ᚾ': paths = L(-h*.4,-h,-h*.4,h) + L(h*.4,-h,h*.4,h) + L(-h*.4,-h*.4,h*.4,h*.4); break;
+    case 'ᛁ': paths = L(0,-h,0,h); break;
+    case 'ᛃ': paths = L(-h*.4,-h,h*.4,-h*.3) + L(h*.4,-h*.3,-h*.4,h*.3) + L(-h*.4,h*.3,h*.4,h); break;
+    case 'ᛇ': paths = L(0,-h,0,h) + L(0,-h*.3,-h*.5,-h) + L(0,h*.3,h*.5,h); break;
+    case 'ᛈ': paths = L(-h*.3,-h,-h*.3,h) + L(-h*.3,-h,h*.5,-h) + L(h*.5,-h,h*.5,0) + L(-h*.3,0,h*.5,0); break;
+    case 'ᛉ': paths = L(0,h*.1,0,h) + L(0,h*.1,-h*.65,-h) + L(0,h*.1,h*.65,-h); break;
+    case 'ᛊ': paths = L(h*.3,-h,-h*.3,-h*.3) + L(-h*.3,-h*.3,h*.3,h*.3) + L(h*.3,h*.3,-h*.3,h); break;
+    case 'ᛏ': paths = L(0,-h,0,h) + L(0,-h,-h*.5,-h*.25) + L(0,-h,h*.5,-h*.25); break;
+    case 'ᛒ': paths = L(-h*.3,-h,-h*.3,h) + L(-h*.3,-h,h*.5,-h*.65) + L(h*.5,-h*.65,h*.5,-h*.15) + L(-h*.3,-h*.15,h*.5,-h*.15) + L(-h*.3,-h*.15,h*.5,h*.3) + L(h*.5,h*.3,h*.5,h*.75) + L(-h*.3,h*.75,h*.5,h*.75); break;
+    case 'ᛖ': paths = L(-h*.45,-h,-h*.45,h) + L(h*.45,-h,h*.45,h) + L(-h*.45,-h,0,-h*.2) + L(h*.45,-h,0,-h*.2); break;
+    case 'ᛗ': paths = L(-h*.45,-h,-h*.45,h) + L(h*.45,-h,h*.45,h) + L(-h*.45,-h,0,0) + L(h*.45,-h,0,0); break;
+    case 'ᛚ': paths = L(-h*.3,-h,-h*.3,h*.25) + L(-h*.3,h*.25,h*.5,h); break;
+    case 'ᛜ': paths = L(0,-h,h*.5,0) + L(h*.5,0,0,h) + L(0,h,-h*.5,0) + L(-h*.5,0,0,-h); break;
+    case 'ᛞ': paths = L(-h*.45,-h,-h*.45,h) + L(h*.45,-h,h*.45,h) + L(-h*.45,-h,h*.45,h) + L(-h*.45,h,h*.45,-h); break;
+    case 'ᛟ': paths = L(0,-h*.45,h*.45,0) + L(h*.45,0,0,h*.45) + L(0,h*.45,-h*.45,0) + L(-h*.45,0,0,-h*.45) + L(-h*.3,h*.45,h*.3,h*.45) + L(0,h*.45,0,h); break;
+    default:  paths = L(0,-h,0,h); break;
+  }
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" class="rune-svg-container">${paths}</svg>`;
+}
+
+// ---------- SEEDED RNG (spec §28 — seed + rune set = same draw) ----------
+function mulberry32(seed) {
+  return function() {
+    seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function seededShuffle(arr, rng) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// ---------- SPREAD (spec §5 — situation/challenge/advice) ----------
+const NORNS_POSITIONS = [
+  { key:'situation', label:'状況' },
+  { key:'challenge', label:'障害' },
+  { key:'advice', label:'助言' }
+];
+const POSITION_PHRASES = {
+  situation: { upright:'今すでに動いている状況として、', reversed:'今の状況の裏側にある要素として、' },
+  challenge:  { upright:'今回の相談で立ちはだかっている壁として、', reversed:'表に出にくい形で妨げになっている要素として、' },
+  advice:     { upright:'今意識すべき方向性として、', reversed:'まだ十分に発揮されていない、今こそ必要な姿勢として、' }
+};
+
+let currentMethod = 'norns';
+let currentReading = null; // { readingId, seed, consultation, runes:[{position,rune,orientation}] }
+
+function selectMethod(el, method) {
+  document.querySelectorAll('.cast-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  currentMethod = method;
+}
+
+function makeReadingId() {
+  return 'rn_' + Date.now().toString(36) + '_' + Math.floor(Math.random()*1e6).toString(36);
+}
+
+function startCasting() {
+  const question = document.getElementById('questionInput').value.trim();
+  const context = document.getElementById('contextInput').value.trim();
+  const errEl = document.getElementById('formError');
+
+  // Consultation (theme + question) is required for the paid "ノルンの紡ぎ"
+  // reading (spec §6/§18). The 1-rune quick draw stays lightweight and
+  // does not require it.
+  if (currentMethod === 'norns' && (!selectedTheme || !question)) {
+    errEl.classList.add('show');
+    errEl.scrollIntoView({ behavior:'smooth', block:'center' });
+    return;
+  }
+  errEl.classList.remove('show');
+
+  document.getElementById('inputSection').style.display = 'none';
+  document.getElementById('castingArea').classList.add('active');
+  document.getElementById('castBtn').disabled = true;
+
+  setTimeout(() => draw(question, context), 1800);
+}
+
+function draw(question, context) {
+  document.getElementById('castingArea').classList.remove('active');
+  document.getElementById('resultArea').classList.add('active');
+  document.getElementById('castBtn').disabled = false;
+
+  const seed = Math.floor(Math.random() * 2147483647);
+  const rng = mulberry32(seed);
+  const shuffled = seededShuffle(RUNES, rng);
+
+  if (currentMethod === '1') {
+    const r = shuffled[0];
+    const orientation = (r.canReverse && rng() < 0.3) ? 'reversed' : 'upright';
+    currentReading = {
+      readingId: makeReadingId(), seed, mode:'single',
+      consultation: { theme: null, question, context },
+      runes: [{ position:'message', positionLabel:'今のメッセージ', rune:r, orientation }]
+    };
+  } else {
+    const positions = NORNS_POSITIONS.map((pos, i) => {
+      const r = shuffled[i];
+      const orientation = (r.canReverse && rng() < 0.3) ? 'reversed' : 'upright';
+      return { position:pos.key, positionLabel:pos.label, rune:r, orientation };
+    });
+    currentReading = {
+      readingId: makeReadingId(), seed, mode:'norns',
+      consultation: { theme: selectedTheme, question, context },
+      runes: positions
+    };
+  }
+
+  renderQuestionEcho();
+  renderRunesDisplay();
+  renderReadingCards();
+  renderOverall();
+
+  document.getElementById('metaNote').textContent =
+    `reading ${currentReading.readingId} · seed ${seed} · この結果は固定されており、引き直すまで変わりません`;
+}
+
+function renderQuestionEcho() {
+  const { theme, question, context } = currentReading.consultation;
+  const echo = document.getElementById('questionEcho');
+  if (!question && !theme) { echo.style.display = 'none'; return; }
+  echo.style.display = 'block';
+  const themeLabel = theme ? (THEMES.find(t => t.id === theme)?.label || theme) : null;
+  echo.innerHTML =
+    (themeLabel ? `テーマ：<b>${themeLabel}</b><br>` : '') +
+    (question ? `ご相談：${escapeHtml(question)}` : '') +
+    (context ? `<br>補足：${escapeHtml(context)}` : '');
+}
+
+function renderRunesDisplay() {
+  const display = document.getElementById('runesDisplay');
+  display.innerHTML = currentReading.runes.map(dc => `
+    <div class="rune-stone">
+      <div class="stone-circle ${dc.orientation === 'reversed' ? 'reversed' : ''}">
+        ${drawRuneSVG(dc.rune.sym, 52, '#7a5c20')}
+      </div>
+      <div class="stone-position">${dc.positionLabel}</div>
+      <div class="stone-name-ja">${dc.rune.name}</div>
+      <div class="stone-reversed-badge ${dc.orientation === 'reversed' ? 'show' : ''}">逆位置</div>
+    </div>
+  `).join('');
+}
+
+// ---------- CONTEXTUAL INTERPRETATION (spec §12/§13/§14) ----------
+function buildContextualInterpretation(dc, theme) {
+  const r = dc.rune;
+  const rev = dc.orientation === 'reversed';
+  const base = rev ? r.rev : r.norm;
+  const posPhrase = POSITION_PHRASES[dc.position] ? POSITION_PHRASES[dc.position][rev ? 'reversed' : 'upright'] : '';
+  const domainLabel = theme ? (THEME_DOMAIN_LABEL[theme] || '今回の相談') : null;
+
+  if (!domainLabel) return base; // 1-rune quick draw: no consultation, no theme framing
+  return `${posPhrase}${domainLabel}について、このルーンは次のような意味を持っています。${base}`;
+}
+
+function renderReadingCards() {
+  const cards = document.getElementById('readingCards');
+  const theme = currentReading.consultation.theme;
+  cards.innerHTML = currentReading.runes.map(dc => {
+    const r = dc.rune;
+    const rev = dc.orientation === 'reversed';
+    const contextual = buildContextualInterpretation(dc, theme);
+    return `
+    <div class="reading-card">
+      <div class="card-header">
+        <div class="card-rune-symbol">${drawRuneSVG(r.sym, 28, '#7a5c20')}</div>
+        <div class="card-title-block">
+          <div class="card-position">${dc.positionLabel}</div>
+          <div class="card-name">${r.name} <span class="card-name-en">${r.en}</span>${rev ? '<span class="card-reversed">（逆位置）</span>' : ''}</div>
+        </div>
+      </div>
+      <div class="card-keywords">
+        ${r.keys.map(k => `<span class="keyword-tag">${rev ? '⟳ ' : ''}${k}</span>`).join('')}
+      </div>
+      <div class="card-reading">${contextual}</div>
+    </div>`;
+  }).join('');
+}
+
+// ---------- THREE-RUNE SYNTHESIS (spec §15/§16/§17) ----------
+// Relationship types, in priority order:
+//   1. missing_element — advice rune reversed: the very thing being
+//      advised is not yet happening, which is itself the signal.
+//   2. reinforcement    — situation/challenge/advice share a domain.
+//   3. resolution        — challenge and advice domains overlap
+//                          (the advice directly answers the challenge).
+//   4. tension            — situation and challenge domains don't
+//                          overlap at all (friction, not flow).
+//   5. progression        — default: a coherent A→B→C development.
+function detectRelationship(runes) {
+  const [sit, chal, adv] = runes;
+  if (adv.orientation === 'reversed') return 'missing_element';
+
+  const domSit = sit.rune.domains, domChal = chal.rune.domains, domAdv = adv.rune.domains;
+  const overlap = (a,b) => a.some(x => b.includes(x));
+  const sharedAll = domSit.some(d => domChal.includes(d) && domAdv.includes(d));
+
+  if (sharedAll) return 'reinforcement';
+  if (overlap(domChal, domAdv)) return 'resolution';
+  if (!overlap(domSit, domChal)) return 'tension';
+  return 'progression';
+}
+
+const RELATIONSHIP_TEXT = {
+  missing_element: 'この助言のルーンが逆位置で現れているのは、その姿勢や行動がまだ十分に発揮されていないことの表れです。今回の核心は、状況そのものより「まだ手を付けていないこと」にある可能性が高いです。',
+  reinforcement: '状況・障害・助言の3つが同じテーマの周りに集まっており、今回の相談の焦点が非常にはっきりしていることを示しています。',
+  resolution: '障害として出ているルーンに対し、助言のルーンが直接的に応える形になっています。何が壁で、それにどう向き合えばいいかが一直線につながっています。',
+  tension: '状況を示すルーンと障害を示すルーンの間に、あまり関連性が見られません。表面的な状況とは別のところに、本当の課題がある可能性があります。',
+  progression: '状況から障害、そして助言へと、無理のない自然な流れが読み取れます。'
+};
+
+function buildDirectAnswer(theme, relationship, runes) {
+  const domainLabel = theme ? (THEME_DOMAIN_LABEL[theme] || '今回の相談') : '今回の相談';
+  const [sit, chal, adv] = runes;
+
+  const conclusion = {
+    missing_element: `${domainLabel}において、まだ試していない、あるいは踏み出せていない一歩がありそうです。`,
+    reinforcement: `${domainLabel}は、今かなり集中して向き合うべきテーマになっています。`,
+    resolution: `${domainLabel}には壁がありますが、それに対する応え方もすでにルーンの中に示されています。`,
+    tension: `${domainLabel}は、表面的に見えている状況と、実際の課題がずれている可能性があります。`,
+    progression: `${domainLabel}は、今の流れのまま素直に進めていくことができそうです。`
+  }[relationship];
+
+  const reason = `状況（${sit.rune.name}${sit.orientation==='reversed'?'・逆位置':''}）→障害（${chal.rune.name}${chal.orientation==='reversed'?'・逆位置':''}）→助言（${adv.rune.name}${adv.orientation==='reversed'?'・逆位置':''}）という並びが、${RELATIONSHIP_TEXT[relationship]}`;
+
+  const action = {
+    missing_element: `${adv.rune.name}が示す「${adv.rune.keys[0]}」を、まず小さくでも実際に行動に移してみることが次の一歩です。`,
+    reinforcement: '一点に集中している分、他のことを一旦脇に置いてでも、このテーマに向き合う時間を作ることをお勧めします。',
+    resolution: `${chal.rune.name}が示す壁に対して、${adv.rune.name}が示す「${adv.rune.keys[0]}」という姿勢で応えることが、今回の具体的な方向性です。`,
+    tension: '今見えている状況をそのまま信じるより、一度立ち止まって前提を確認し直すことをお勧めします。',
+    progression: '今のペースや方向性を大きく変える必要はなく、続けていくことが結果につながります。'
+  }[relationship];
+
+  return { conclusion, reason, action };
+}
+
+function buildAdvice(theme, relationship) {
+  const base = {
+    love: ['相手の反応そのものより、自分がこの関係に何を求めているかを先に整理してみてください。', '次に自然に話せる機会を一つ具体的に思い浮かべておきましょう。'],
+    unrequited_love: ['気持ちを伝えるかどうかより先に、今どれくらい自然な接点があるかを確認してみてください。', '結果を急がず、会話や接点を少しずつ増やす行動を一つ決めてみましょう。'],
+    reconciliation: ['連絡を取る前に、以前の関係で繰り返していたパターンを一つ書き出してみてください。', '感情的な連絡より、落ち着いたタイミングでの短い連絡が現実的です。'],
+    feelings: ['相手の気持ちを断定するより、次に自然に確認できる場面を想定しておいてください。', '相手の態度の変化を、自分の状態と切り離して観察してみましょう。'],
+    relationship: ['相手を変えようとするより、自分がどこまで関わるかの境界線を先に決めておきましょう。', '伝えるべきことと、伝えなくてもいいことを分けてみてください。'],
+    work: ['感情的な判断を急がず、まず現状の事実関係を書き出してみてください。', '相談できる相手が社内・社外にいるか確認しておきましょう。'],
+    career_change: ['今の職場に足りないものと、転職先に求めるものを分けて書き出してみてください。', '結論を急がず、情報収集を一つだけ具体的に動かしてみましょう。'],
+    future_direction: ['遠い将来より、直近1〜3ヶ月で試せる小さな一歩を決めてみてください。', '「正解」を探すより、後悔が少なそうな選択肢から動いてみましょう。'],
+    self_understanding: ['今回のルーンで気になった言葉を一つ選び、数日反芻してみてください。', '誰かに相談する前に、まず自分の言葉で状況を書き出してみましょう。'],
+    decision: ['今すぐ決めなくてもいい部分と、期限が迫っている部分を分けてみてください。', '選択肢を減らす前に、一度すべて書き出して比較してみましょう。'],
+    other: ['今回のルーンで一番引っかかった言葉について、数日考えてみてください。', '結論を急がず、小さな観察を続けることも一つの選択です。']
+  };
+  const list = (base[theme] || base.other).slice(0, 2);
+  if (relationship === 'tension' || relationship === 'missing_element') {
+    list.push('急いで結論を出すより、今回は一度立ち止まって状況を言語化すること自体がアドバイスです。');
+  }
+  return list;
+}
+
+function renderOverall() {
+  const section = document.getElementById('overallSection');
+  const theme = currentReading.consultation.theme;
+
+  if (currentReading.mode === 'single') {
+    const dc = currentReading.runes[0];
+    const r = dc.rune;
+    const rev = dc.orientation === 'reversed';
+    const q = currentReading.consultation.question;
+    section.innerHTML = `<div class="overall-title">ルーンのメッセージ</div>
+      <div class="overall-text">${r.name}のルーンが選ばれました。${rev ? '逆位置として現れたこのルーンは、' : 'このルーンは、'}${rev ? r.rev : r.norm}${q ? '「' + escapeHtml(q) + '」というあなたの問いに対して、' : ''}今この瞬間に必要なメッセージをもたらしています。</div>`;
+    return;
+  }
+
+  const relationship = detectRelationship(currentReading.runes);
+  const { conclusion, reason, action } = buildDirectAnswer(theme, relationship, currentReading.runes);
+  const advice = buildAdvice(theme, relationship);
+
+  section.innerHTML =
+    `<div class="overall-title">ルーンのメッセージ</div>` +
+    `<div class="overall-block"><div class="overall-block-label">3ルーンの関係</div><div class="overall-text">${RELATIONSHIP_TEXT[relationship]}</div></div>` +
+    `<div class="overall-block"><div class="overall-block-label">今回の答え</div><div class="overall-text">${conclusion}<br><br>${reason}<br><br>${action}</div></div>` +
+    `<div class="overall-block"><div class="overall-block-label">アドバイス</div><ul class="advice-list">${advice.map(a => `<li>${a}</li>`).join('')}</ul></div>`;
+}
+
+function escapeHtml(s) {
+  return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function resetReading() {
+  currentReading = null;
+  document.getElementById('resultArea').classList.remove('active');
+  document.getElementById('inputSection').style.display = 'block';
+  document.getElementById('readingCards').innerHTML = '';
+  document.getElementById('runesDisplay').innerHTML = '';
+  document.getElementById('questionInput').value = '';
+  document.getElementById('contextInput').value = '';
+  selectedTheme = null;
+  document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ---------- INIT ----------
+renderThemeGrid();
+</script>
+</body>
+</html>
